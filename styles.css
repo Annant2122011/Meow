@@ -1,0 +1,83 @@
+:root {
+  color-scheme: light;
+  --bg: #0a1026;
+  --panel: #121c3f;
+  --accent: #1ac0ff;
+  --text: #e8f0ff;
+  --muted: #b7c7e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #172a66 0%, var(--bg) 55%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.hero {
+  text-align: center;
+  padding: 5rem 1.5rem 3rem;
+}
+
+.tag {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.cta {
+  display: inline-block;
+  margin-top: 1.25rem;
+  background: var(--accent);
+  color: #041323;
+  padding: 0.75rem 1.15rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+main {
+  width: min(980px, 92vw);
+  margin: 0 auto 3rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+  background: color-mix(in srgb, var(--panel) 88%, black);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 14px;
+  padding: 1.1rem;
+}
+
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.card p {
+  color: var(--muted);
+  margin-bottom: 0;
+  line-height: 1.55;
+}
