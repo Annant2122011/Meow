@@ -3,14 +3,19 @@
 Cric Pulse is a fan-first cricket experience built around one promise: **never miss a beat**.
 
 ## What this project includes
-- A simple landing page (`index.html`) that presents the Cric Pulse mission and key fan-focused features.
-- A standalone stylesheet (`styles.css`) with a modern visual style and responsive layout.
+- `index.html`: landing page plus interactive match center.
+- `styles.css`: responsive styling for layout, cards, and interactive controls.
+- `app.js`: client-side behavior for live score simulation, voting, favorites, and chat.
 
-## Core product story
-- **Live Activity & Dynamic Island:** Real-time score updates directly on the lock screen.
-- **Global Pulse:** Coverage for 50+ tournaments including IPL, World Cup, and domestic leagues.
-- **Your Voice Matters:** Polls and match chat rooms for fan participation.
-- **Your Game, Your App:** Personalized tracking for favorite teams and tournaments.
+## Interactive experience
+- **Live Score Simulation:** Scoreline updates every few seconds (pause/resume supported).
+- **Fan Poll:** Vote live and instantly view percentage split.
+- **Personalization:** Select favorite teams/tournaments and get a tailored follow list.
+- **Match Chat:** Send messages and receive bot responses to mimic community interaction.
 
 ## Run locally
-Open `index.html` in any browser.
+Open `index.html` directly in a browser, or serve with:
+
+```bash
+python3 -m http.server 4173 --directory /workspace/Meow
+```
