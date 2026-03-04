@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cric Pulse — Never Miss a Beat</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <p class="tag">Live Cricket Platform</p>
+      <h1>Cric Pulse</h1>
+      <p class="subtitle">Never miss a beat of the game.</p>
+      <a class="cta" href="#interactive">Try Interactive Demo</a>
+    </header>
+
+    <main>
+      <section id="mission" class="card">
+        <h2>Mission</h2>
+        <p>
+          Cric Pulse keeps fans connected in real time without constant refreshes or
+          even unlocking their phones.
+        </p>
+      </section>
+
+      <section id="features" class="grid">
+        <article class="card">
+          <h3>Live Activity &amp; Dynamic Island</h3>
+          <p>Lock-screen score updates inspired by Live Activities and Dynamic Island.</p>
+        </article>
+
+        <article class="card">
+          <h3>Global Pulse</h3>
+          <p>Track 50+ competitions from IPL and World Cup to domestic leagues.</p>
+        </article>
+
+        <article class="card">
+          <h3>Your Voice Matters</h3>
+          <p>Vote in polls and chat with fellow fans during every game.</p>
+        </article>
+
+        <article class="card">
+          <h3>Your Game, Your App</h3>
+          <p>Follow favorite teams and tournaments for a personalized feed.</p>
+        </article>
+      </section>
+
+      <section id="interactive" class="card interactive">
+        <h2>Interactive Match Center</h2>
+        <div class="live-score">
+          <div>
+            <p class="muted">Live</p>
+            <h3 id="scoreline">IND 147/3 (15.2)</h3>
+            <p id="status" class="muted">India need 29 runs in 28 balls</p>
+          </div>
+          <button id="toggle-live" class="btn">Pause Live</button>
+        </div>
+
+        <div class="interactive-grid">
+          <article class="panel">
+            <h3>Fan Poll</h3>
+            <p class="muted">Who wins from here?</p>
+            <div class="poll-actions">
+              <button class="btn vote" data-team="India">India</button>
+              <button class="btn vote" data-team="Australia">Australia</button>
+            </div>
+            <p id="poll-result" class="muted">No votes yet.</p>
+          </article>
+
+          <article class="panel">
+            <h3>Personalization</h3>
+            <p class="muted">Select your favorites:</p>
+            <div class="chips">
+              <button class="chip" data-name="India">India</button>
+              <button class="chip" data-name="Australia">Australia</button>
+              <button class="chip" data-name="IPL">IPL</button>
+              <button class="chip" data-name="World Cup">World Cup</button>
+            </div>
+            <p id="favorites-output" class="muted">No favorites selected.</p>
+          </article>
+
+          <article class="panel panel-wide">
+            <h3>Match Chat</h3>
+            <div id="chat-box" class="chat-box" aria-live="polite"></div>
+            <form id="chat-form" class="chat-form">
+              <input id="chat-input" type="text" placeholder="Share your take..." required />
+              <button class="btn" type="submit">Send</button>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

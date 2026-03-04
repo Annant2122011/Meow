@@ -1,0 +1,96 @@
+:root {
+  --bg: #0a1026;
+  --panel: #121c3f;
+  --accent: #1ac0ff;
+  --text: #e8f0ff;
+  --muted: #b7c7e8;
+  --good: #2ee6a6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(circle at top, #172a66 0%, var(--bg) 55%);
+  color: var(--text);
+}
+
+.hero { text-align: center; padding: 4.5rem 1.5rem 2.5rem; }
+.tag { text-transform: uppercase; letter-spacing: 0.16em; color: var(--accent); font-size: 0.8rem; }
+h1 { margin: 0; font-size: clamp(2.4rem, 8vw, 4rem); }
+.subtitle { color: var(--muted); margin-top: 0.75rem; }
+
+.cta,
+.btn {
+  display: inline-block;
+  border: 0;
+  background: var(--accent);
+  color: #041323;
+  padding: 0.7rem 1.05rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+main { width: min(1024px, 92vw); margin: 0 auto 3rem; }
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.card,
+.panel {
+  background: color-mix(in srgb, var(--panel) 88%, black);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: 14px;
+  padding: 1.1rem;
+}
+
+.interactive { margin-top: 1rem; }
+.live-score { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+.interactive-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-wide { grid-column: 1 / -1; }
+.muted { color: var(--muted); margin: 0.35rem 0; }
+
+.poll-actions, .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+.chip {
+  border: 1px solid var(--accent);
+  color: var(--text);
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+.chip.active { background: color-mix(in srgb, var(--accent) 22%, transparent); color: white; }
+
+.chat-box {
+  min-height: 140px;
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 0.7rem;
+}
+.chat-message { margin: 0.35rem 0; }
+.chat-message strong { color: var(--good); }
+
+.chat-form { display: flex; gap: 0.5rem; }
+.chat-form input {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #335094;
+  background: #0f1737;
+  color: var(--text);
+  padding: 0.6rem 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .interactive-grid { grid-template-columns: 1fr; }
+}
