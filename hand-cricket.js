@@ -475,8 +475,14 @@ function saveLifetimeStats(result) {
         stats.highestScore = gameState.playerStats.runs;
     }
     
-    if (gameState.playerStats.runs === 0 && gameState.playerStats.outOn !== '-') {
-        stats.ducks += 1;
+    // TRACK DISMISSALS FOR BATTING AVERAGE
+    if (gameState.playerStats.outOn !== '-') {
+        stats.totalDismissals = (stats.totalDismissals || 0) + 1;
+        
+        // Track Ducks
+        if (gameState.playerStats.runs === 0) {
+            stats.ducks += 1;
+        }
     }
     
     stats.totalRunsConceded += gameState.compStats.runs;
@@ -492,7 +498,6 @@ function saveLifetimeStats(result) {
     usersDB[currentUser] = stats;
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
-
 function populateStats(prefix, batterStats, bowlerStats) {
     document.getElementById(`${prefix}-runs`).innerText = batterStats.runs;
     document.getElementById(`${prefix}-balls`).innerText = batterStats.balls;
