@@ -196,8 +196,9 @@ function writeCommentary(text) {
 function endGame(result) {
     gameState.gameOver = true;
     actionArea.style.display = 'none';
-    analysisScreen.style.display = 'block';
-    restartBtn.style.display = 'block';
+    
+    // Show the new button container instead of the raw analysis screen
+    document.getElementById('end-game-controls').style.display = 'flex';
     
     if (result === "PLAYER_WINS") {
         inningsStatus.innerText = "🏆 YOU WON THE MATCH!";
@@ -242,4 +243,12 @@ function generateAIInsight(result) {
 
 function resetToToss() {
     location.reload(); // Quickest way to clean slate everything for a browser game
+}
+// Modal Control Functions
+function openAnalysis() {
+    document.getElementById('analysis-modal').style.display = 'flex';
+}
+
+function closeAnalysis() {
+    document.getElementById('analysis-modal').style.display = 'none';
 }
