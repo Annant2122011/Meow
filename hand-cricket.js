@@ -44,7 +44,8 @@ window.onload = function() {
     if (storedUser) {
         loadUser(storedUser);
     } else {
-        document.getElementById('login-modal').style.display = 'flex';
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) loginModal.style.display = 'flex';
     }
 };
 
@@ -70,12 +71,17 @@ function loginUser() {
 
 function loadUser(username) {
     currentUser = username;
-    document.getElementById('login-modal').style.display = 'none';
-    document.getElementById('user-profile-btn').style.display = 'block';
+    const loginModal = document.getElementById('login-modal');
+    const profileBtn = document.getElementById('user-profile-btn');
+    const avatarText = document.getElementById('avatar-text');
+    const profAvatarLetter = document.getElementById('prof-avatar-letter');
+    
+    if (loginModal) loginModal.style.display = 'none';
+    if (profileBtn) profileBtn.style.display = 'block';
     
     const initial = username.charAt(0);
-    document.getElementById('avatar-text').innerText = initial;
-    document.getElementById('prof-avatar-letter').innerText = initial;
+    if (avatarText) avatarText.innerText = initial;
+    if (profAvatarLetter) profAvatarLetter.innerText = initial;
 }
 
 function logoutUser() {
@@ -86,6 +92,11 @@ function logoutUser() {
 function openProfile() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
+    
+    if (!stats) {
+        logoutUser();
+        return;
+    }
     
     document.getElementById('prof-username').innerText = currentUser;
     document.getElementById('prof-matches').innerText = stats.matches;
@@ -473,7 +484,6 @@ function saveLifetimeStats(result) {
     
     if (gameState.compStats.outOn !== '-') {
         stats.totalWicketsTaken += 1;
-        // FIXED: Allows the lowest score to be correctly recorded without null interference
         if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) {
             stats.bestSpellRuns = gameState.compStats.runs;
         }
