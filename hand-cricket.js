@@ -92,6 +92,11 @@ function openProfile() {
     document.getElementById('prof-wins').innerText = stats.wins;
     document.getElementById('prof-losses').innerText = stats.losses;
     document.getElementById('prof-ties').innerText = stats.ties;
+    
+    // CONNECTING THE NEW FIELDS TO THE DATABASE
+    document.getElementById('prof-total-runs').innerText = stats.totalRuns || 0;
+    document.getElementById('prof-total-wickets').innerText = stats.totalWicketsTaken || 0;
+
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
@@ -102,7 +107,6 @@ function openProfile() {
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
     
-    // FIXED: Formats cleanly when null
     const bestSpell = stats.bestSpellRuns === null ? "-" : `1/${stats.bestSpellRuns}`;
     document.getElementById('prof-best-spell').innerText = bestSpell;
     
