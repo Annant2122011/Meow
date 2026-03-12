@@ -112,13 +112,14 @@
 
                 <div id="hand-action-area" class="action-area">
                     <p style="color: var(--text-bright); margin-bottom: 15px; font-weight: bold;">THROW YOUR NUMBER:</p>
-                    <div class="button-grid">
+                    <div class="button-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
                         <button class="hand-btn" onclick="playHand(1)">1</button>
                         <button class="hand-btn" onclick="playHand(2)">2</button>
                         <button class="hand-btn" onclick="playHand(3)">3</button>
                         <button class="hand-btn" onclick="playHand(4)">4</button>
                         <button class="hand-btn" onclick="playHand(5)">5</button>
                         <button class="hand-btn" onclick="playHand(6)">6</button>
+                        <button class="hand-btn" style="grid-column: span 3; background: rgba(0,255,136,0.1); border-color: var(--accent-neon); font-size: 1.5rem;" onclick="playHand(0)">🛡️ 0 (DEFEND / WIDE)</button>
                     </div>
                 </div>
 
@@ -145,6 +146,8 @@
                         <li><b>Strike Rate:</b> <span id="an-p-sr">0.00</span></li>
                         <li><b>Run Rate (CRR):</b> <span id="an-p-rr">0.00</span></li>
                         <li><b>Boundaries:</b> <span id="an-p-bounds">0</span> (4s: <span id="an-p-4s">0</span> | 6s: <span id="an-p-6s">0</span>)</li>
+                        <li><b>Extras Received:</b> <span id="an-p-extras" style="color: var(--accent-neon);">0</span></li>
+                        <li><b>Economy (Bowling):</b> <span id="an-p-eco" style="color: var(--accent-neon);">0.00</span></li>
                         <li><b>Dismissed On:</b> <span id="an-p-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
                     </ul>
                 </div>
@@ -157,6 +160,8 @@
                         <li><b>Strike Rate:</b> <span id="an-c-sr">0.00</span></li>
                         <li><b>Run Rate (CRR):</b> <span id="an-c-rr">0.00</span></li>
                         <li><b>Boundaries:</b> <span id="an-c-bounds">0</span> (4s: <span id="an-c-4s">0</span> | 6s: <span id="an-c-6s">0</span>)</li>
+                        <li><b>Extras Received:</b> <span id="an-c-extras" style="color: var(--accent-neon);">0</span></li>
+                        <li><b>Economy (Bowling):</b> <span id="an-c-eco" style="color: var(--accent-neon);">0.00</span></li>
                         <li><b>Dismissed On:</b> <span id="an-c-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
                     </ul>
                 </div>
