@@ -1,5 +1,5 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | DYNAMIC GAME LOGIC & PDF GEN
+   CRICPULSE FUN-GUN ARENA | DYNAMIC GAME LOGIC & AUTH
    ========================================================= */
 
 // Game State Object
@@ -12,14 +12,12 @@ let gameState = {
     isTransitioning: false, 
     playerConsecZeros: 0,
     compConsecZeros: 0,
-    
-    // NEW: Array to store every single ball for the PDF
     commentaryHistory: [], 
-    
     playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 },
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 }
 };
 
+let currentUser = null; // Tracks the logged-in player
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
 // DOM Elements
@@ -39,6 +37,85 @@ const targetBox = document.getElementById('target-box');
 const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
 const zeroBtn = document.getElementById('zero-btn'); 
+
+// --- INITIALIZATION & AUTH SYSTEM ---
+window.onload = function() {
+    const storedUser = localStorage.getItem('hc_currentUser');
+    if (storedUser) {
+        loadUser(storedUser);
+    } else {
+        document.getElementById('login-modal').style.display = 'flex';
+    }
+};
+
+function loginUser() {
+    const username = document.getElementById('username-input').value.trim().toUpperCase();
+    if (!username) { alert("Arena requires a Player Name!"); return; }
+    
+    // Check local database for profile, or create new
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    if (!usersDB[username]) {
+        usersDB[username] = {
+            matches: 0, wins: 0, losses: 0, ties: 0,
+            totalRuns: 0, totalBallsFaced: 0,
+            totalRunsConceded: 0, totalBallsBowled: 0,
+            totalWicketsTaken: 0, ducks: 0, highestScore: 0,
+            bestSpellRuns: Infinity // Lowest runs conceded for a wicket
+        };
+        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    }
+    
+    localStorage.setItem('hc_currentUser', username);
+    loadUser(username);
+}
+
+function loadUser(username) {
+    currentUser = username;
+    document.getElementById('login-modal').style.display = 'none';
+    document.getElementById('user-profile-btn').style.display = 'block';
+    
+    // Update Avatar Icon (First letter of name)
+    const initial = username.charAt(0);
+    document.getElementById('avatar-text').innerText = initial;
+    document.getElementById('prof-avatar-letter').innerText = initial;
+}
+
+function logoutUser() {
+    localStorage.removeItem('hc_currentUser');
+    location.reload();
+}
+
+function openProfile() {
+    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const stats = usersDB[currentUser];
+    
+    document.getElementById('prof-username').innerText = currentUser;
+    document.getElementById('prof-matches').innerText = stats.matches;
+    document.getElementById('prof-wins').innerText = stats.wins;
+    document.getElementById('prof-losses').innerText = stats.losses;
+    document.getElementById('prof-ties').innerText = stats.ties;
+    document.getElementById('prof-hs').innerText = stats.highestScore;
+    document.getElementById('prof-ducks').innerText = stats.ducks;
+    
+    // Calculate Averages
+    const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
+    const oversBowled = stats.totalBallsBowled / 6;
+    const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
+    
+    document.getElementById('prof-sr').innerText = avgSR;
+    document.getElementById('prof-eco').innerText = avgEco;
+    
+    // Format Best Spell (In our game, taking 1 wicket for X runs is the "spell")
+    const bestSpell = stats.bestSpellRuns === Infinity ? "-" : `1/${stats.bestSpellRuns}`;
+    document.getElementById('prof-best-spell').innerText = bestSpell;
+    
+    document.getElementById('profile-modal').style.display = 'flex';
+}
+
+function closeProfile() {
+    document.getElementById('profile-modal').style.display = 'none';
+}
+
 
 // Utility: Random Commentary Picker
 function getRandomCommentary(arr) {
@@ -67,7 +144,6 @@ function playToss(playerNum) {
     
     const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
     
-    // Log the Toss in the Match Report
     gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
 
     if (playerWins) {
@@ -160,7 +236,6 @@ function playHand(playerNum) {
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
     document.getElementById('computer-hand').innerText = handEmojis[compNum];
 
-    // Log the throw to history for PDF
     const batNum = gameState.isPlayerBatting ? playerNum : compNum;
     const bowlNum = gameState.isPlayerBatting ? compNum : playerNum;
     const currentBalls = (gameState.isPlayerBatting ? gameState.playerStats.balls : gameState.compStats.balls) + 1;
@@ -341,15 +416,13 @@ function triggerInningsChange(currentBatterStats) {
 }
 
 function writeCommentary(text) {
-    // Add result to history log
     gameState.commentaryHistory.push(`↳ ${text}`);
-    
     commentaryBox.innerHTML = `> ${text}`;
     commentaryBox.style.transform = 'scale(1.02)';
     setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
 }
 
-// --- POST MATCH ANALYSIS ---
+// --- POST MATCH ANALYSIS & DATA SAVING ---
 function endGame(result) {
     gameState.gameOver = true;
     actionArea.style.display = 'none';
@@ -371,6 +444,50 @@ function endGame(result) {
     populateStats('an-p', gameState.playerStats, gameState.compStats);
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     generateAIInsight(result);
+    
+    // Save Lifetime Stats to Profile
+    saveLifetimeStats(result);
+}
+
+function saveLifetimeStats(result) {
+    if (!currentUser) return;
+    
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    let stats = usersDB[currentUser];
+    
+    // Increment Match Outcomes
+    stats.matches += 1;
+    if (result === "PLAYER_WINS") stats.wins += 1;
+    else if (result === "COM_WINS") stats.losses += 1;
+    else stats.ties += 1;
+    
+    // Add Batting Stats
+    stats.totalRuns += gameState.playerStats.runs;
+    stats.totalBallsFaced += gameState.playerStats.balls;
+    if (gameState.playerStats.runs > stats.highestScore) {
+        stats.highestScore = gameState.playerStats.runs;
+    }
+    
+    // Check for a Duck (0 Runs AND Out)
+    if (gameState.playerStats.runs === 0 && gameState.playerStats.outOn !== '-') {
+        stats.ducks += 1;
+    }
+    
+    // Add Bowling Stats
+    stats.totalRunsConceded += gameState.compStats.runs;
+    stats.totalBallsBowled += gameState.compStats.balls;
+    
+    // Did Player take a wicket? (If comp gets out)
+    if (gameState.compStats.outOn !== '-') {
+        stats.totalWicketsTaken += 1;
+        // Check for best spell (Least runs conceded for a wicket)
+        if (gameState.compStats.runs < stats.bestSpellRuns) {
+            stats.bestSpellRuns = gameState.compStats.runs;
+        }
+    }
+    
+    usersDB[currentUser] = stats;
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
 
 function populateStats(prefix, batterStats, bowlerStats) {
@@ -416,7 +533,6 @@ function downloadPDF() {
 
     const printElement = document.createElement('div');
     
-    // 1. High Contrast, Size 15, Pitch Black Font & Table Layout (No Flexbox!)
     let pdfHTML = `
         <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
             
@@ -466,11 +582,9 @@ function downloadPDF() {
                 <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000;">
     `;
 
-    // 2. Grouping Logic: Glues the Ball thrown and the Result together so they CANNOT split!
     let currentGroup = '';
 
     gameState.commentaryHistory.forEach(log => {
-        // Strip out emojis that cause font corruption in PDFs
         let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵]/g, '').trim();
         safeText = safeText.replace('↳', '>').trim();
 
@@ -484,7 +598,6 @@ function downloadPDF() {
             lineStyle = "margin: 20px 0 10px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
         }
 
-        // If it's a new Ball or a Section Header, package the last group and start a new one inside an Unbreakable DIV
         if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
             if (currentGroup !== '') {
                 pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
@@ -495,7 +608,6 @@ function downloadPDF() {
         }
     });
 
-    // Append the very last group
     if (currentGroup !== '') {
         pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
     }
@@ -512,14 +624,13 @@ function downloadPDF() {
 
     printElement.innerHTML = pdfHTML;
 
-    // 3. Configuration with explicit Pagebreak Handling
     const opt = {
         margin:       0.4, 
         filename:     'Hand_Clash_Match_Report.pdf',
         image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // letterRendering helps prevent the font glitch!
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, 
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } // This ensures the 2nd Innings never disappears!
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
     };
 
     html2pdf().set(opt).from(printElement).save().then(() => {
