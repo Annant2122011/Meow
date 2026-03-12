@@ -155,15 +155,19 @@
             
             <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 <ul style="list-style: none; color: var(--text-bright); font-size: 1.2rem; line-height: 2.2;">
-                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Matches Played:</b> <span id="prof-matches" style="color: var(--accent-neon); font-weight: bold; font-size: 1.4rem;">0</span> <span style="font-size:1rem;">(<span id="prof-wins" style="color: var(--accent-blue);">0 W</span> / <span id="prof-losses" style="color: var(--accent-red);">0 L</span> / <span id="prof-ties" style="color: gray;">0 T</span>)</span></li>
-                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Runs:</b> <span id="prof-total-runs" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
+                   <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Matches Played:</b> <span id="prof-matches" style="color: var(--accent-neon); font-weight: bold; font-size: 1.4rem;">0</span> <span style="font-size:1rem;">(<span id="prof-wins" style="color: var(--accent-blue);">0 W</span> / <span id="prof-losses" style="color: var(--accent-red);">0 L</span> / <span id="prof-ties" style="color: gray;">0 T</span>)</span></li>
+                    
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Career Runs:</b> <span id="prof-total-runs" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Wickets Taken:</b> <span id="prof-total-wickets" style="color: #ff2a2a; font-weight: bold; font-size: 1.4rem;">0</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Highest Score:</b> <span id="prof-hs" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
+                    
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Batting Average:</b> <span id="prof-bat-avg" style="color: var(--accent-blue); font-weight: bold;">0.00</span></li>
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Bowling Average:</b> <span id="prof-bowl-avg" style="color: #ff2a2a; font-weight: bold;">0.00</span></li>
+
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Career Avg Strike Rate:</b> <span id="prof-sr" style="color: var(--accent-neon); font-weight: bold;">0.00</span></li>
-                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Wickets:</b> <span id="prof-total-wickets" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
-                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Career Avg Bowling Economy:</b> <span id="prof-eco" style="color: var(--accent-neon); font-weight: bold;">0.00</span></li>
-                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Duckouts 🦆:</b> <span id="prof-ducks" style="color: var(--accent-red); font-weight: bold;">0</span></li>
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Career Bowling Economy:</b> <span id="prof-eco" style="color: var(--accent-neon); font-weight: bold;">0.00</span></li>
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Ducks 🦆:</b> <span id="prof-ducks" style="color: var(--accent-red); font-weight: bold;">0</span></li>
                     <li><b>Best Bowling Spell:</b> <span id="prof-best-spell" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">-</span></li>
-                </ul>
             </div>
             <button class="btn" style="margin-top: 25px; width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 2px solid var(--accent-red); color: var(--accent-red); font-size: 1.2rem; font-weight: 900; letter-spacing: 2px;" onclick="logoutUser()">LOGOUT & SWITCH ACCOUNT</button>
         </div>
