@@ -57,10 +57,10 @@ function loginUser() {
     if (!usersDB[username]) {
         usersDB[username] = {
             matches: 0, wins: 0, losses: 0, ties: 0,
-            totalRuns: 0, totalBallsFaced: 0,
+            totalRuns: 0, totalBallsFaced: 0, totalDismissals: 0, // <-- ADDED DISMISSALS
             totalRunsConceded: 0, totalBallsBowled: 0,
             totalWicketsTaken: 0, ducks: 0, highestScore: 0,
-            bestSpellRuns: null // FIXED: Replaced Infinity with null so JSON saves correctly
+            bestSpellRuns: null 
         };
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
@@ -103,14 +103,27 @@ function openProfile() {
     document.getElementById('prof-wins').innerText = stats.wins;
     document.getElementById('prof-losses').innerText = stats.losses;
     document.getElementById('prof-ties').innerText = stats.ties;
-    
-    // CONNECTING THE NEW FIELDS TO THE DATABASE
     document.getElementById('prof-total-runs').innerText = stats.totalRuns || 0;
     document.getElementById('prof-total-wickets').innerText = stats.totalWicketsTaken || 0;
-
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
+    // BATTING AVERAGE MATH
+    const dismissals = stats.totalDismissals || 0;
+    let batAvg = "0.00";
+    if (dismissals > 0) {
+        batAvg = (stats.totalRuns / dismissals).toFixed(2);
+    } else if (stats.totalRuns > 0) {
+        batAvg = stats.totalRuns.toFixed(2) + "*"; // * means not-out
+    }
+    document.getElementById('prof-bat-avg').innerText = batAvg;
+
+    // BOWLING AVERAGE MATH
+    const wickets = stats.totalWicketsTaken || 0;
+    const bowlAvg = wickets > 0 ? (stats.totalRunsConceded / wickets).toFixed(2) : "-";
+    document.getElementById('prof-bowl-avg').innerText = bowlAvg;
+
+    // EXISTING STRIKE RATE & ECONOMY MATH
     const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
     const oversBowled = stats.totalBallsBowled / 6;
     const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
