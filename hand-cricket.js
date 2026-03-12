@@ -1,5 +1,5 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | GAME LOGIC (WITH DEFENSE/WIDE SYSTEM)
+   CRICPULSE FUN-GUN ARENA | GAME LOGIC (WITH HIT WICKET)
    ========================================================= */
 
 // Game State Object
@@ -15,12 +15,12 @@ let gameState = {
     playerConsecZeros: 0,
     compConsecZeros: 0,
     
-    // Added 'extras' to stats
+    // Stats
     playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 },
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 }
 };
 
-// Hand Number to Emoji Map (Added 0)
+// Hand Number to Emoji Map
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
 // DOM Elements
@@ -53,7 +53,7 @@ function playToss(playerNum) {
     tossStep2.style.display = 'none';
     tossResultScreen.style.display = 'block';
     
-    const compNum = Math.floor(Math.random() * 6) + 1; // Toss is strictly 1-6
+    const compNum = Math.floor(Math.random() * 6) + 1; 
     const sum = playerNum + compNum;
     const isSumEven = sum % 2 === 0;
     
@@ -114,19 +114,12 @@ function updateMatchUI() {
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
-    // RULE: Batter cannot defend more than 2 times in a row
-    if (gameState.isPlayerBatting && playerNum === 0) {
-        if (gameState.playerConsecZeros >= 2) {
-            alert("⚠️ BATTER PENALTY: You cannot defend (0) more than 2 times consecutively!");
-            return;
-        }
-    }
-
     // Generate Computer Number
     let compNum;
     if (!gameState.isPlayerBatting) { // Computer is Batting
         if (gameState.compConsecZeros >= 2) {
-            compNum = Math.floor(Math.random() * 6) + 1; // Force 1-6 if comp defended twice
+            // AI is smart but has a 10% chance to make a mistake and get Hit Wicket!
+            compNum = Math.random() < 0.1 ? 0 : Math.floor(Math.random() * 6) + 1; 
         } else {
             compNum = Math.floor(Math.random() * 7); // 0-6
         }
@@ -141,14 +134,21 @@ function playHand(playerNum) {
         gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
     }
 
-    // Mobile Vibrate Feedback (50ms)
+    // Mobile Vibrate Feedback
     if (navigator.vibrate) navigator.vibrate([50]);
 
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
     document.getElementById('computer-hand').innerText = handEmojis[compNum];
 
+    // SCENARIO 0: HIT WICKET (3 consecutive zeros by Batter)
+    if (gameState.isPlayerBatting && gameState.playerConsecZeros === 3) {
+        handleWicket(0, 'HIT_WICKET');
+    }
+    else if (!gameState.isPlayerBatting && gameState.compConsecZeros === 3) {
+        handleWicket(0, 'HIT_WICKET');
+    }
     // SCENARIO 1: Both throw 0 (LBW Wicket)
-    if (playerNum === 0 && compNum === 0) {
+    else if (playerNum === 0 && compNum === 0) {
         handleWicket(0, 'LBW');
     }
     // SCENARIO 2: Normal Wicket
@@ -176,14 +176,20 @@ function playHand(playerNum) {
 function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.balls++;
-    currentBatterStats.outOn = num;
     
+    // Update the stats sheet to show how they got out
+    currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'LBW' ? '0 (LBW)' : num);
+    
+    // Play-by-Play Commentary
     if (type === 'LBW') {
-        writeCommentary(`🚨 HOWZAT?! Both threw 🛡️ (0). ${gameState.isPlayerBatting ? "You are" : "Computer is"} OUT LBW! Plumb in front!`);
+        writeCommentary(`🚨 HOWZAT?! Both threw 🛡️. ${gameState.isPlayerBatting ? "You are" : "Computer is"} OUT LBW! Plumb in front!`);
+    } else if (type === 'HIT_WICKET') {
+        writeCommentary(`🏏💥 HIT WICKET! ${gameState.isPlayerBatting ? "You" : "Computer"} defended too deep (3 consecutive 0s) and stepped on the stumps! OUT!`);
     } else {
         writeCommentary(`💥 WICKET! Both threw ${num}. ${gameState.isPlayerBatting ? "You are" : "Computer is"} OUT!`);
     }
     
+    // Switch Innings or End Match
     if (gameState.innings === 1) {
         gameState.innings = 2;
         gameState.target = currentBatterStats.runs + 1;
@@ -215,7 +221,6 @@ function handleWicket(num, type) {
 function handleWide() {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     
-    // Wides add 1 run to the batting team, but DO NOT consume a ball delivery!
     currentBatterStats.runs += 1;
     currentBatterStats.extras += 1;
     
@@ -229,7 +234,6 @@ function handleWide() {
 function handleDefense() {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     
-    // Defense consumes a ball but scores 0 runs
     currentBatterStats.balls++;
     writeCommentary(`🛡️ SOLID DEFENSE! Batter blocked the ball. No runs scored.`);
 }
@@ -277,7 +281,6 @@ function endGame(result) {
         inningsStatus.style.background = "gray";
     }
 
-    // Populate stats (pass both batter and opponent stats to calculate bowling economy)
     populateStats('an-p', gameState.playerStats, gameState.compStats);
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     generateAIInsight(result);
@@ -291,12 +294,12 @@ function populateStats(prefix, batterStats, bowlerStats) {
     document.getElementById(`${prefix}-bounds`).innerText = batterStats.fours + batterStats.sixes;
     document.getElementById(`${prefix}-4s`).innerText = batterStats.fours;
     document.getElementById(`${prefix}-6s`).innerText = batterStats.sixes;
-    document.getElementById(`${prefix}-out`).innerText = batterStats.outOn;
     
-    // New Stats
+    // Shows standard numbers, or "0 (Hit Wkt)" / "0 (LBW)"
+    document.getElementById(`${prefix}-out`).innerText = batterStats.outOn; 
+    
     document.getElementById(`${prefix}-extras`).innerText = batterStats.extras;
     
-    // Economy is calculated using the runs you CONCEDED (bowlerStats.runs) / overs you BOWLED (bowlerStats.balls / 6)
     const oversBowled = bowlerStats.balls / 6;
     const economy = oversBowled > 0 ? (bowlerStats.runs / oversBowled).toFixed(2) : "0.00";
     document.getElementById(`${prefix}-eco`).innerText = economy;
