@@ -417,65 +417,65 @@ function downloadPDF() {
     // Create a temporary layout div for the PDF
     const printElement = document.createElement('div');
     
-    // Premium, Professional "Official Sports Report" Layout
+    // High-Contrast, Professional Print Layout
     let pdfHTML = `
-        <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #1f2937; padding: 20px; background: #ffffff;">
+        <div style="font-family: 'Segoe UI', Helvetica, Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px;">
             
-            <div style="text-align: center; border-bottom: 3px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px;">
-                <h1 style="font-size: 32px; font-weight: 900; color: #111827; letter-spacing: 2px; margin: 0; text-transform: uppercase;">HAND CLASH</h1>
-                <h2 style="font-size: 16px; font-weight: 600; color: #6b7280; letter-spacing: 4px; margin: 5px 0 0 0; text-transform: uppercase;">Official Match Report</h2>
+            <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="font-size: 32px; font-weight: 900; color: #000000; letter-spacing: 2px; margin: 0; text-transform: uppercase;">HAND CLASH</h1>
+                <h2 style="font-size: 18px; font-weight: 800; color: #000000; letter-spacing: 4px; margin: 5px 0 0 0; text-transform: uppercase;">Official Match Report</h2>
             </div>
 
-            <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 6px solid #3b82f6;">
-                <h3 style="margin: 0; font-size: 20px; color: #1f2937;">${document.getElementById('innings-status').innerText}</h3>
+            <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
+                <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText}</h3>
             </div>
 
-            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px;">
-                <div style="flex: 1; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; border-top: 5px solid #3b82f6; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <h3 style="margin-top: 0; color: #3b82f6; font-size: 18px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">👤 YOUR PERFORMANCE</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr><td style="padding: 8px 0; color: #4b5563;">Runs Scored</td><td style="text-align: right; font-weight: bold; font-size: 18px; color: #111827;">${gameState.playerStats.runs} <span style="font-size:12px; font-weight:normal; color:#9ca3af;">(${gameState.playerStats.balls} balls)</span></td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Strike Rate</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-p-sr').innerText}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Boundaries</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-p-bounds').innerText} <span style="font-weight:normal; font-size:12px; color:#9ca3af;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Bowling Eco.</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-p-eco').innerText}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Extras Rcvd.</td><td style="text-align: right; font-weight: bold; color: #111827;">${gameState.playerStats.extras}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Dismissed On</td><td style="text-align: right; font-weight: bold; color: #ef4444;">${gameState.playerStats.outOn}</td></tr>
+            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 30px; page-break-inside: avoid;">
+                <div style="flex: 1; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">👤 YOUR PERFORMANCE</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 600;">
+                        <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.playerStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.playerStats.balls} balls)</span></td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-sr').innerText}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-eco').innerText}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.playerStats.extras}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Dismissed On</td><td style="text-align: right; font-weight: 900; color: #dc2626;">${gameState.playerStats.outOn}</td></tr>
                     </table>
                 </div>
 
-                <div style="flex: 1; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; border-top: 5px solid #ef4444; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <h3 style="margin-top: 0; color: #ef4444; font-size: 18px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">🤖 COM PERFORMANCE</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <tr><td style="padding: 8px 0; color: #4b5563;">Runs Scored</td><td style="text-align: right; font-weight: bold; font-size: 18px; color: #111827;">${gameState.compStats.runs} <span style="font-size:12px; font-weight:normal; color:#9ca3af;">(${gameState.compStats.balls} balls)</span></td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Strike Rate</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-c-sr').innerText}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Boundaries</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-c-bounds').innerText} <span style="font-weight:normal; font-size:12px; color:#9ca3af;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Bowling Eco.</td><td style="text-align: right; font-weight: bold; color: #111827;">${document.getElementById('an-c-eco').innerText}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Extras Rcvd.</td><td style="text-align: right; font-weight: bold; color: #111827;">${gameState.compStats.extras}</td></tr>
-                        <tr style="border-top: 1px solid #f3f4f6;"><td style="padding: 8px 0; color: #4b5563;">Dismissed On</td><td style="text-align: right; font-weight: bold; color: #ef4444;">${gameState.compStats.outOn}</td></tr>
+                <div style="flex: 1; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 20px;">
+                    <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">🤖 COM PERFORMANCE</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 600;">
+                        <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.compStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.compStats.balls} balls)</span></td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-sr').innerText}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-eco').innerText}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.compStats.extras}</td></tr>
+                        <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Dismissed On</td><td style="text-align: right; font-weight: 900; color: #dc2626;">${gameState.compStats.outOn}</td></tr>
                     </table>
                 </div>
             </div>
 
-            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #22c55e; padding: 20px; border-radius: 8px; margin-bottom: 40px;">
-                <h4 style="margin: 0 0 8px 0; color: #166534; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Expert AI Insight</h4>
-                <p style="margin: 0; color: #15803d; font-size: 16px; font-weight: 500; line-height: 1.6;">${document.getElementById('ai-insight-text').innerText}</p>
+            <div style="background: #f0fdf4; border: 2px solid #166534; border-left: 8px solid #166534; padding: 20px; border-radius: 8px; margin-bottom: 40px; page-break-inside: avoid;">
+                <h4 style="margin: 0 0 8px 0; color: #14532d; font-size: 16px; text-transform: uppercase; font-weight: 900; letter-spacing: 1px;">Expert AI Insight</h4>
+                <p style="margin: 0; color: #000000; font-size: 15px; font-weight: 700; line-height: 1.6;">${document.getElementById('ai-insight-text').innerText}</p>
             </div>
 
             <div style="page-break-before: auto;">
-                <h3 style="color: #111827; font-size: 18px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 20px;">📜 Ball-by-Ball Match Log</h3>
-                <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; color: #374151;">
+                <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">📜 Ball-by-Ball Match Log</h3>
+                <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000;">
     `;
 
-    // Inject the commentary log array with clean highlight styling
+    // Inject the commentary log array with page-break protection!
     gameState.commentaryHistory.forEach(log => {
         if(log.includes("WICKET") || log.includes("STUMPED") || log.includes("HOWZAT") || log.includes("HIT WICKET")) {
-            pdfHTML += `<div style="padding: 8px 12px; background: #fef2f2; color: #b91c1c; border-left: 4px solid #ef4444; margin-bottom: 6px; font-weight: bold; border-radius: 0 4px 4px 0;">${log}</div>`;
+            pdfHTML += `<div style="padding: 10px 15px; background: #fef2f2; color: #7f1d1d; border: 2px solid #fca5a5; border-left: 6px solid #dc2626; margin-bottom: 8px; font-weight: bold; border-radius: 4px; page-break-inside: avoid;">${log}</div>`;
         } else if (log.includes("+4") || log.includes("+6")) {
-            pdfHTML += `<div style="padding: 8px 12px; background: #eff6ff; color: #1d4ed8; border-left: 4px solid #3b82f6; margin-bottom: 6px; font-weight: bold; border-radius: 0 4px 4px 0;">${log}</div>`;
+            pdfHTML += `<div style="padding: 10px 15px; background: #eff6ff; color: #1e3a8a; border: 2px solid #bfdbfe; border-left: 6px solid #2563eb; margin-bottom: 8px; font-weight: bold; border-radius: 4px; page-break-inside: avoid;">${log}</div>`;
         } else if (log.includes("---")) {
-            pdfHTML += `<div style="padding: 12px; background: #f3f4f6; color: #1f2937; text-align: center; font-weight: bold; margin: 20px 0; text-transform: uppercase; letter-spacing: 1px; border-radius: 6px;">${log}</div>`;
+            pdfHTML += `<div style="padding: 15px; background: #e5e7eb; color: #000000; border: 3px solid #000000; text-align: center; font-weight: 900; margin: 25px 0; text-transform: uppercase; letter-spacing: 2px; border-radius: 6px; page-break-inside: avoid;">${log}</div>`;
         } else {
-            pdfHTML += `<div style="padding: 4px 12px; border-left: 2px solid #e5e7eb; margin-bottom: 6px;">${log}</div>`;
+            pdfHTML += `<div style="padding: 8px 15px; border-left: 4px solid #000000; margin-bottom: 8px; color: #000000; font-weight: 600; background: #f9fafb; page-break-inside: avoid;">${log}</div>`;
         }
     });
 
@@ -483,7 +483,7 @@ function downloadPDF() {
                 </div>
             </div>
 
-            <div style="margin-top: 50px; text-align: center; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+            <div style="margin-top: 50px; text-align: center; color: #000000; font-size: 13px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">
                 Generated by Hand Clash Arena &bull; &copy; 2026
             </div>
         </div>
@@ -491,13 +491,14 @@ function downloadPDF() {
 
     printElement.innerHTML = pdfHTML;
 
-    // PDF Configuration Options
+    // The 'pagebreak' setting here is the magic that fixes the missing 2nd innings!
     const opt = {
-        margin:       [0.5, 0.5, 0.5, 0.5], // Adds clean white borders around the whole page
+        margin:       [0.5, 0.5, 0.5, 0.5], 
         filename:     'Hand Clash_Match_Report.pdf',
         image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' }, // Forces white background
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
     };
 
     // Generate and Download
