@@ -4,22 +4,21 @@
 
 // Game State Object
 let gameState = {
-    tossChoice: null, // 'odd' or 'even'
+    tossChoice: null,
     isPlayerBatting: null,
     innings: 1,
     target: null,
     gameOver: false,
+    isTransitioning: false, // Prevents clicks during innings break
     
     playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-' },
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-' }
 };
 
 // Hand Number to Emoji Map
-const handEmojis = {
-    1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙'
-};
+const handEmojis = { 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
-// DOM Elements - Toss
+// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -27,7 +26,6 @@ const tossResultScreen = document.getElementById('toss-result-screen');
 const playerDecisionBox = document.getElementById('player-decision-box');
 const computerDecisionBox = document.getElementById('computer-decision-box');
 
-// DOM Elements - Match
 const matchScreen = document.getElementById('match-screen');
 const tossScreen = document.getElementById('toss-screen');
 const inningsStatus = document.getElementById('innings-status');
@@ -37,11 +35,8 @@ const computerHandScoreUi = document.getElementById('computer-hand-score');
 const targetBox = document.getElementById('target-box');
 const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
-const analysisScreen = document.getElementById('analysis-screen');
-const restartBtn = document.getElementById('hand-restart-btn');
 
 // --- TOSS LOGIC ---
-
 function chooseToss(choice) {
     gameState.tossChoice = choice;
     tossStep1.style.display = 'none';
@@ -71,7 +66,6 @@ function playToss(playerNum) {
         document.getElementById('toss-winner-text').innerText = "🤖 COMPUTER WON THE TOSS!";
         document.getElementById('toss-winner-text').style.color = 'var(--accent-red)';
         
-        // Computer AI randomly decides to bat or bowl
         gameState.isPlayerBatting = Math.random() < 0.5 ? false : true;
         const compChoice = gameState.isPlayerBatting ? 'BOWL' : 'BAT';
         
@@ -86,7 +80,6 @@ function playToss(playerNum) {
 }
 
 // --- MATCH SETUP ---
-
 function startMatch(playerOptsToBat) {
     gameState.isPlayerBatting = playerOptsToBat;
     continueToMatch();
@@ -113,26 +106,28 @@ function updateMatchUI() {
 }
 
 // --- CORE GAMEPLAY LOGIC ---
-
 function playHand(playerNum) {
-    if (gameState.gameOver) return;
+    if (gameState.gameOver || gameState.isTransitioning) return;
+
+    // Mobile Vibrate Feedback (50ms)
+    if (navigator.vibrate) {
+        navigator.vibrate([50]);
+    }
 
     const compNum = Math.floor(Math.random() * 6) + 1;
     
-    // Animate Hands
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
     document.getElementById('computer-hand').innerText = handEmojis[compNum];
     
-    // WICKET!
     if (playerNum === compNum) {
         handleWicket(playerNum);
-    } 
-    // RUNS!
-    else {
+    } else {
         handleRuns(gameState.isPlayerBatting ? playerNum : compNum);
     }
     
-    updateMatchUI();
+    if (!gameState.isTransitioning) {
+        updateMatchUI();
+    }
 }
 
 function handleWicket(num) {
@@ -143,18 +138,20 @@ function handleWicket(num) {
     writeCommentary(`💥 WICKET! Both threw ${num}. ${gameState.isPlayerBatting ? "You are" : "Computer is"} OUT!`);
     
     if (gameState.innings === 1) {
-        // Setup 2nd Innings
         gameState.innings = 2;
         gameState.target = currentBatterStats.runs + 1;
         gameState.isPlayerBatting = !gameState.isPlayerBatting;
+        
+        gameState.isTransitioning = true; 
         
         setTimeout(() => {
             writeCommentary(`Innings Break! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`);
             document.getElementById('player-hand').innerText = '✊';
             document.getElementById('computer-hand').innerText = '✊';
+            gameState.isTransitioning = false; 
+            updateMatchUI(); 
         }, 2000);
     } else {
-        // Match Over - Team batting second got all out
         const battingSecondStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
         if (battingSecondStats.runs < gameState.target - 1) {
             endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS");
@@ -178,7 +175,6 @@ function handleRuns(runs) {
     if (runs === 6) msg += "Massive SIX! Out of the park! 🚀";
     writeCommentary(msg);
 
-    // Check target in 2nd innings
     if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) {
         endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
     }
@@ -186,18 +182,16 @@ function handleRuns(runs) {
 
 function writeCommentary(text) {
     commentaryBox.innerHTML = `> ${text}`;
-    // Simple pulse animation for commentary
     commentaryBox.style.transform = 'scale(1.02)';
     setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
 }
 
 // --- POST MATCH ANALYSIS ---
-
 function endGame(result) {
     gameState.gameOver = true;
     actionArea.style.display = 'none';
     
-    // Show the new button container instead of the raw analysis screen
+    // Show the new End Game Button Container
     document.getElementById('end-game-controls').style.display = 'flex';
     
     if (result === "PLAYER_WINS") {
@@ -242,9 +236,10 @@ function generateAIInsight(result) {
 }
 
 function resetToToss() {
-    location.reload(); // Quickest way to clean slate everything for a browser game
+    location.reload(); 
 }
-// Modal Control Functions
+
+// Modal View Controllers
 function openAnalysis() {
     document.getElementById('analysis-modal').style.display = 'flex';
 }
