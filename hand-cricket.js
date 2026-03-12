@@ -17,7 +17,7 @@ let gameState = {
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 }
 };
 
-let currentUser = null; // Tracks the logged-in player
+let currentUser = null;
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
 // DOM Elements
@@ -52,7 +52,6 @@ function loginUser() {
     const username = document.getElementById('username-input').value.trim().toUpperCase();
     if (!username) { alert("Arena requires a Player Name!"); return; }
     
-    // Check local database for profile, or create new
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     if (!usersDB[username]) {
         usersDB[username] = {
@@ -60,7 +59,7 @@ function loginUser() {
             totalRuns: 0, totalBallsFaced: 0,
             totalRunsConceded: 0, totalBallsBowled: 0,
             totalWicketsTaken: 0, ducks: 0, highestScore: 0,
-            bestSpellRuns: Infinity // Lowest runs conceded for a wicket
+            bestSpellRuns: null // FIXED: Replaced Infinity with null so JSON saves correctly
         };
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
@@ -74,7 +73,6 @@ function loadUser(username) {
     document.getElementById('login-modal').style.display = 'none';
     document.getElementById('user-profile-btn').style.display = 'block';
     
-    // Update Avatar Icon (First letter of name)
     const initial = username.charAt(0);
     document.getElementById('avatar-text').innerText = initial;
     document.getElementById('prof-avatar-letter').innerText = initial;
@@ -97,7 +95,6 @@ function openProfile() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
-    // Calculate Averages
     const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
     const oversBowled = stats.totalBallsBowled / 6;
     const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
@@ -105,8 +102,8 @@ function openProfile() {
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
     
-    // Format Best Spell (In our game, taking 1 wicket for X runs is the "spell")
-    const bestSpell = stats.bestSpellRuns === Infinity ? "-" : `1/${stats.bestSpellRuns}`;
+    // FIXED: Formats cleanly when null
+    const bestSpell = stats.bestSpellRuns === null ? "-" : `1/${stats.bestSpellRuns}`;
     document.getElementById('prof-best-spell').innerText = bestSpell;
     
     document.getElementById('profile-modal').style.display = 'flex';
@@ -116,8 +113,6 @@ function closeProfile() {
     document.getElementById('profile-modal').style.display = 'none';
 }
 
-
-// Utility: Random Commentary Picker
 function getRandomCommentary(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -445,7 +440,6 @@ function endGame(result) {
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     generateAIInsight(result);
     
-    // Save Lifetime Stats to Profile
     saveLifetimeStats(result);
 }
 
@@ -455,33 +449,28 @@ function saveLifetimeStats(result) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     let stats = usersDB[currentUser];
     
-    // Increment Match Outcomes
     stats.matches += 1;
     if (result === "PLAYER_WINS") stats.wins += 1;
     else if (result === "COM_WINS") stats.losses += 1;
     else stats.ties += 1;
     
-    // Add Batting Stats
     stats.totalRuns += gameState.playerStats.runs;
     stats.totalBallsFaced += gameState.playerStats.balls;
     if (gameState.playerStats.runs > stats.highestScore) {
         stats.highestScore = gameState.playerStats.runs;
     }
     
-    // Check for a Duck (0 Runs AND Out)
     if (gameState.playerStats.runs === 0 && gameState.playerStats.outOn !== '-') {
         stats.ducks += 1;
     }
     
-    // Add Bowling Stats
     stats.totalRunsConceded += gameState.compStats.runs;
     stats.totalBallsBowled += gameState.compStats.balls;
     
-    // Did Player take a wicket? (If comp gets out)
     if (gameState.compStats.outOn !== '-') {
         stats.totalWicketsTaken += 1;
-        // Check for best spell (Least runs conceded for a wicket)
-        if (gameState.compStats.runs < stats.bestSpellRuns) {
+        // FIXED: Allows the lowest score to be correctly recorded without null interference
+        if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) {
             stats.bestSpellRuns = gameState.compStats.runs;
         }
     }
@@ -524,7 +513,7 @@ function resetToToss() { location.reload(); }
 function openAnalysis() { document.getElementById('analysis-modal').style.display = 'flex'; }
 function closeAnalysis() { document.getElementById('analysis-modal').style.display = 'none'; }
 
-// --- PDF GENERATION LOGIC ---
+// --- PDF GENERATION LOGIC (HIGH CONTRAST TABLE LAYOUT) ---
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn');
     const originalText = btn.innerHTML;
