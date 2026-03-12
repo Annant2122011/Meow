@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hand Cricket Clash</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -167,9 +168,13 @@
                 </div>
             </div>
 
-            <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(0,255,136,0.3); padding: 20px; border-radius: 12px; border-left: 5px solid var(--accent-neon);">
+            <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(0,255,136,0.3); padding: 20px; border-radius: 12px; border-left: 5px solid var(--accent-neon); margin-bottom: 20px;">
                 <h4 style="color: var(--text-dim); margin-bottom: 10px; font-size: 1rem; letter-spacing: 2px;">🤖 EXPERT AI INSIGHT</h4>
                 <p id="ai-insight-text" style="color: var(--accent-neon); font-size: 1.3rem; font-weight: bold; line-height: 1.5;"></p>
+            </div>
+
+            <div style="text-align: center;">
+                <button id="pdf-btn" class="btn pulse-btn" style="padding: 15px 30px; font-size: 1.2rem; background: var(--accent-blue); color: #000; border: none; font-weight: 900;" onclick="downloadPDF()">📄 DOWNLOAD MATCH REPORT</button>
             </div>
         </div>
     </div>
