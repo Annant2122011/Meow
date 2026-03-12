@@ -339,3 +339,65 @@ footer {
     50% { box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); border-color: var(--accent-neon); }
     100% { box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
 }
+/* =========================================================
+   COMPACT UI & MODAL POPUP UPDATES
+   ========================================================= */
+
+/* 1. Compacting the Main Game Board to prevent scrolling */
+.container { padding: 10px 20px; }
+.game-header { margin-bottom: 15px; }
+.section-title { font-size: 2rem; }
+.hand-display { padding: 15px; margin-bottom: 15px; }
+.hand-icon { font-size: 3.5rem; } /* Slightly smaller hands */
+.hand-scoreboard { margin-bottom: 15px; }
+.score-card { padding: 10px; }
+.score-number { font-size: 2.5rem; } /* Slightly smaller scores */
+.commentary-box { margin-bottom: 15px; padding: 12px; font-size: 1.1rem; min-height: auto; }
+.button-grid { margin: 10px auto; gap: 10px; }
+.hand-btn { padding: 10px; font-size: 1.8rem; }
+
+/* 2. Analysis Modal (Popup) Styles */
+.modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border: 2px solid var(--accent-blue);
+    border-radius: 20px;
+    width: 90%; 
+    max-width: 700px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 210, 255, 0.3);
+    max-height: 90vh; 
+    overflow-y: auto;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 2.5rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: 0.2s;
+    line-height: 1;
+}
+
+.close-modal:hover { color: var(--accent-red); }
+
+/* Flexbox for end-game buttons */
+.end-game-controls {
+    display: none;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
