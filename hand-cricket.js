@@ -1,5 +1,5 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | ULTIMATE STATS ENGINE
+   CRICPULSE FUN-GUN ARENA | PERFECTED STATS ALGORITHMS
    ========================================================= */
 
 // Game State Object
@@ -17,8 +17,9 @@ let gameState = {
     playerConsecZeros: 0,
     compConsecZeros: 0,
     commentaryHistory: [], 
-    playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, hitCentury: false },
-    compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, dots: 0 }
+    // NEW ALGORITHM TRACKERS ADDED: currentWicketRuns, dismissalHistory, wicketRunsHistory
+    playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, hitCentury: false, dots: 0, currentWicketRuns: 0, dismissalHistory: [], wicketRunsHistory: [] },
+    compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, dots: 0, currentWicketRuns: 0, dismissalHistory: [], wicketRunsHistory: [] }
 };
 
 let currentUser = null;
@@ -27,10 +28,9 @@ let runsChartInstance = null;
 let throwDnaInstance = null;
 let fatalChartInstance = null;
 
-// UPDATED EMOJI FOR 6 TO THUMBS UP
+// EMOJI FOR 6 IS THUMBS UP
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
-// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -154,10 +154,9 @@ function renderProfilePage() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
-    const dismissals = stats.totalDismissals || 0;
+    // NEW BATTING AVERAGE ALGORITHM (Total Runs / Total Matches)
     let batAvg = "0.00";
-    if (dismissals > 0) batAvg = (stats.totalRuns / dismissals).toFixed(2);
-    else if (stats.totalRuns > 0) batAvg = stats.totalRuns.toFixed(2) + "*";
+    if (stats.matches > 0) batAvg = (stats.totalRuns / stats.matches).toFixed(2);
     document.getElementById('prof-bat-avg').innerText = batAvg;
 
     const wickets = stats.totalWicketsTaken || 0;
@@ -222,7 +221,7 @@ function renderProfilePage() {
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
             type: 'bar', data: { 
-                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `M${i+1}${inn.notOut ? '*' : ''}`) : [], 
+                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `Inn ${i+1}${inn.notOut ? '*' : ''}`) : [], 
                 datasets: [{ label: 'Runs Scored', data: stats.last20Innings ? stats.last20Innings.map(inn => inn.runs) : [], backgroundColor: '#00d2ff', borderRadius: 4 }] 
             },
             options: { 
@@ -241,7 +240,6 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
                 datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(0, 255, 136, 0.2)', borderColor: '#00ff88', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            // FIXED: Added min: 0 to force perfect scaling relative to zero!
             options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
     }
@@ -254,7 +252,6 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Wkt/Stmp)'], 
                 datasets: [{ label: 'Got Out On', data: [ft['1'], ft['2'], ft['3'], ft['4'], ft['5'], ft['6'], ft['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            // FIXED: Added min: 0 to force perfect scaling relative to zero!
             options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
     }
@@ -411,6 +408,7 @@ function getComputerThrow() {
     }
 }
 
+// --- CORE GAMEPLAY LOGIC ---
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
@@ -450,9 +448,18 @@ function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.balls++; currentBatterStats.wicketsLost++;
     if (!gameState.isPlayerBatting) gameState.compStats.dots++; 
+    
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
+    // ALGORITHM CORRECTION: PUSH EVERY SINGLE WICKET INTO HISTORY DURING MATCH
+    let outNum = (type === 'HIT_WICKET' || type === 'STUMPED') ? '0' : num.toString();
+    currentBatterStats.dismissalHistory.push({ num: outNum, type: type });
+    
+    // ALGORITHM CORRECTION: PUSH INNINGS SCORE FOR THE FALLEN WICKET
+    currentBatterStats.wicketRunsHistory.push({ runs: currentBatterStats.currentWicketRuns, notOut: false });
+    currentBatterStats.currentWicketRuns = 0; // Reset runs for the next batter
+
     if (type === 'STUMPED') writeCommentary(`🚨 WIDE AND STUMPED! Lightning-fast glovework removes ${batterName}!`);
     else if (type === 'HIT_WICKET') writeCommentary(`🏏💥 HIT WICKET! ${batterName} defended too deep (3x 0s) and stepped on the stumps! OUT!`);
     else writeCommentary(`💥 WICKET! Clean bowled! Both threw ${num}. ${batterName} departs!`);
@@ -467,7 +474,10 @@ function handleWicket(num, type) {
 
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    const runsToAdd = batterNum + 1; currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
+    const runsToAdd = batterNum + 1; 
+    currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
+    currentBatterStats.currentWicketRuns += runsToAdd; // Track per wicket
+    
     const team = gameState.isPlayerBatting ? "You" : "Computer";
     writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs to ${team}. (Ball not counted)`);
     if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
@@ -494,6 +504,7 @@ function handleDefense() {
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.runs += runs; currentBatterStats.balls++;
+    currentBatterStats.currentWicketRuns += runs; // Track per wicket
     
     if (runs === 4) { currentBatterStats.fours++; writeCommentary(`🔥 +4 Runs! Glorious cover drive!`); }
     else if (runs === 6) { currentBatterStats.sixes++; writeCommentary(`🚀 👍 +6 Runs! MASSIVE HIT!`); }
@@ -590,29 +601,31 @@ function saveLifetimeStats(result) {
     if (gameState.playerStats.runs > stats.highestScore) stats.highestScore = gameState.playerStats.runs;
     if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) stats.successfulChases += 1;
 
-    let isNotOut = gameState.playerStats.wicketsLost < gameState.maxWickets;
-    
     if (!stats.last20Innings) stats.last20Innings = []; 
-    stats.last20Innings.push({ runs: gameState.playerStats.runs, notOut: isNotOut });
-    if(stats.last20Innings.length > 20) stats.last20Innings.shift();
 
-    if (gameState.playerStats.outOn !== '-') {
-        stats.totalDismissals += 1; if (gameState.playerStats.runs === 0) stats.ducks += 1;
-        
-        let outStr = gameState.playerStats.outOn.toString();
-        let outNum = '0';
-        if (outStr.includes('1')) outNum = '1';
-        else if (outStr.includes('2')) outNum = '2';
-        else if (outStr.includes('3')) outNum = '3';
-        else if (outStr.includes('4')) outNum = '4';
-        else if (outStr.includes('5')) outNum = '5';
-        else if (outStr.includes('6')) outNum = '6';
+    // PROCESS ALL WICKETS FOR FATAL FLAWS
+    gameState.playerStats.dismissalHistory.forEach(d => {
+        stats.totalDismissals += 1;
+        stats.fatalThrows[d.num] = (stats.fatalThrows[d.num] || 0) + 1;
+        if (d.type === 'HIT_WICKET') stats.dismissalTypes['Hit Wicket']++;
+        else if (d.type === 'STUMPED') stats.dismissalTypes['Stumped']++;
+        else stats.dismissalTypes['Caught/Bowled']++;
+    });
 
-        stats.fatalThrows[outNum] = (stats.fatalThrows[outNum] || 0) + 1;
-    } else {
+    // PROCESS RUNS PER WICKET FOR INNINGS SCORE CHART
+    gameState.playerStats.wicketRunsHistory.forEach(w => {
+        if (w.runs === 0) stats.ducks += 1;
+        stats.last20Innings.push({ runs: w.runs, notOut: false });
+    });
+
+    // PUSH FINAL NOT-OUT SCORE
+    if (gameState.playerStats.wicketsLost < gameState.maxWickets) {
         stats.notOutMatches += 1; 
+        stats.last20Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true });
     }
     
+    while(stats.last20Innings.length > 20) { stats.last20Innings.shift(); }
+
     stats.totalRunsConceded += gameState.compStats.runs; stats.totalBallsBowled += gameState.compStats.balls;
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.aiDucksGivens += 1;
 
