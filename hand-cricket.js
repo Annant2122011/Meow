@@ -78,7 +78,6 @@ function syncUserData(username) {
     u.totalRunsConceded = u.totalRunsConceded || 0; u.totalBallsBowled = u.totalBallsBowled || 0;
     u.totalWicketsTaken = u.totalWicketsTaken || 0; u.ducks = u.ducks || 0; u.highestScore = u.highestScore || 0;
     
-    // NEW: Corrected Best Spell Tracker (Wickets/Runs format)
     if (!u.bestSpell) {
         u.bestSpell = { wickets: 0, runs: 0 };
     }
@@ -171,7 +170,6 @@ function renderProfilePage() {
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
     
-    // UPDATED PRO BEST SPELL LOGIC RENDERER
     document.getElementById('prof-best-spell').innerText = stats.bestSpell.wickets > 0 ? `${stats.bestSpell.wickets}/${stats.bestSpell.runs}` : "-";
 
     const achData = [
@@ -220,7 +218,6 @@ function renderProfilePage() {
         });
     }
 
-    // UPDATED: Last 20 Matches with Asterisk for Not-Out
     const runsCtxElement = document.getElementById('runsBarChart');
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
@@ -244,11 +241,11 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
                 datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(0, 255, 136, 0.2)', borderColor: '#00ff88', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
+            // FIXED: Added min: 0 to force perfect scaling relative to zero!
+            options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
     }
 
-    // NEW: FATAL FLAWS WEB CHART (How you get out)
     const fatalCtxElement = document.getElementById('fatalThrowsChart');
     if (fatalCtxElement && stats.fatalThrows) {
         const ft = stats.fatalThrows;
@@ -257,7 +254,8 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Wkt/Stmp)'], 
                 datasets: [{ label: 'Got Out On', data: [ft['1'], ft['2'], ft['3'], ft['4'], ft['5'], ft['6'], ft['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
+            // FIXED: Added min: 0 to force perfect scaling relative to zero!
+            options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
     }
 }
@@ -413,7 +411,6 @@ function getComputerThrow() {
     }
 }
 
-// --- CORE GAMEPLAY LOGIC ---
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
@@ -499,7 +496,7 @@ function handleRuns(runs) {
     currentBatterStats.runs += runs; currentBatterStats.balls++;
     
     if (runs === 4) { currentBatterStats.fours++; writeCommentary(`🔥 +4 Runs! Glorious cover drive!`); }
-    else if (runs === 6) { currentBatterStats.sixes++; writeCommentary(`🚀 +6 Runs! MASSIVE HIT!`); }
+    else if (runs === 6) { currentBatterStats.sixes++; writeCommentary(`🚀 👍 +6 Runs! MASSIVE HIT!`); }
     else writeCommentary(`🏃 +${runs} Runs! Quick running.`);
 
     if (gameState.isPlayerBatting && currentBatterStats.runs >= 100 && !currentBatterStats.hitCentury) {
@@ -599,7 +596,6 @@ function saveLifetimeStats(result) {
     stats.last20Innings.push({ runs: gameState.playerStats.runs, notOut: isNotOut });
     if(stats.last20Innings.length > 20) stats.last20Innings.shift();
 
-    // Log the EXACT number you got out on for the Fatal Flaws graph
     if (gameState.playerStats.outOn !== '-') {
         stats.totalDismissals += 1; if (gameState.playerStats.runs === 0) stats.ducks += 1;
         
@@ -620,7 +616,6 @@ function saveLifetimeStats(result) {
     stats.totalRunsConceded += gameState.compStats.runs; stats.totalBallsBowled += gameState.compStats.balls;
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.aiDucksGivens += 1;
 
-    // Corrected Best Spell Math (Wickets/Runs)
     if (gameState.compStats.wicketsLost > 0) {
         let currentWkts = gameState.compStats.wicketsLost;
         let currentRuns = gameState.compStats.runs;
