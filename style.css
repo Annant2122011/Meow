@@ -35,6 +35,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     animation: gridMove 20s linear infinite;
+    transition: background-color 0.3s ease;
 }
 
 @keyframes gridMove {
@@ -45,7 +46,7 @@ body {
 /* Header */
 header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
     background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
@@ -68,12 +69,12 @@ header {
 .container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: 20px 20px;
 }
 
 .game-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .neon-text {
@@ -86,7 +87,7 @@ header {
 
 .section-title {
     font-size: 2.5rem;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .game-subtitle {
@@ -104,7 +105,7 @@ header {
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(0, 255, 136, 0.15);
-    padding: 30px;
+    padding: 25px;
     position: relative;
     overflow: hidden;
 }
@@ -119,6 +120,7 @@ header {
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 12px 24px;
 }
 
 .pulse-btn {
@@ -131,7 +133,7 @@ header {
 
 .pulse-btn:hover {
     background: var(--accent-neon);
-    color: var(--bg-dark);
+    color: var(--bg-dark) !important;
     box-shadow: 0 0 30px rgba(0, 255, 136, 0.8), 0 10px 20px rgba(0,0,0,0.6);
     transform: translateY(-3px);
 }
@@ -147,13 +149,21 @@ header {
     100% { box-shadow: 0 0 15px rgba(0, 255, 136, 0.3) inset, 0 5px 15px rgba(0,0,0,0.5); }
 }
 
+/* Match Setup Selected Highlights */
+.active-setup-btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
+    animation: none;
+}
+
 /* Hand Interaction Grid */
 .button-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin: 20px auto;
-    max-width: 400px;
+    gap: 12px;
+    margin: 15px auto;
 }
 
 .hand-btn {
@@ -166,6 +176,9 @@ header {
     cursor: pointer;
     box-shadow: 5px 5px 15px rgba(0,0,0,0.6), inset 2px 2px 5px rgba(255,255,255,0.05);
     transition: all 0.1s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .hand-btn:hover {
@@ -187,9 +200,9 @@ header {
     justify-content: space-around;
     align-items: center;
     background: rgba(0, 0, 0, 0.5);
-    padding: 30px 20px;
+    padding: 20px 15px;
     border-radius: 16px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     border: 1px solid rgba(255, 255, 255, 0.03);
     box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
 }
@@ -205,9 +218,9 @@ header {
 }
 
 .hand-icon {
-    font-size: 5rem;
+    font-size: 4.5rem;
     text-align: center;
-    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
 }
 
@@ -216,7 +229,7 @@ header {
 
 .vs-text {
     font-family: var(--font-display);
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 900;
     color: rgba(255, 255, 255, 0.1);
     font-style: italic;
@@ -228,13 +241,13 @@ header {
     display: flex;
     justify-content: space-between;
     gap: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .score-card {
     flex: 1;
     text-align: center;
-    padding: 20px 10px;
+    padding: 15px 10px;
     border-radius: 16px;
     background: linear-gradient(180deg, rgba(20,20,25,0.9) 0%, rgba(10,10,15,1) 100%);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -256,12 +269,12 @@ header {
 
 .score-number {
     font-family: var(--font-display);
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: 900;
     line-height: 1;
 }
 
-/* Misc Utilities */
+/* Commentary & Badges */
 .innings-badge {
     font-family: var(--font-display);
     background: var(--accent-neon);
@@ -272,93 +285,30 @@ header {
     font-weight: 900;
     font-size: 1.1rem;
     letter-spacing: 1px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
     text-transform: uppercase;
+    width: 100%;
+    text-align: center;
 }
 
 .commentary-box {
     background: rgba(0, 0, 0, 0.6);
     border-left: 5px solid var(--accent-blue);
-    padding: 20px;
+    padding: 15px;
     border-radius: 0 12px 12px 0;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--accent-blue);
     box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
     text-shadow: 0 0 5px rgba(0, 210, 255, 0.4);
+    min-height: 60px;
 }
 
-@keyframes popIn {
-    0% { transform: scale(0.5) translateY(20px); opacity: 0; }
-    60% { transform: scale(1.2) translateY(-10px); }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-footer {
-    text-align: center;
-    padding: 30px;
-    color: rgba(255, 255, 255, 0.2);
-    font-family: var(--font-display);
-    font-size: 0.9rem;
-    margin-top: 40px;
-    letter-spacing: 2px;
-}
-
-/* Mobile Adjustments */
-@media (max-width: 600px) {
-    .hand-icon { font-size: 3.5rem; }
-    .score-number { font-size: 2.5rem; }
-    .button-grid { gap: 10px; }
-    .hand-btn { font-size: 1.8rem; padding: 12px; }
-    #analysis-screen > div { grid-template-columns: 1fr; }
-    .card { padding: 20px 15px; }
-}
-
-/* Special Action Classes (For JS integration later) */
-.shake-violent {
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-    border-color: var(--accent-red) !important;
-    box-shadow: 0 0 40px rgba(255, 42, 42, 0.4) !important;
-}
-
-.glow-green {
-    animation: successGlow 0.5s ease-out;
-}
-
-@keyframes shake {
-    10%, 90% { transform: translate3d(-2px, 0, 0); }
-    20%, 80% { transform: translate3d(4px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-    40%, 60% { transform: translate3d(8px, 0, 0); }
-}
-
-@keyframes successGlow {
-    0% { box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
-    50% { box-shadow: 0 0 50px rgba(0, 255, 136, 0.8); border-color: var(--accent-neon); }
-    100% { box-shadow: 0 0 0 rgba(0, 255, 136, 0); }
-}
-/* =========================================================
-   COMPACT UI & MODAL POPUP UPDATES
-   ========================================================= */
-
-/* 1. Compacting the Main Game Board to prevent scrolling */
-.container { padding: 10px 20px; }
-.game-header { margin-bottom: 15px; }
-.section-title { font-size: 2rem; }
-.hand-display { padding: 15px; margin-bottom: 15px; }
-.hand-icon { font-size: 3.5rem; } /* Slightly smaller hands */
-.hand-scoreboard { margin-bottom: 15px; }
-.score-card { padding: 10px; }
-.score-number { font-size: 2.5rem; } /* Slightly smaller scores */
-.commentary-box { margin-bottom: 15px; padding: 12px; font-size: 1.1rem; min-height: auto; }
-.button-grid { margin: 10px auto; gap: 10px; }
-.hand-btn { padding: 10px; font-size: 1.8rem; }
-
-/* 2. Analysis Modal (Popup) Styles */
+/* Modals */
 .modal-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.85);
@@ -393,20 +343,142 @@ footer {
 
 .close-modal:hover { color: var(--accent-red); }
 
-/* Flexbox for end-game buttons */
+/* End Game Layout */
 .end-game-controls {
     display: none;
     justify-content: center;
     gap: 15px;
-    margin-top: 15px;
+    margin-top: 20px;
     flex-wrap: wrap;
 }
+
 /* =========================================================
-   SETUP SCREEN BUTTON HIGHLIGHTS
+   PROFILE SYSTEM (TABS, ACHIEVEMENTS, CHARTS)
    ========================================================= */
-.active-setup-btn {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border-color: #ffffff !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5) !important;
+
+.tab-container {
+    display: flex;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 15px 10px;
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    font-family: var(--font-display);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tab-btn:hover { color: white; }
+.tab-btn.active-tab { color: var(--accent-blue); border-bottom: 3px solid var(--accent-blue); text-shadow: 0 0 10px rgba(0,210,255,0.5); }
+
+.tab-content { display: none; }
+.tab-content.active-content { display: block; animation: fadeIn 0.3s ease; }
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
+    text-align: center;
+}
+
+.badge {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 20px 10px;
+    border-radius: 12px;
+    filter: grayscale(100%);
+    opacity: 0.4;
+    transition: 0.4s;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.badge.unlocked {
+    filter: none;
+    opacity: 1;
+    border-color: var(--accent-neon);
+    box-shadow: 0 0 15px rgba(0,255,136,0.2), inset 0 0 20px rgba(0,255,136,0.1);
+    background: rgba(0,255,136,0.05);
+    transform: translateY(-3px);
+}
+
+.badge-icon { font-size: 3rem; margin-bottom: 10px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+.badge-title { font-family: var(--font-display); font-weight: 900; color: white; margin-bottom: 5px; font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; }
+.badge-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.3; }
+
+.chart-wrapper {
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* =========================================================
+   ANIMATIONS & EFFECTS
+   ========================================================= */
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes popIn {
+    0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+    60% { transform: scale(1.2) translateY(-10px); }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Heartbeat Danger Pulse */
+@keyframes dangerPulse {
+    0% { box-shadow: inset 0 0 0vw rgba(255, 42, 42, 0); }
+    50% { box-shadow: inset 0 0 15vw rgba(255, 42, 42, 0.25); background-color: #1a0505; }
+    100% { box-shadow: inset 0 0 0vw rgba(255, 42, 42, 0); }
+}
+.danger-pulse { animation: dangerPulse 1s infinite; }
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(0, 0, 0, 0.95);
+    border-left: 5px solid var(--accent-neon);
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-family: var(--font-display);
+    font-weight: bold;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 20px rgba(0,255,136,0.3);
+    animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards;
+}
+
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(120%); } }
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+    .hand-icon { font-size: 3.5rem; }
+    .score-number { font-size: 2.2rem; }
+    .button-grid { gap: 8px; }
+    .hand-btn { font-size: 1.5rem; padding: 10px; }
+    .card { padding: 15px 10px; }
+    .modal-content { padding: 20px; width: 95%; }
+    .achievements-grid { grid-template-columns: 1fr 1fr; }
 }
