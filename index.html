@@ -11,7 +11,8 @@
 <body>
 
     <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
-        <div style="width: 40px;"></div> <div class="logo" style="margin: 0 auto;">
+        <div style="width: 40px;"></div> 
+        <div class="logo" style="margin: 0 auto;">
             <span class="logo-text" style="font-size: 2rem; letter-spacing: 2px;">HAND<span style="color: var(--accent-neon); text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);">CRICKET</span></span>
         </div>
         <div id="user-profile-btn" style="display: none; cursor: pointer; transition: transform 0.2s;" onclick="openProfile()" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
@@ -27,7 +28,26 @@
 
         <div class="hand-cricket-board card">
             
-            <div id="toss-screen" style="text-align: center; padding: 20px;">
+            <div id="setup-screen" style="display: none; text-align: center; padding: 20px;">
+                <h3 class="neon-text" style="font-size: 2.5rem; margin-bottom: 30px;">⚙️ MATCH SETUP ⚙️</h3>
+                
+                <p style="color: var(--accent-blue); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">SELECT FORMAT</p>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
+                    <button id="btn-fmt-1" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(1, Infinity, 'btn-fmt-1')">Classic (1 Wkt)</button>
+                    <button id="btn-fmt-3" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(3, 30, 'btn-fmt-3')">T5 (5 Overs, 3 Wkts)</button>
+                    <button id="btn-fmt-5" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(5, 60, 'btn-fmt-5')">T10 (10 Overs, 5 Wkts)</button>
+                </div>
+
+                <p style="color: var(--accent-red); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">AI DIFFICULTY</p>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap;">
+                    <button id="btn-diff-easy" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('easy', 'btn-diff-easy')">🟢 Casual AI</button>
+                    <button id="btn-diff-hard" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('hard', 'btn-diff-hard')">🔴 Pro AI (Learns)</button>
+                </div>
+
+                <button class="btn pulse-btn" style="padding: 15px 40px; font-size: 1.5rem; background: var(--accent-neon); color: black; border: none; font-weight: 900;" onclick="goToToss()">🪙 PROCEED TO TOSS</button>
+            </div>
+
+            <div id="toss-screen" style="display: none; text-align: center; padding: 20px;">
                 <h3 class="neon-text" style="font-size: 2.5rem; margin-bottom: 30px;">🪙 THE TOSS 🪙</h3>
                 
                 <div id="toss-step-1">
@@ -98,7 +118,8 @@
                 <div class="hand-scoreboard">
                     <div class="score-card player-bg">
                         <div class="score-label">YOUR SCORE</div>
-                        <div id="player-hand-score" class="score-number player-color">0</div>
+                        <div class="score-number player-color"><span id="player-hand-score">0</span><span style="font-size: 1.5rem; color: var(--text-dim);">/<span id="player-hand-wickets">0</span></span></div>
+                        <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px; font-weight: bold;">Overs: <span id="player-overs">0.0</span> <span id="player-max-overs"></span></div>
                     </div>
                     
                     <div id="target-box" class="score-card target-bg" style="display: none;">
@@ -108,7 +129,8 @@
 
                     <div class="score-card computer-bg">
                         <div class="score-label">COM SCORE</div>
-                        <div id="computer-hand-score" class="score-number computer-color">0</div>
+                        <div class="score-number computer-color"><span id="computer-hand-score">0</span><span style="font-size: 1.5rem; color: var(--text-dim);">/<span id="computer-hand-wickets">0</span></span></div>
+                        <div style="font-size: 0.9rem; color: var(--text-dim); margin-top: 5px; font-weight: bold;">Overs: <span id="computer-overs">0.0</span> <span id="computer-max-overs"></span></div>
                     </div>
                 </div>
 
@@ -155,19 +177,17 @@
             
             <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 <ul style="list-style: none; color: var(--text-bright); font-size: 1.2rem; line-height: 2.2;">
-                   <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Matches Played:</b> <span id="prof-matches" style="color: var(--accent-neon); font-weight: bold; font-size: 1.4rem;">0</span> <span style="font-size:1rem;">(<span id="prof-wins" style="color: var(--accent-blue);">0 W</span> / <span id="prof-losses" style="color: var(--accent-red);">0 L</span> / <span id="prof-ties" style="color: gray;">0 T</span>)</span></li>
-                    
+                    <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Matches Played:</b> <span id="prof-matches" style="color: var(--accent-neon); font-weight: bold; font-size: 1.4rem;">0</span> <span style="font-size:1rem;">(<span id="prof-wins" style="color: var(--accent-blue);">0 W</span> / <span id="prof-losses" style="color: var(--accent-red);">0 L</span> / <span id="prof-ties" style="color: gray;">0 T</span>)</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Career Runs:</b> <span id="prof-total-runs" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Wickets Taken:</b> <span id="prof-total-wickets" style="color: #ff2a2a; font-weight: bold; font-size: 1.4rem;">0</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Highest Score:</b> <span id="prof-hs" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">0</span></li>
-                    
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Batting Average:</b> <span id="prof-bat-avg" style="color: var(--accent-blue); font-weight: bold;">0.00</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Bowling Average:</b> <span id="prof-bowl-avg" style="color: #ff2a2a; font-weight: bold;">0.00</span></li>
-
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Career Avg Strike Rate:</b> <span id="prof-sr" style="color: var(--accent-neon); font-weight: bold;">0.00</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Career Bowling Economy:</b> <span id="prof-eco" style="color: var(--accent-neon); font-weight: bold;">0.00</span></li>
                     <li style="border-bottom: 1px solid rgba(255,255,255,0.05);"><b>Total Ducks 🦆:</b> <span id="prof-ducks" style="color: var(--accent-red); font-weight: bold;">0</span></li>
                     <li><b>Best Bowling Spell:</b> <span id="prof-best-spell" style="color: var(--accent-blue); font-weight: bold; font-size: 1.4rem;">-</span></li>
+                </ul>
             </div>
             <button class="btn" style="margin-top: 25px; width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 2px solid var(--accent-red); color: var(--accent-red); font-size: 1.2rem; font-weight: 900; letter-spacing: 2px;" onclick="logoutUser()">LOGOUT & SWITCH ACCOUNT</button>
         </div>
@@ -183,13 +203,14 @@
                     <h4 style="color: var(--accent-blue); font-size: 1.5rem; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">👤 YOUR PERFORMANCE</h4>
                     <ul style="list-style: none; color: var(--text-bright); font-size: 1.1rem; line-height: 1.8;">
                         <li><b>Total Runs:</b> <span id="an-p-runs" style="color: var(--accent-blue); font-weight: bold;">0</span></li>
+                        <li><b>Wickets Lost:</b> <span id="an-p-wickets" style="color: #ff2a2a; font-weight: bold;">0</span></li>
                         <li><b>Balls Faced:</b> <span id="an-p-balls">0</span></li>
                         <li><b>Strike Rate:</b> <span id="an-p-sr">0.00</span></li>
                         <li><b>Run Rate (CRR):</b> <span id="an-p-rr">0.00</span></li>
                         <li><b>Boundaries:</b> <span id="an-p-bounds">0</span> (4s: <span id="an-p-4s">0</span> | 6s: <span id="an-p-6s">0</span>)</li>
                         <li><b>Extras Received:</b> <span id="an-p-extras" style="color: var(--accent-neon);">0</span></li>
                         <li><b>Economy (Bowling):</b> <span id="an-p-eco" style="color: var(--accent-neon);">0.00</span></li>
-                        <li><b>Dismissed On:</b> <span id="an-p-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
+                        <li><b>Last Dismissal:</b> <span id="an-p-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
                     </ul>
                 </div>
 
@@ -197,13 +218,14 @@
                     <h4 style="color: #ff2a2a; font-size: 1.5rem; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">🤖 COM PERFORMANCE</h4>
                     <ul style="list-style: none; color: var(--text-bright); font-size: 1.1rem; line-height: 1.8;">
                         <li><b>Total Runs:</b> <span id="an-c-runs" style="color: #ff2a2a; font-weight: bold;">0</span></li>
+                        <li><b>Wickets Lost:</b> <span id="an-c-wickets" style="color: #ff2a2a; font-weight: bold;">0</span></li>
                         <li><b>Balls Faced:</b> <span id="an-c-balls">0</span></li>
                         <li><b>Strike Rate:</b> <span id="an-c-sr">0.00</span></li>
                         <li><b>Run Rate (CRR):</b> <span id="an-c-rr">0.00</span></li>
                         <li><b>Boundaries:</b> <span id="an-c-bounds">0</span> (4s: <span id="an-c-4s">0</span> | 6s: <span id="an-c-6s">0</span>)</li>
                         <li><b>Extras Received:</b> <span id="an-c-extras" style="color: var(--accent-neon);">0</span></li>
                         <li><b>Economy (Bowling):</b> <span id="an-c-eco" style="color: var(--accent-neon);">0.00</span></li>
-                        <li><b>Dismissed On:</b> <span id="an-c-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
+                        <li><b>Last Dismissal:</b> <span id="an-c-out" style="color: #ff2a2a; font-weight: bold;">-</span></li>
                     </ul>
                 </div>
             </div>
