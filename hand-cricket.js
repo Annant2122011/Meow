@@ -1,13 +1,21 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | ULTRA PRO MAX UPDATE
+   CRICPULSE FUN-GUN ARENA | CAREER AI & PERFECT PDF ENGINE
    ========================================================= */
 
-// Game State Object
 let gameState = {
-    maxWickets: 3, maxBalls: 30, aiDifficulty: 'easy',
-    playerHistory: [], tossChoice: null, isPlayerBatting: null,
-    innings: 1, target: null, gameOver: false, isTransitioning: false, 
-    playerConsecZeros: 0, compConsecZeros: 0, commentaryHistory: [], 
+    maxWickets: 3,
+    maxBalls: 30,
+    aiDifficulty: 'easy',
+    playerHistory: [], 
+    tossChoice: null,
+    isPlayerBatting: null,
+    innings: 1,
+    target: null,
+    gameOver: false,
+    isTransitioning: false, 
+    playerConsecZeros: 0,
+    compConsecZeros: 0,
+    commentaryHistory: [], 
     playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, hitCentury: false },
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0 }
 };
@@ -18,25 +26,55 @@ let pieChartInstance = null;
 
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
-// DOM
-const tossStep1 = document.getElementById('toss-step-1'); const tossStep2 = document.getElementById('toss-step-2'); const tossChoiceText = document.getElementById('toss-choice-text'); const tossResultScreen = document.getElementById('toss-result-screen'); const playerDecisionBox = document.getElementById('player-decision-box'); const computerDecisionBox = document.getElementById('computer-decision-box'); const matchScreen = document.getElementById('match-screen'); const tossScreen = document.getElementById('toss-screen'); const setupScreen = document.getElementById('setup-screen'); const inningsStatus = document.getElementById('innings-status'); const commentaryBox = document.getElementById('hand-commentary'); const targetBox = document.getElementById('target-box'); const targetScoreUi = document.getElementById('target-score'); const actionArea = document.getElementById('hand-action-area'); const zeroBtn = document.getElementById('zero-btn'); 
+const tossStep1 = document.getElementById('toss-step-1');
+const tossStep2 = document.getElementById('toss-step-2');
+const tossChoiceText = document.getElementById('toss-choice-text');
+const tossResultScreen = document.getElementById('toss-result-screen');
+const playerDecisionBox = document.getElementById('player-decision-box');
+const computerDecisionBox = document.getElementById('computer-decision-box');
+const matchScreen = document.getElementById('match-screen');
+const tossScreen = document.getElementById('toss-screen');
+const setupScreen = document.getElementById('setup-screen');
+const inningsStatus = document.getElementById('innings-status');
+const commentaryBox = document.getElementById('hand-commentary');
+const targetBox = document.getElementById('target-box');
+const targetScoreUi = document.getElementById('target-score');
+const actionArea = document.getElementById('hand-action-area');
+const zeroBtn = document.getElementById('zero-btn'); 
 
-// --- INITIALIZATION & AUTO-PATCHING ---
 window.onload = function() {
     const storedUser = localStorage.getItem('hc_currentUser');
-    if (storedUser) loadUser(storedUser);
-    else document.getElementById('login-modal').style.display = 'flex';
+    const isProfilePage = document.getElementById('profile-page-container') !== null;
+
+    if (isProfilePage) {
+        if (!storedUser) {
+            window.location.href = 'index.html';
+            return;
+        }
+        currentUser = storedUser;
+        renderProfilePage();
+    } else {
+        if (storedUser) {
+            loadUser(storedUser);
+        } else {
+            const loginModal = document.getElementById('login-modal');
+            if (loginModal) loginModal.style.display = 'flex';
+        }
+    }
 };
 
 function loginUser() {
     const username = document.getElementById('username-input').value.trim().toUpperCase();
-    if (!username) return alert("Arena requires a Player Name!"); 
+    if (!username) { alert("Arena requires a Player Name!"); return; }
     
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     if (!usersDB[username]) {
         usersDB[username] = {
-            matches: 0, wins: 0, losses: 0, ties: 0, totalRuns: 0, totalBallsFaced: 0, totalDismissals: 0,
-            totalRunsConceded: 0, totalBallsBowled: 0, totalWicketsTaken: 0, ducks: 0, highestScore: 0, bestSpellRuns: null,
+            matches: 0, wins: 0, losses: 0, ties: 0,
+            totalRuns: 0, totalBallsFaced: 0, totalDismissals: 0,
+            totalRunsConceded: 0, totalBallsBowled: 0,
+            totalWicketsTaken: 0, ducks: 0, highestScore: 0,
+            bestSpellRuns: null,
             battingThrows: { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 },
             bowlingThrows: { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 },
             careerDefenses: 0,
@@ -47,35 +85,122 @@ function loginUser() {
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
     
-    localStorage.setItem('hc_currentUser', username);
-    loadUser(username);
-}
-
-function loadUser(username) {
-    currentUser = username;
-    
-    // Auto-patch old profiles with new Ultra Pro Max data fields
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     let patched = false;
     if (!usersDB[username].battingThrows) { usersDB[username].battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 }; usersDB[username].bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 }; patched = true; }
     if (usersDB[username].careerDefenses === undefined) { usersDB[username].careerDefenses = 0; patched = true; }
     if (!usersDB[username].achievements) { usersDB[username].achievements = { theWall: false, hitman: false, sniper: false }; patched = true; }
     if (!usersDB[username].last10SR) { usersDB[username].last10SR = []; patched = true; }
     if (!usersDB[username].dismissalTypes) { usersDB[username].dismissalTypes = { 'Caught/Bowled': 0, 'Hit Wicket': 0, 'Stumped': 0 }; patched = true; }
-    if(patched) localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    if (patched) localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    
+    localStorage.setItem('hc_currentUser', username);
+    loadUser(username);
+}
 
-    document.getElementById('login-modal').style.display = 'none';
-    document.getElementById('user-profile-btn').style.display = 'block';
+function loadUser(username) {
+    currentUser = username;
+    const loginModal = document.getElementById('login-modal');
+    const profileBtn = document.getElementById('user-profile-btn');
+    const avatarText = document.getElementById('avatar-text');
+    
+    if (loginModal) loginModal.style.display = 'none';
+    if (profileBtn) profileBtn.style.display = 'block';
     
     const initial = username.charAt(0);
-    document.getElementById('avatar-text').innerText = initial;
-    document.getElementById('prof-avatar-letter').innerText = initial;
+    if (avatarText) avatarText.innerText = initial;
+    
     if (setupScreen) setupScreen.style.display = 'block';
 }
 
-function logoutUser() { localStorage.removeItem('hc_currentUser'); location.reload(); }
+function logoutUser() {
+    localStorage.removeItem('hc_currentUser');
+    window.location.href = 'index.html';
+}
 
-// --- VISUAL EFFECTS & TOASTS ---
+function goToProfile() {
+    window.location.href = 'profile.html';
+}
+
+// --- PROFILE PAGE RENDERER ---
+function renderProfilePage() {
+    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const stats = usersDB[currentUser];
+    
+    if (!stats) {
+        logoutUser();
+        return;
+    }
+    
+    document.getElementById('prof-username').innerText = currentUser;
+    document.getElementById('prof-avatar-letter').innerText = currentUser.charAt(0);
+    document.getElementById('prof-matches').innerText = stats.matches;
+    document.getElementById('prof-wins').innerText = stats.wins;
+    document.getElementById('prof-losses').innerText = stats.losses;
+    document.getElementById('prof-ties').innerText = stats.ties;
+    document.getElementById('prof-total-runs').innerText = stats.totalRuns || 0;
+    document.getElementById('prof-total-wickets').innerText = stats.totalWicketsTaken || 0;
+    document.getElementById('prof-hs').innerText = stats.highestScore;
+    document.getElementById('prof-ducks').innerText = stats.ducks;
+    
+    const dismissals = stats.totalDismissals || 0;
+    let batAvg = "0.00";
+    if (dismissals > 0) batAvg = (stats.totalRuns / dismissals).toFixed(2);
+    else if (stats.totalRuns > 0) batAvg = stats.totalRuns.toFixed(2) + "*";
+    document.getElementById('prof-bat-avg').innerText = batAvg;
+
+    const wickets = stats.totalWicketsTaken || 0;
+    document.getElementById('prof-bowl-avg').innerText = wickets > 0 ? (stats.totalRunsConceded / wickets).toFixed(2) : "-";
+
+    const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
+    const oversBowled = stats.totalBallsBowled / 6;
+    const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
+    
+    document.getElementById('prof-sr').innerText = avgSR;
+    document.getElementById('prof-eco').innerText = avgEco;
+    
+    const bestSpell = stats.bestSpellRuns === null ? "-" : `Multi-Wkt/${stats.bestSpellRuns}`;
+    document.getElementById('prof-best-spell').innerText = bestSpell;
+
+    // Badges
+    const badgeWall = document.getElementById('badge-wall');
+    const badgeHitman = document.getElementById('badge-hitman');
+    const badgeSniper = document.getElementById('badge-sniper');
+    if (badgeWall && stats.achievements && stats.achievements.theWall) badgeWall.classList.add('unlocked');
+    if (badgeHitman && stats.achievements && stats.achievements.hitman) badgeHitman.classList.add('unlocked');
+    if (badgeSniper && stats.achievements && stats.achievements.sniper) badgeSniper.classList.add('unlocked');
+
+    // Chart.js Generation
+    if(srChartInstance) srChartInstance.destroy();
+    if(pieChartInstance) pieChartInstance.destroy();
+
+    const srCtxElement = document.getElementById('srLineChart');
+    if (srCtxElement) {
+        const srCtx = srCtxElement.getContext('2d');
+        srChartInstance = new Chart(srCtx, {
+            type: 'line',
+            data: {
+                labels: stats.last10SR ? stats.last10SR.map((_, i) => `M${i+1}`) : [],
+                datasets: [{ label: 'Strike Rate', data: stats.last10SR || [], borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)', borderWidth: 2, fill: true, tension: 0.3 }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'} } }, color: '#fff' }
+        });
+    }
+
+    const pieCtxElement = document.getElementById('outPieChart');
+    if (pieCtxElement && stats.dismissalTypes) {
+        const pieCtx = pieCtxElement.getContext('2d');
+        pieChartInstance = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Caught/Bowled', 'Hit Wicket', 'Stumped'],
+                datasets: [{ data: [stats.dismissalTypes['Caught/Bowled'], stats.dismissalTypes['Hit Wicket'], stats.dismissalTypes['Stumped']], backgroundColor: ['#00d2ff', '#ff2a2a', '#00ff88'], borderWidth: 1, borderColor: '#000' }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+        });
+    }
+}
+
+// --- VISUALS & EFFECTS ---
 function fireConfetti() {
     if (typeof confetti !== 'undefined') {
         var duration = 3000; var end = Date.now() + duration;
@@ -89,6 +214,7 @@ function fireConfetti() {
 
 function showToast(message) {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = message;
@@ -101,7 +227,6 @@ function updateAtmosphere() {
     if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) {
         const runsNeeded = gameState.target - gameState.playerStats.runs;
         const ballsLeft = gameState.maxBalls - gameState.playerStats.balls;
-        // Pulse Red if Chase is tight! (<15 runs, <12 balls)
         if (runsNeeded > 0 && runsNeeded <= 15 && ballsLeft <= 12) {
             body.classList.add('danger-pulse');
             return;
@@ -110,117 +235,84 @@ function updateAtmosphere() {
     body.classList.remove('danger-pulse');
 }
 
-// --- TAB SYSTEM & PROFILE ---
 function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
-    event.target.classList.add('active-tab');
-    document.getElementById(tabId).classList.add('active-content');
+    const eventObj = window.event;
+    if (eventObj && eventObj.target) eventObj.target.classList.add('active-tab');
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) activeContent.classList.add('active-content');
 }
 
-function openProfile() {
-    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
-    const stats = usersDB[currentUser];
-    if (!stats) return logoutUser();
-    
-    // Stats Text
-    document.getElementById('prof-username').innerText = currentUser;
-    document.getElementById('prof-matches').innerText = stats.matches;
-    document.getElementById('prof-wins').innerText = stats.wins;
-    document.getElementById('prof-losses').innerText = stats.losses;
-    document.getElementById('prof-ties').innerText = stats.ties;
-    document.getElementById('prof-total-runs').innerText = stats.totalRuns || 0;
-    document.getElementById('prof-total-wickets').innerText = stats.totalWicketsTaken || 0;
-    document.getElementById('prof-hs').innerText = stats.highestScore;
-    document.getElementById('prof-ducks').innerText = stats.ducks;
-    
-    const dismissals = stats.totalDismissals || 0;
-    document.getElementById('prof-bat-avg').innerText = dismissals > 0 ? (stats.totalRuns / dismissals).toFixed(2) : (stats.totalRuns > 0 ? stats.totalRuns.toFixed(2) + "*" : "0.00");
-    const wickets = stats.totalWicketsTaken || 0;
-    document.getElementById('prof-bowl-avg').innerText = wickets > 0 ? (stats.totalRunsConceded / wickets).toFixed(2) : "-";
-    const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
-    const oversBowled = stats.totalBallsBowled / 6;
-    const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
-    
-    document.getElementById('prof-sr').innerText = avgSR;
-    document.getElementById('prof-eco').innerText = avgEco;
-    document.getElementById('prof-best-spell').innerText = stats.bestSpellRuns === null ? "-" : `Wkt/${stats.bestSpellRuns}`;
-    
-    // Badges Update
-    if(stats.achievements.theWall) document.getElementById('badge-wall').classList.add('unlocked');
-    if(stats.achievements.hitman) document.getElementById('badge-hitman').classList.add('unlocked');
-    if(stats.achievements.sniper) document.getElementById('badge-sniper').classList.add('unlocked');
-
-    // Chart.js Generation
-    if(srChartInstance) srChartInstance.destroy();
-    if(pieChartInstance) pieChartInstance.destroy();
-
-    const srCtx = document.getElementById('srLineChart').getContext('2d');
-    srChartInstance = new Chart(srCtx, {
-        type: 'line',
-        data: {
-            labels: stats.last10SR.map((_, i) => `M${i+1}`),
-            datasets: [{ label: 'Strike Rate', data: stats.last10SR, borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)', borderWidth: 2, fill: true, tension: 0.3 }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'} } }, color: '#fff' }
-    });
-
-    const pieCtx = document.getElementById('outPieChart').getContext('2d');
-    pieChartInstance = new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Caught/Bowled', 'Hit Wicket', 'Stumped'],
-            datasets: [{ data: [stats.dismissalTypes['Caught/Bowled'], stats.dismissalTypes['Hit Wicket'], stats.dismissalTypes['Stumped']], backgroundColor: ['#00d2ff', '#ff2a2a', '#00ff88'], borderWidth: 1, borderColor: '#000' }]
-        },
-        options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
-    });
-
-    document.getElementById('profile-modal').style.display = 'flex';
-}
-function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; }
-
-// --- MATCH SETUP ---
+// --- GAME UI ---
 function setFormat(wickets, balls, btnId) {
-    gameState.maxWickets = wickets; gameState.maxBalls = balls;
-    document.querySelectorAll('.setup-btn').forEach(btn => { if(btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn'); });
-    document.getElementById(btnId).classList.add('active-setup-btn');
+    gameState.maxWickets = wickets;
+    gameState.maxBalls = balls;
+    document.querySelectorAll('.setup-btn').forEach(btn => {
+        if(btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn');
+    });
+    const activeBtn = document.getElementById(btnId);
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
 }
+
 function setDifficulty(level, btnId) {
     gameState.aiDifficulty = level;
-    document.querySelectorAll('.setup-btn').forEach(btn => { if(btn.id && btn.id.startsWith('btn-diff')) btn.classList.remove('active-setup-btn'); });
-    document.getElementById(btnId).classList.add('active-setup-btn');
+    document.querySelectorAll('.setup-btn').forEach(btn => {
+        if(btn.id && btn.id.startsWith('btn-diff')) btn.classList.remove('active-setup-btn');
+    });
+    const activeBtn = document.getElementById(btnId);
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
 }
 
 function goToToss() {
-    setupScreen.style.display = 'none'; tossScreen.style.display = 'block';
+    if (setupScreen) setupScreen.style.display = 'none';
+    if (tossScreen) tossScreen.style.display = 'block';
+    
     let aiMode = gameState.aiDifficulty === 'hard' ? "PRO AI (Career Analysis Active)" : "CASUAL AI (Random)";
     let formatMode = gameState.maxBalls === Infinity ? "CLASSIC FORMAT" : `T${gameState.maxBalls/6} FORMAT`;
     gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
 }
 
 function chooseToss(choice) {
-    gameState.tossChoice = choice; tossStep1.style.display = 'none'; tossStep2.style.display = 'block'; tossChoiceText.innerText = `You chose ${choice.toUpperCase()}`;
+    gameState.tossChoice = choice;
+    tossStep1.style.display = 'none';
+    tossStep2.style.display = 'block';
+    tossChoiceText.innerText = `You chose ${choice.toUpperCase()}`;
 }
 
 function playToss(playerNum) {
-    tossStep2.style.display = 'none'; tossResultScreen.style.display = 'block';
-    const compNum = Math.floor(Math.random() * 6) + 1; const sum = playerNum + compNum; const isSumEven = sum % 2 === 0;
+    tossStep2.style.display = 'none';
+    tossResultScreen.style.display = 'block';
     
-    document.getElementById('toss-player-hand').innerText = handEmojis[playerNum]; document.getElementById('toss-computer-hand').innerText = handEmojis[compNum];
+    const compNum = Math.floor(Math.random() * 6) + 1; 
+    const sum = playerNum + compNum;
+    const isSumEven = sum % 2 === 0;
+    
+    document.getElementById('toss-player-hand').innerText = handEmojis[playerNum];
+    document.getElementById('toss-computer-hand').innerText = handEmojis[compNum];
     document.getElementById('toss-sum-text').innerText = `${playerNum} + ${compNum} = ${sum} (${isSumEven ? 'Even' : 'Odd'})`;
     
     const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
     gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
 
     if (playerWins) {
-        document.getElementById('toss-winner-text').innerText = "🎉 YOU WON THE TOSS!"; document.getElementById('toss-winner-text').style.color = 'var(--accent-neon)'; playerDecisionBox.style.display = 'block';
+        document.getElementById('toss-winner-text').innerText = "🎉 YOU WON THE TOSS!";
+        document.getElementById('toss-winner-text').style.color = 'var(--accent-neon)';
+        playerDecisionBox.style.display = 'block';
     } else {
-        document.getElementById('toss-winner-text').innerText = "🤖 COMPUTER WON THE TOSS!"; document.getElementById('toss-winner-text').style.color = 'var(--accent-red)';
+        document.getElementById('toss-winner-text').innerText = "🤖 COMPUTER WON THE TOSS!";
+        document.getElementById('toss-winner-text').style.color = 'var(--accent-red)';
+        
         gameState.isPlayerBatting = Math.random() < 0.5 ? false : true;
         const compChoice = gameState.isPlayerBatting ? 'BOWL' : 'BAT';
         gameState.commentaryHistory.push(`🤖 Computer elected to ${compChoice} first.`);
-        let p = document.createElement('p'); p.style.color = "var(--text-bright)"; p.style.fontSize = "1.2rem"; p.innerHTML = `Computer chooses to <b>${compChoice}</b> first.`;
-        computerDecisionBox.prepend(p); computerDecisionBox.style.display = 'block';
+
+        let p = document.createElement('p');
+        p.style.color = "var(--text-bright)";
+        p.style.fontSize = "1.2rem";
+        p.innerHTML = `Computer chooses to <b>${compChoice}</b> first.`;
+        computerDecisionBox.prepend(p);
+        computerDecisionBox.style.display = 'block';
     }
 }
 
@@ -231,75 +323,127 @@ function startMatch(playerOptsToBat) {
 }
 
 function continueToMatch() {
-    tossScreen.style.display = 'none'; matchScreen.style.display = 'block'; updateMatchUI();
+    if (tossScreen) tossScreen.style.display = 'none';
+    matchScreen.style.display = 'block';
+    updateMatchUI();
+    
     let formatText = gameState.maxBalls === Infinity ? "Classic (Unlimited Overs)" : `T${gameState.maxBalls/6} (${gameState.maxWickets} Wickets)`;
     gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS | ${formatText} ---`);
     writeCommentary(gameState.isPlayerBatting ? "You are Batting first. Put up a massive total!" : "You are Bowling first. Take early wickets!");
 }
 
-function ballsToOvers(balls) { return Math.floor(balls / 6) + "." + (balls % 6); }
-
-function updateMatchUI() {
-    if (gameState.innings === 1) inningsStatus.innerText = "🏏 1ST INNINGS";
-    else { inningsStatus.innerText = "⚔️ 2ND INNINGS THE CHASE"; targetBox.style.display = 'block'; targetScoreUi.innerText = gameState.target; }
-    
-    document.getElementById('player-hand-score').innerText = gameState.playerStats.runs;
-    document.getElementById('player-hand-wickets').innerText = gameState.playerStats.wicketsLost;
-    document.getElementById('player-overs').innerText = ballsToOvers(gameState.playerStats.balls);
-    
-    document.getElementById('computer-hand-score').innerText = gameState.compStats.runs;
-    document.getElementById('computer-hand-wickets').innerText = gameState.compStats.wicketsLost;
-    document.getElementById('computer-overs').innerText = ballsToOvers(gameState.compStats.balls);
-
-    const maxOversText = gameState.maxBalls === Infinity ? " (Unlimited)" : ` / ${gameState.maxBalls/6}.0`;
-    document.getElementById('player-max-overs').innerText = maxOversText; document.getElementById('computer-max-overs').innerText = maxOversText;
-
-    if (gameState.isPlayerBatting) {
-        zeroBtn.innerHTML = "🛡️ 0 (DEFEND)"; zeroBtn.style.background = "rgba(0, 210, 255, 0.1)"; zeroBtn.style.borderColor = "var(--accent-blue)";
-    } else {
-        zeroBtn.innerHTML = "↔️ 0 (WIDE)"; zeroBtn.style.background = "rgba(255, 42, 42, 0.1)"; zeroBtn.style.borderColor = "var(--accent-red)";
-    }
-    
-    updateAtmosphere(); // Update visual pulse
+function ballsToOvers(balls) {
+    return Math.floor(balls / 6) + "." + (balls % 6);
 }
 
-// --- PRO AI ENGINE ---
+function updateMatchUI() {
+    if (gameState.innings === 1) {
+        inningsStatus.innerText = "🏏 1ST INNINGS";
+    } else {
+        inningsStatus.innerText = "⚔️ 2ND INNINGS THE CHASE";
+        targetBox.style.display = 'block';
+        targetScoreUi.innerText = gameState.target;
+    }
+    
+    const playerHandScore = document.getElementById('player-hand-score');
+    if (playerHandScore) playerHandScore.innerText = gameState.playerStats.runs;
+    
+    const playerHandWickets = document.getElementById('player-hand-wickets');
+    if (playerHandWickets) playerHandWickets.innerText = gameState.playerStats.wicketsLost;
+    
+    const playerOvers = document.getElementById('player-overs');
+    if (playerOvers) playerOvers.innerText = ballsToOvers(gameState.playerStats.balls);
+    
+    const compHandScore = document.getElementById('computer-hand-score');
+    if (compHandScore) compHandScore.innerText = gameState.compStats.runs;
+    
+    const compHandWickets = document.getElementById('computer-hand-wickets');
+    if (compHandWickets) compHandWickets.innerText = gameState.compStats.wicketsLost;
+    
+    const compOvers = document.getElementById('computer-overs');
+    if (compOvers) compOvers.innerText = ballsToOvers(gameState.compStats.balls);
+
+    const maxOversText = gameState.maxBalls === Infinity ? " (Unlimited)" : ` / ${gameState.maxBalls/6}.0`;
+    
+    const playerMaxOvers = document.getElementById('player-max-overs');
+    if (playerMaxOvers) playerMaxOvers.innerText = maxOversText;
+    
+    const compMaxOvers = document.getElementById('computer-max-overs');
+    if (compMaxOvers) compMaxOvers.innerText = maxOversText;
+
+    if (zeroBtn) {
+        if (gameState.isPlayerBatting) {
+            zeroBtn.innerHTML = "🛡️ 0 (DEFEND)";
+            zeroBtn.style.background = "rgba(0, 210, 255, 0.1)";
+            zeroBtn.style.borderColor = "var(--accent-blue)";
+        } else {
+            zeroBtn.innerHTML = "↔️ 0 (WIDE)";
+            zeroBtn.style.background = "rgba(255, 42, 42, 0.1)";
+            zeroBtn.style.borderColor = "var(--accent-red)";
+        }
+    }
+
+    updateAtmosphere();
+}
+
 function getComputerThrow() {
+    let compNum;
     let isCompBatting = !gameState.isPlayerBatting;
+
     if (gameState.compConsecZeros >= 2) return Math.floor(Math.random() * 6) + 1;
     if (gameState.aiDifficulty === 'easy' || !currentUser) return Math.floor(Math.random() * 7);
 
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     let stats = usersDB[currentUser];
+    
     if (!stats || !stats.battingThrows) return Math.floor(Math.random() * 7);
 
     if (!isCompBatting) {
         let pBats = stats.battingThrows;
-        let likelyThrow = Object.keys(pBats).reduce((a, b) => pBats[a] > pBats[b] ? a : b);
-        return (Math.random() < 0.75) ? parseInt(likelyThrow) : Math.floor(Math.random() * 7);
+        let likelyPlayerThrow = Object.keys(pBats).reduce((a, b) => pBats[a] > pBats[b] ? a : b);
+        
+        if (Math.random() < 0.75) {
+            compNum = parseInt(likelyPlayerThrow);
+        } else {
+            compNum = Math.floor(Math.random() * 7);
+        }
     } else {
         let pBowls = stats.bowlingThrows;
-        let likelyThrow = Object.keys(pBowls).reduce((a, b) => pBowls[a] > pBowls[b] ? a : b);
-        let compNum = Math.floor(Math.random() * 7);
+        let likelyPlayerThrow = Object.keys(pBowls).reduce((a, b) => pBowls[a] > pBowls[b] ? a : b);
+        
+        compNum = Math.floor(Math.random() * 7);
         let attempts = 0;
-        while (compNum === parseInt(likelyThrow) && attempts < 5) { compNum = Math.floor(Math.random() * 7); attempts++; }
-        return compNum;
+        while (compNum === parseInt(likelyPlayerThrow) && attempts < 5) {
+            compNum = Math.floor(Math.random() * 7);
+            attempts++;
+        }
     }
+    
+    return compNum;
 }
 
-// --- CORE MATCHPLAY ---
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
     if (currentUser) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-        if (gameState.isPlayerBatting) usersDB[currentUser].battingThrows[playerNum]++;
-        else usersDB[currentUser].bowlingThrows[playerNum]++;
+        let stats = usersDB[currentUser];
+        if (gameState.isPlayerBatting) {
+            stats.battingThrows[playerNum] = (stats.battingThrows[playerNum] || 0) + 1;
+        } else {
+            stats.bowlingThrows[playerNum] = (stats.bowlingThrows[playerNum] || 0) + 1;
+        }
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
 
     const compNum = getComputerThrow();
-    gameState.isPlayerBatting ? gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0 : gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
+
+    if (gameState.isPlayerBatting) {
+        gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0;
+    } else {
+        gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
+    }
+
     if (navigator.vibrate) navigator.vibrate([50]);
 
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
@@ -324,20 +468,25 @@ function playHand(playerNum) {
     }
 }
 
+function getRandomCommentary(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    currentBatterStats.balls++; currentBatterStats.wicketsLost++;
+    currentBatterStats.balls++;
+    currentBatterStats.wicketsLost++;
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
+    
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
     if (type === 'STUMPED') writeCommentary(`🚨 WIDE AND STUMPED! Lightning-fast glovework removes ${batterName}!`);
     else if (type === 'HIT_WICKET') writeCommentary(`🏏💥 HIT WICKET! ${batterName} defended too deep (3x 0s) and stepped on the stumps! OUT!`);
     else writeCommentary(`💥 WICKET! Clean bowled! Both threw ${num}. ${batterName} departs!`);
 
-    // SNIPER ACHIEVEMENT CHECK
     if (!gameState.isPlayerBatting && gameState.compStats.runs === 0 && currentUser) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-        if (!usersDB[currentUser].achievements.sniper) {
+        if (usersDB[currentUser] && !usersDB[currentUser].achievements.sniper) {
             usersDB[currentUser].achievements.sniper = true;
             localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
             showToast("🎯 ACHIEVEMENT UNLOCKED: Sniper (Wicket on 0 Runs!)");
@@ -348,8 +497,16 @@ function handleWicket(num, type) {
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     const runsToAdd = batterNum + 1;
-    currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
-    writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs. (Ball not counted)`);
+    
+    currentBatterStats.runs += runsToAdd;
+    currentBatterStats.extras += runsToAdd; 
+
+    const team = gameState.isPlayerBatting ? "You" : "Computer";
+    writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs to ${team}. (Ball not counted)`);
+
+    if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) {
+        endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
+    }
 }
 
 function handleDefense() {
@@ -357,33 +514,37 @@ function handleDefense() {
     currentBatterStats.balls++;
     writeCommentary(`🛡️ SOLID DEFENSE! Batter blocked the ball safely. 0 runs.`);
 
-    // THE WALL ACHIEVEMENT CHECK
     if (gameState.isPlayerBatting && currentUser) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-        usersDB[currentUser].careerDefenses = (usersDB[currentUser].careerDefenses || 0) + 1;
-        if (usersDB[currentUser].careerDefenses >= 15 && !usersDB[currentUser].achievements.theWall) {
-            usersDB[currentUser].achievements.theWall = true;
-            showToast("🧱 ACHIEVEMENT UNLOCKED: The Wall (15 Career Defenses)");
+        if (usersDB[currentUser]) {
+            usersDB[currentUser].careerDefenses = (usersDB[currentUser].careerDefenses || 0) + 1;
+            if (usersDB[currentUser].careerDefenses >= 15 && !usersDB[currentUser].achievements.theWall) {
+                usersDB[currentUser].achievements.theWall = true;
+                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                showToast("🧱 ACHIEVEMENT UNLOCKED: The Wall (15 Career Defenses)");
+            }
         }
-        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
 }
 
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    currentBatterStats.runs += runs; currentBatterStats.balls++;
+    currentBatterStats.runs += runs;
+    currentBatterStats.balls++;
     
-    if (runs === 4) { currentBatterStats.fours++; writeCommentary(`🔥 +4 Runs! Glorious cover drive!`); }
-    else if (runs === 6) { currentBatterStats.sixes++; writeCommentary(`🚀 +6 Runs! MASSIVE HIT!`); }
-    else writeCommentary(`🏃 +${runs} Runs! Quick running.`);
+    if (runs === 4) currentBatterStats.fours++;
+    if (runs === 6) currentBatterStats.sixes++;
 
-    // HITMAN ACHIEVEMENT / CONFETTI CHECK
+    if (runs === 4) writeCommentary(`🔥 +4 Runs! Glorious cover drive to the boundary!`);
+    else if (runs === 6) writeCommentary(`🚀 +6 Runs! MASSIVE HIT! Out of the stadium!`);
+    else writeCommentary(`🏃 +${runs} Runs! Quick running between the wickets.`);
+
     if (gameState.isPlayerBatting && currentBatterStats.runs >= 100 && !currentBatterStats.hitCentury) {
         currentBatterStats.hitCentury = true;
         fireConfetti();
         if (currentUser) {
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-            if (!usersDB[currentUser].achievements.hitman) {
+            if (usersDB[currentUser] && !usersDB[currentUser].achievements.hitman) {
                 usersDB[currentUser].achievements.hitman = true;
                 localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
                 showToast("🏏 ACHIEVEMENT UNLOCKED: Hitman (Scored a Century!)");
@@ -394,101 +555,185 @@ function handleRuns(runs) {
 
 function checkMatchState() {
     const stats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    if (gameState.innings === 2 && stats.runs >= gameState.target) return endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
     
     const isAllOut = stats.wicketsLost >= gameState.maxWickets;
     const isOversDone = stats.balls >= gameState.maxBalls;
+    const isTargetReached = gameState.innings === 2 && stats.runs >= gameState.target;
+
+    if (isTargetReached) {
+        endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
+        return;
+    }
+
     if (isAllOut || isOversDone) {
-        if (gameState.innings === 1) triggerInningsChange(stats, isAllOut ? "ALL OUT" : "OVERS COMPLETED");
-        else {
+        const reason = isAllOut ? "ALL OUT" : "OVERS COMPLETED";
+        
+        if (gameState.innings === 1) {
+            triggerInningsChange(stats, reason);
+        } else {
             if (stats.runs < gameState.target - 1) endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS");
-            else endGame("TIE");
+            else if (stats.runs === gameState.target - 1) endGame("TIE");
         }
     }
 }
 
 function triggerInningsChange(currentBatterStats, reason) {
-    gameState.innings = 2; gameState.target = currentBatterStats.runs + 1; gameState.isPlayerBatting = !gameState.isPlayerBatting;
-    gameState.playerConsecZeros = 0; gameState.compConsecZeros = 0; gameState.isTransitioning = true; document.body.classList.remove('danger-pulse');
+    gameState.innings = 2;
+    gameState.target = currentBatterStats.runs + 1;
+    gameState.isPlayerBatting = !gameState.isPlayerBatting;
+    
+    gameState.playerConsecZeros = 0;
+    gameState.compConsecZeros = 0;
+    gameState.isTransitioning = true; 
+    document.body.classList.remove('danger-pulse');
+    
     setTimeout(() => {
-        gameState.commentaryHistory.push(`\n--- INNINGS BREAK (${reason}) ---`); gameState.commentaryHistory.push(`--- MATCH START | 2ND INNINGS THE CHASE ---`);
-        writeCommentary(`${reason}! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`);
-        document.getElementById('player-hand').innerText = '✊'; document.getElementById('computer-hand').innerText = '✊';
-        gameState.isTransitioning = false; updateMatchUI(); 
+        const breakMsg = `${reason}! Innings Break! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`;
+        gameState.commentaryHistory.push(`\n--- INNINGS BREAK (${reason}) ---`);
+        gameState.commentaryHistory.push(`--- MATCH START | 2ND INNINGS THE CHASE ---`);
+        writeCommentary(breakMsg);
+
+        document.getElementById('player-hand').innerText = '✊';
+        document.getElementById('computer-hand').innerText = '✊';
+        gameState.isTransitioning = false; 
+        updateMatchUI(); 
     }, 2500);
 }
 
 function writeCommentary(text) {
-    gameState.commentaryHistory.push(`↳ ${text}`); commentaryBox.innerHTML = `> ${text}`;
-    commentaryBox.style.transform = 'scale(1.02)'; setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
+    gameState.commentaryHistory.push(`↳ ${text}`);
+    commentaryBox.innerHTML = `> ${text}`;
+    commentaryBox.style.transform = 'scale(1.02)';
+    setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
 }
 
 function endGame(result) {
-    gameState.gameOver = true; actionArea.style.display = 'none'; document.getElementById('end-game-controls').style.display = 'flex';
+    gameState.gameOver = true;
+    actionArea.style.display = 'none';
+    document.getElementById('end-game-controls').style.display = 'flex';
     document.body.classList.remove('danger-pulse');
     
     if (result === "PLAYER_WINS") {
-        inningsStatus.innerText = "🏆 YOU WON THE MATCH!"; inningsStatus.style.background = "var(--accent-blue)"; fireConfetti();
+        inningsStatus.innerText = "🏆 YOU WON THE MATCH!";
+        inningsStatus.style.background = "var(--accent-blue)";
+        fireConfetti();
     } else if (result === "COM_WINS") {
-        inningsStatus.innerText = "💀 COMPUTER WON!"; inningsStatus.style.background = "var(--accent-red)";
+        inningsStatus.innerText = "💀 COMPUTER WON!";
+        inningsStatus.style.background = "var(--accent-red)";
     } else {
-        inningsStatus.innerText = "🤝 IT'S A TIE!"; inningsStatus.style.background = "gray";
+        inningsStatus.innerText = "🤝 IT'S A TIE!";
+        inningsStatus.style.background = "gray";
     }
 
     gameState.commentaryHistory.push(`\n--- MATCH ENDED | ${inningsStatus.innerText} ---`);
-    populateStats('an-p', gameState.playerStats, gameState.compStats); populateStats('an-c', gameState.compStats, gameState.playerStats);
-    generateAIInsight(result); saveLifetimeStats(result);
+
+    populateStats('an-p', gameState.playerStats, gameState.compStats);
+    populateStats('an-c', gameState.compStats, gameState.playerStats);
+    generateAIInsight(result);
+    saveLifetimeStats(result);
 }
 
 function saveLifetimeStats(result) {
     if (!currentUser) return;
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; let stats = usersDB[currentUser];
+    
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    let stats = usersDB[currentUser];
     
     stats.matches += 1;
-    if (result === "PLAYER_WINS") stats.wins += 1; else if (result === "COM_WINS") stats.losses += 1; else stats.ties += 1;
-    stats.totalRuns += gameState.playerStats.runs; stats.totalBallsFaced += gameState.playerStats.balls;
-    if (gameState.playerStats.runs > stats.highestScore) stats.highestScore = gameState.playerStats.runs;
-    stats.totalDismissals = (stats.totalDismissals || 0) + gameState.playerStats.wicketsLost;
-    if (gameState.playerStats.runs === 0 && gameState.playerStats.wicketsLost > 0) stats.ducks += 1;
-    stats.totalRunsConceded += gameState.compStats.runs; stats.totalBallsBowled += gameState.compStats.balls;
+    if (result === "PLAYER_WINS") stats.wins += 1;
+    else if (result === "COM_WINS") stats.losses += 1;
+    else stats.ties += 1;
     
-    if (gameState.compStats.wicketsLost > 0) {
-        stats.totalWicketsTaken += gameState.compStats.wicketsLost;
-        if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) stats.bestSpellRuns = gameState.compStats.runs;
+    stats.totalRuns += gameState.playerStats.runs;
+    stats.totalBallsFaced += gameState.playerStats.balls;
+    if (gameState.playerStats.runs > stats.highestScore) {
+        stats.highestScore = gameState.playerStats.runs;
     }
-
-    // Chart Data Savings
-    let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
-    stats.last10SR.push(parseFloat(pSR));
-    if(stats.last10SR.length > 10) stats.last10SR.shift();
-
+    
     if (gameState.playerStats.outOn !== '-') {
+        stats.totalDismissals = (stats.totalDismissals || 0) + 1;
+        if (gameState.playerStats.runs === 0) stats.ducks += 1;
+        
         if (gameState.playerStats.outOn === '0 (Hit Wkt)') stats.dismissalTypes['Hit Wicket']++;
         else if (gameState.playerStats.outOn === '0 (Stumped)') stats.dismissalTypes['Stumped']++;
         else stats.dismissalTypes['Caught/Bowled']++;
     }
     
-    usersDB[currentUser] = stats; localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    stats.totalRunsConceded += gameState.compStats.runs;
+    stats.totalBallsBowled += gameState.compStats.balls;
+    
+    if (gameState.compStats.outOn !== '-') {
+        stats.totalWicketsTaken += 1;
+        if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) {
+            stats.bestSpellRuns = gameState.compStats.runs;
+        }
+    }
+    
+    let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
+    if (!stats.last10SR) stats.last10SR = [];
+    stats.last10SR.push(parseFloat(pSR));
+    if(stats.last10SR.length > 10) stats.last10SR.shift();
+
+    usersDB[currentUser] = stats;
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
 
-function populateStats(prefix, bStats, wStats) {
-    document.getElementById(`${prefix}-runs`).innerText = bStats.runs; document.getElementById(`${prefix}-wickets`).innerText = bStats.wicketsLost;
-    document.getElementById(`${prefix}-balls`).innerText = bStats.balls; document.getElementById(`${prefix}-sr`).innerText = bStats.balls > 0 ? ((bStats.runs / bStats.balls) * 100).toFixed(2) : "0.00";
-    document.getElementById(`${prefix}-rr`).innerText = bStats.balls > 0 ? ((bStats.runs / (bStats.balls/6))).toFixed(2) : "0.00";
-    document.getElementById(`${prefix}-bounds`).innerText = bStats.fours + bStats.sixes; document.getElementById(`${prefix}-4s`).innerText = bStats.fours;
-    document.getElementById(`${prefix}-6s`).innerText = bStats.sixes; document.getElementById(`${prefix}-out`).innerText = bStats.outOn; 
-    document.getElementById(`${prefix}-extras`).innerText = bStats.extras;
-    const ob = wStats.balls / 6; document.getElementById(`${prefix}-eco`).innerText = ob > 0 ? (wStats.runs / ob).toFixed(2) : "0.00";
+function populateStats(prefix, batterStats, bowlerStats) {
+    const rElement = document.getElementById(`${prefix}-runs`);
+    if(rElement) rElement.innerText = batterStats.runs;
+    
+    const wElement = document.getElementById(`${prefix}-wickets`);
+    if(wElement) wElement.innerText = batterStats.wicketsLost;
+    
+    const bElement = document.getElementById(`${prefix}-balls`);
+    if(bElement) bElement.innerText = batterStats.balls;
+    
+    const srElement = document.getElementById(`${prefix}-sr`);
+    if(srElement) srElement.innerText = batterStats.balls > 0 ? ((batterStats.runs / batterStats.balls) * 100).toFixed(2) : "0.00";
+    
+    const rrElement = document.getElementById(`${prefix}-rr`);
+    if(rrElement) rrElement.innerText = batterStats.balls > 0 ? ((batterStats.runs / (batterStats.balls/6))).toFixed(2) : "0.00";
+    
+    const boundsElement = document.getElementById(`${prefix}-bounds`);
+    if(boundsElement) boundsElement.innerText = batterStats.fours + batterStats.sixes;
+    
+    const foursElement = document.getElementById(`${prefix}-4s`);
+    if(foursElement) foursElement.innerText = batterStats.fours;
+    
+    const sixesElement = document.getElementById(`${prefix}-6s`);
+    if(sixesElement) sixesElement.innerText = batterStats.sixes;
+    
+    const outElement = document.getElementById(`${prefix}-out`);
+    if(outElement) outElement.innerText = batterStats.outOn; 
+    
+    const extrasElement = document.getElementById(`${prefix}-extras`);
+    if(extrasElement) extrasElement.innerText = batterStats.extras;
+    
+    const oversBowled = bowlerStats.balls / 6;
+    const ecoElement = document.getElementById(`${prefix}-eco`);
+    if(ecoElement) ecoElement.innerText = oversBowled > 0 ? (bowlerStats.runs / oversBowled).toFixed(2) : "0.00";
 }
 
-function generateAIInsight() {
-    const insightBox = document.getElementById('ai-insight-text'); if (!insightBox) return;
-    insightBox.innerText = gameState.aiDifficulty === 'hard' ? "Pro AI Engine Active: The computer analyzed your career throw history to predict your moves. Keep randomizing!" : "Casual Match Completed. Try increasing AI difficulty to 'Pro' to see how well it reads your mind!";
+function generateAIInsight(result) {
+    const insightBox = document.getElementById('ai-insight-text');
+    if (!insightBox) return;
+    if (gameState.aiDifficulty === 'hard') {
+        insightBox.innerText = "Pro AI Engine Active: The computer analyzed your entire career throw history to predict your moves. Keep randomizing your patterns to break the algorithm!";
+    } else {
+        insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
+    }
 }
 
-// --- BULLETPROOF PDF EXPORTER ---
+function resetToToss() { location.reload(); }
+function openAnalysis() { document.getElementById('analysis-modal').style.display = 'flex'; }
+function closeAnalysis() { document.getElementById('analysis-modal').style.display = 'none'; }
+
 function downloadPDF() {
-    const btn = document.getElementById('pdf-btn'); const originalText = btn.innerHTML; btn.innerHTML = "⏳ GENERATING REPORT..."; btn.disabled = true;
+    const btn = document.getElementById('pdf-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = "⏳ GENERATING REPORT...";
+    btn.disabled = true;
+
     const printElement = document.createElement('div');
     
     let pdfHTML = `
@@ -499,7 +744,7 @@ function downloadPDF() {
                     <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
                 </div>
                 <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
-                    <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim()}</h3>
+                    <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️]/g, '').trim()}</h3>
                 </div>
                 <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px;">
                     <tr>
@@ -509,7 +754,7 @@ function downloadPDF() {
                                 <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.playerStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.playerStats.balls} balls)</span></td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.playerStats.wicketsLost}</td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-sr').innerText}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-eco').innerText}</td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.playerStats.extras}</td></tr>
                             </table>
@@ -520,7 +765,7 @@ function downloadPDF() {
                                 <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.compStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.compStats.balls} balls)</span></td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.compStats.wicketsLost}</td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-sr').innerText}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-eco').innerText}</td></tr>
                                 <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.compStats.extras}</td></tr>
                             </table>
@@ -539,27 +784,50 @@ function downloadPDF() {
         let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝]/g, '').trim();
         safeText = safeText.replace('↳', '>').trim();
         let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
-        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
-        else if (safeText.includes("+4") || safeText.includes("+6")) lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
-        else if (safeText.includes("---")) lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
+        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
+            lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+        } else if (safeText.includes("+4") || safeText.includes("+6")) {
+            lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+        } else if (safeText.includes("---")) {
+            lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
+        }
 
         if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
-            if (currentGroup !== '') pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`;
+            if (currentGroup !== '') {
+                pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`;
+            }
             currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
-        } else currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
+        } else {
+            currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
+        }
     });
     
-    if (currentGroup !== '') pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`;
+    if (currentGroup !== '') {
+        pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`;
+    }
 
-    pdfHTML += `</tbody></table></div><div class="log-group" style="display: block; width: 100%; margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid !important; break-inside: avoid;">Generated by Hand Clash Arena &bull; &copy; 2026</div></div>`;
+    pdfHTML += `
+                    </tbody>
+                </table>
+            </div>
+            <div class="log-group" style="display: block; width: 100%; margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid !important; break-inside: avoid;">
+                Generated by Hand Clash Arena &bull; &copy; 2026
+            </div>
+        </div>`;
 
     printElement.innerHTML = pdfHTML;
 
     const opt = {
-        margin: 0.4, filename: 'Hand_Clash_Match_Report.pdf', image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+        margin: 0.4, 
+        filename: 'Hand_Clash_Match_Report.pdf', 
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: 'css', avoid: ['.log-group', 'tr'] } 
     };
 
-    html2pdf().set(opt).from(printElement).save().then(() => { btn.innerHTML = originalText; btn.disabled = false; });
+    html2pdf().set(opt).from(printElement).save().then(() => {
+        btn.innerHTML = originalText; 
+        btn.disabled = false;
+    });
 }
