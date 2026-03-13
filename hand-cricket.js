@@ -2,7 +2,6 @@
    CRICPULSE FUN-GUN ARENA | CAREER AI & PERFECT PDF ENGINE
    ========================================================= */
 
-// Game State Object
 let gameState = {
     maxWickets: 3,
     maxBalls: 30,
@@ -23,11 +22,11 @@ let gameState = {
 
 let currentUser = null;
 let srChartInstance = null;
-let pieChartInstance = null;
+let runsChartInstance = null;
+let throwDnaInstance = null;
 
-const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
+const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
-// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -64,7 +63,7 @@ window.onload = function() {
     }
 };
 
-// --- DATA AUTO-PATCHER (Ensures trackers never break) ---
+// --- DATA AUTO-PATCHER ---
 function syncUserData(username) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     if (!usersDB[username]) usersDB[username] = {};
@@ -79,7 +78,6 @@ function syncUserData(username) {
     if (!u.battingThrows) u.battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     if (!u.bowlingThrows) u.bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     
-    // Achievement Trackers
     u.careerDefenses = u.careerDefenses || 0;
     u.careerSixes = u.careerSixes || 0;
     u.careerFours = u.careerFours || 0;
@@ -94,7 +92,7 @@ function syncUserData(username) {
     for(let key in defAch) { if(u.achievements[key] === undefined) u.achievements[key] = defAch[key]; }
     
     if (!u.last10SR) u.last10SR = [];
-    if (!u.dismissalTypes) u.dismissalTypes = { 'Caught/Bowled': 0, 'Hit Wicket': 0, 'Stumped': 0 };
+    if (!u.last10Runs) u.last10Runs = []; // NEW STAT
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -198,21 +196,36 @@ function renderProfilePage() {
         });
     }, 100);
 
-    // Chart.js
+    // NEW CHARTS GENERATION
     if(srChartInstance) srChartInstance.destroy();
-    if(pieChartInstance) pieChartInstance.destroy();
+    if(runsChartInstance) runsChartInstance.destroy();
+    if(throwDnaInstance) throwDnaInstance.destroy();
+
     const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
         srChartInstance = new Chart(srCtxElement.getContext('2d'), {
-            type: 'line', data: { labels: stats.last10SR.map((_, i) => `M${i+1}`), datasets: [{ label: 'Strike Rate', data: stats.last10SR, borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)', borderWidth: 2, fill: true, tension: 0.3 }] },
+            type: 'line', data: { labels: stats.last10SR ? stats.last10SR.map((_, i) => `M${i+1}`) : [], datasets: [{ label: 'Strike Rate', data: stats.last10SR || [], borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.1)', borderWidth: 2, fill: true, tension: 0.3 }] },
             options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'} } }, color: '#fff' }
         });
     }
-    const pieCtxElement = document.getElementById('outPieChart');
-    if (pieCtxElement) {
-        pieChartInstance = new Chart(pieCtxElement.getContext('2d'), {
-            type: 'pie', data: { labels: ['Caught/Bowled', 'Hit Wicket', 'Stumped'], datasets: [{ data: [stats.dismissalTypes['Caught/Bowled'], stats.dismissalTypes['Hit Wicket'], stats.dismissalTypes['Stumped']], backgroundColor: ['#00d2ff', '#ff2a2a', '#00ff88'], borderWidth: 1, borderColor: '#000' }] },
-            options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+
+    const runsCtxElement = document.getElementById('runsBarChart');
+    if (runsCtxElement) {
+        runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
+            type: 'bar', data: { labels: stats.last10Runs ? stats.last10Runs.map((_, i) => `M${i+1}`) : [], datasets: [{ label: 'Runs Scored', data: stats.last10Runs || [], backgroundColor: '#00d2ff', borderRadius: 4 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'} } }, color: '#fff' }
+        });
+    }
+
+    const dnaCtxElement = document.getElementById('throwDnaChart');
+    if (dnaCtxElement && stats.battingThrows) {
+        const t = stats.battingThrows;
+        throwDnaInstance = new Chart(dnaCtxElement.getContext('2d'), {
+            type: 'radar', data: { 
+                labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
+                datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#00ff88', borderWidth: 2 }] 
+            },
+            options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
     }
 }
@@ -245,7 +258,17 @@ function showToast(message) {
     container.appendChild(toast); setTimeout(() => { if(container.contains(toast)) container.removeChild(toast); }, 5000);
 }
 
-// --- MATCH SETUP ---
+function updateAtmosphere() {
+    const body = document.body;
+    if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) {
+        const runsNeeded = gameState.target - gameState.playerStats.runs;
+        const ballsLeft = gameState.maxBalls - gameState.playerStats.balls;
+        if (runsNeeded > 0 && runsNeeded <= 15 && ballsLeft <= 12) { body.classList.add('danger-pulse'); return; }
+    }
+    body.classList.remove('danger-pulse');
+}
+
+// --- GAME UI & SETUP ---
 function setFormat(wickets, balls, btnId) {
     gameState.maxWickets = wickets; gameState.maxBalls = balls;
     document.querySelectorAll('.setup-btn').forEach(btn => { if(btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn'); });
@@ -281,6 +304,7 @@ function playToss(playerNum) {
     const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
     gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
 
+    // LUCKY COIN TRACKER
     if (playerWins && currentUser) {
         let uDB = JSON.parse(localStorage.getItem('hc_usersDB'));
         uDB[currentUser].tossesWon += 1;
@@ -334,8 +358,10 @@ function updateMatchUI() {
         if (gameState.isPlayerBatting) { zeroBtn.innerHTML = "🛡️ 0 (DEFEND)"; zeroBtn.style.background = "rgba(0, 210, 255, 0.1)"; zeroBtn.style.borderColor = "var(--accent-blue)"; } 
         else { zeroBtn.innerHTML = "↔️ 0 (WIDE)"; zeroBtn.style.background = "rgba(255, 42, 42, 0.1)"; zeroBtn.style.borderColor = "var(--accent-red)"; }
     }
+    updateAtmosphere();
 }
 
+// --- PRO AI ENGINE ---
 function getComputerThrow() {
     let compNum; let isCompBatting = !gameState.isPlayerBatting;
     if (gameState.compConsecZeros >= 2) return Math.floor(Math.random() * 6) + 1;
@@ -363,14 +389,17 @@ function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
     if (currentUser) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-        if (gameState.isPlayerBatting) usersDB[currentUser].battingThrows[playerNum]++;
-        else usersDB[currentUser].bowlingThrows[playerNum]++;
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); let stats = usersDB[currentUser];
+        if (gameState.isPlayerBatting) stats.battingThrows[playerNum] = (stats.battingThrows[playerNum] || 0) + 1;
+        else stats.bowlingThrows[playerNum] = (stats.bowlingThrows[playerNum] || 0) + 1;
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     }
 
     const compNum = getComputerThrow();
-    gameState.isPlayerBatting ? gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0 : gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
+
+    if (gameState.isPlayerBatting) gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0;
+    else gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
+
     if (navigator.vibrate) navigator.vibrate([50]);
 
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
@@ -398,7 +427,6 @@ function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.balls++; currentBatterStats.wicketsLost++;
     if (!gameState.isPlayerBatting) gameState.compStats.dots++; 
-    
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
@@ -416,8 +444,11 @@ function handleWicket(num, type) {
 
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    const runsToAdd = batterNum + 1; currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
-    writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs. (Ball not counted)`);
+    const runsToAdd = batterNum + 1;
+    currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
+    const team = gameState.isPlayerBatting ? "You" : "Computer";
+    writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs to ${team}. (Ball not counted)`);
+    if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
 }
 
 function handleDefense() {
@@ -429,7 +460,7 @@ function handleDefense() {
     if (gameState.isPlayerBatting && currentUser) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
         if (usersDB[currentUser]) {
-            usersDB[currentUser].careerDefenses += 1;
+            usersDB[currentUser].careerDefenses = (usersDB[currentUser].careerDefenses || 0) + 1;
             if (usersDB[currentUser].careerDefenses >= 15 && !usersDB[currentUser].achievements.theWall) {
                 usersDB[currentUser].achievements.theWall = true; showToast("🧱 ACHIEVEMENT UNLOCKED: The Wall (15 Defenses)");
             }
@@ -461,8 +492,7 @@ function checkMatchState() {
     const stats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     if (gameState.innings === 2 && stats.runs >= gameState.target) return endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
     
-    const isAllOut = stats.wicketsLost >= gameState.maxWickets;
-    const isOversDone = stats.balls >= gameState.maxBalls;
+    const isAllOut = stats.wicketsLost >= gameState.maxWickets; const isOversDone = stats.balls >= gameState.maxBalls;
     if (isAllOut || isOversDone) {
         if (gameState.innings === 1) triggerInningsChange(stats, isAllOut ? "ALL OUT" : "OVERS COMPLETED");
         else {
@@ -474,7 +504,7 @@ function checkMatchState() {
 
 function triggerInningsChange(currentBatterStats, reason) {
     gameState.innings = 2; gameState.target = currentBatterStats.runs + 1; gameState.isPlayerBatting = !gameState.isPlayerBatting;
-    gameState.playerConsecZeros = 0; gameState.compConsecZeros = 0; gameState.isTransitioning = true; 
+    gameState.playerConsecZeros = 0; gameState.compConsecZeros = 0; gameState.isTransitioning = true; document.body.classList.remove('danger-pulse');
     setTimeout(() => {
         gameState.commentaryHistory.push(`\n--- INNINGS BREAK (${reason}) ---`); gameState.commentaryHistory.push(`--- MATCH START | 2ND INNINGS THE CHASE ---`);
         writeCommentary(`${reason}! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`);
@@ -490,6 +520,7 @@ function writeCommentary(text) {
 
 function endGame(result) {
     gameState.gameOver = true; actionArea.style.display = 'none'; document.getElementById('end-game-controls').style.display = 'flex';
+    document.body.classList.remove('danger-pulse');
     
     if (result === "PLAYER_WINS") { inningsStatus.innerText = "🏆 YOU WON THE MATCH!"; inningsStatus.style.background = "var(--accent-blue)"; fireConfetti(); } 
     else if (result === "COM_WINS") { inningsStatus.innerText = "💀 COMPUTER WON!"; inningsStatus.style.background = "var(--accent-red)"; } 
@@ -500,7 +531,6 @@ function endGame(result) {
     generateAIInsight(result); saveLifetimeStats(result);
 }
 
-// --- EVALUATE & SAVE ACHIEVEMENTS ---
 function evaluateAchievements(stats) {
     const checks = [
         { key: 'veteran', current: stats.matches, max: 50, title: 'Veteran (50 Matches)' },
@@ -533,14 +563,11 @@ function saveLifetimeStats(result) {
     stats.totalRuns += gameState.playerStats.runs; stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; stats.careerFours += gameState.playerStats.fours;
     stats.careerDotsBowled += gameState.compStats.dots; 
-    
     if (gameState.playerStats.runs > stats.highestScore) stats.highestScore = gameState.playerStats.runs;
     if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) stats.successfulChases += 1;
 
     if (gameState.playerStats.outOn !== '-') {
         stats.totalDismissals += 1; if (gameState.playerStats.runs === 0) stats.ducks += 1;
-        if (gameState.playerStats.outOn === '0 (Hit Wkt)') stats.dismissalTypes['Hit Wicket']++;
-        else if (gameState.playerStats.outOn === '0 (Stumped)') stats.dismissalTypes['Stumped']++; else stats.dismissalTypes['Caught/Bowled']++;
     } else {
         stats.notOutMatches += 1; 
     }
@@ -555,6 +582,8 @@ function saveLifetimeStats(result) {
     
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
     if (!stats.last10SR) stats.last10SR = []; stats.last10SR.push(parseFloat(pSR)); if(stats.last10SR.length > 10) stats.last10SR.shift();
+
+    if (!stats.last10Runs) stats.last10Runs = []; stats.last10Runs.push(gameState.playerStats.runs); if(stats.last10Runs.length > 10) stats.last10Runs.shift();
 
     evaluateAchievements(stats);
     usersDB[currentUser] = stats; localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
