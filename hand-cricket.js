@@ -1,9 +1,13 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | DYNAMIC GAME LOGIC & AUTH
+   CRICPULSE FUN-GUN ARENA | PRO AI & OVERS SYSTEM
    ========================================================= */
 
 // Game State Object
 let gameState = {
+    maxWickets: 3,
+    maxBalls: 30,
+    aiDifficulty: 'easy',
+    playerHistory: [],
     tossChoice: null,
     isPlayerBatting: null,
     innings: 1,
@@ -13,14 +17,13 @@ let gameState = {
     playerConsecZeros: 0,
     compConsecZeros: 0,
     commentaryHistory: [], 
-    playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 },
-    compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0 }
+    playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0 },
+    compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0 }
 };
 
 let currentUser = null;
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
 
-// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -29,16 +32,14 @@ const playerDecisionBox = document.getElementById('player-decision-box');
 const computerDecisionBox = document.getElementById('computer-decision-box');
 const matchScreen = document.getElementById('match-screen');
 const tossScreen = document.getElementById('toss-screen');
+const setupScreen = document.getElementById('setup-screen');
 const inningsStatus = document.getElementById('innings-status');
 const commentaryBox = document.getElementById('hand-commentary');
-const playerHandScoreUi = document.getElementById('player-hand-score');
-const computerHandScoreUi = document.getElementById('computer-hand-score');
 const targetBox = document.getElementById('target-box');
 const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
 const zeroBtn = document.getElementById('zero-btn'); 
 
-// --- INITIALIZATION & AUTH SYSTEM ---
 window.onload = function() {
     const storedUser = localStorage.getItem('hc_currentUser');
     if (storedUser) {
@@ -57,7 +58,7 @@ function loginUser() {
     if (!usersDB[username]) {
         usersDB[username] = {
             matches: 0, wins: 0, losses: 0, ties: 0,
-            totalRuns: 0, totalBallsFaced: 0, totalDismissals: 0, // <-- ADDED DISMISSALS
+            totalRuns: 0, totalBallsFaced: 0, totalDismissals: 0,
             totalRunsConceded: 0, totalBallsBowled: 0,
             totalWicketsTaken: 0, ducks: 0, highestScore: 0,
             bestSpellRuns: null 
@@ -82,6 +83,8 @@ function loadUser(username) {
     const initial = username.charAt(0);
     if (avatarText) avatarText.innerText = initial;
     if (profAvatarLetter) profAvatarLetter.innerText = initial;
+    
+    if (setupScreen) setupScreen.style.display = 'block';
 }
 
 function logoutUser() {
@@ -108,22 +111,15 @@ function openProfile() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
-    // BATTING AVERAGE MATH
     const dismissals = stats.totalDismissals || 0;
     let batAvg = "0.00";
-    if (dismissals > 0) {
-        batAvg = (stats.totalRuns / dismissals).toFixed(2);
-    } else if (stats.totalRuns > 0) {
-        batAvg = stats.totalRuns.toFixed(2) + "*"; // * means not-out
-    }
+    if (dismissals > 0) batAvg = (stats.totalRuns / dismissals).toFixed(2);
+    else if (stats.totalRuns > 0) batAvg = stats.totalRuns.toFixed(2) + "*";
     document.getElementById('prof-bat-avg').innerText = batAvg;
 
-    // BOWLING AVERAGE MATH
     const wickets = stats.totalWicketsTaken || 0;
-    const bowlAvg = wickets > 0 ? (stats.totalRunsConceded / wickets).toFixed(2) : "-";
-    document.getElementById('prof-bowl-avg').innerText = bowlAvg;
+    document.getElementById('prof-bowl-avg').innerText = wickets > 0 ? (stats.totalRunsConceded / wickets).toFixed(2) : "-";
 
-    // EXISTING STRIKE RATE & ECONOMY MATH
     const avgSR = stats.totalBallsFaced > 0 ? ((stats.totalRuns / stats.totalBallsFaced) * 100).toFixed(2) : "0.00";
     const oversBowled = stats.totalBallsBowled / 6;
     const avgEco = oversBowled > 0 ? (stats.totalRunsConceded / oversBowled).toFixed(2) : "0.00";
@@ -131,7 +127,7 @@ function openProfile() {
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
     
-    const bestSpell = stats.bestSpellRuns === null ? "-" : `1/${stats.bestSpellRuns}`;
+    const bestSpell = stats.bestSpellRuns === null ? "-" : `Multi-Wkt/${stats.bestSpellRuns}`;
     document.getElementById('prof-best-spell').innerText = bestSpell;
     
     document.getElementById('profile-modal').style.display = 'flex';
@@ -141,11 +137,30 @@ function closeProfile() {
     document.getElementById('profile-modal').style.display = 'none';
 }
 
-function getRandomCommentary(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function setFormat(wickets, balls, btnId) {
+    gameState.maxWickets = wickets;
+    gameState.maxBalls = balls;
+    document.querySelectorAll('.setup-btn').forEach(btn => {
+        if(btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn');
+    });
+    const activeBtn = document.getElementById(btnId);
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
 }
 
-// --- TOSS LOGIC ---
+function setDifficulty(level, btnId) {
+    gameState.aiDifficulty = level;
+    document.querySelectorAll('.setup-btn').forEach(btn => {
+        if(btn.id && btn.id.startsWith('btn-diff')) btn.classList.remove('active-setup-btn');
+    });
+    const activeBtn = document.getElementById(btnId);
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
+}
+
+function goToToss() {
+    if (setupScreen) setupScreen.style.display = 'none';
+    if (tossScreen) tossScreen.style.display = 'block';
+}
+
 function chooseToss(choice) {
     gameState.tossChoice = choice;
     tossStep1.style.display = 'none';
@@ -166,7 +181,6 @@ function playToss(playerNum) {
     document.getElementById('toss-sum-text').innerText = `${playerNum} + ${compNum} = ${sum} (${isSumEven ? 'Even' : 'Odd'})`;
     
     const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
-    
     gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
 
     if (playerWins) {
@@ -179,7 +193,6 @@ function playToss(playerNum) {
         
         gameState.isPlayerBatting = Math.random() < 0.5 ? false : true;
         const compChoice = gameState.isPlayerBatting ? 'BOWL' : 'BAT';
-        
         gameState.commentaryHistory.push(`🤖 Computer elected to ${compChoice} first.`);
 
         let p = document.createElement('p');
@@ -187,12 +200,10 @@ function playToss(playerNum) {
         p.style.fontSize = "1.2rem";
         p.innerHTML = `Computer chooses to <b>${compChoice}</b> first.`;
         computerDecisionBox.prepend(p);
-        
         computerDecisionBox.style.display = 'block';
     }
 }
 
-// --- MATCH SETUP ---
 function startMatch(playerOptsToBat) {
     gameState.isPlayerBatting = playerOptsToBat;
     gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
@@ -200,12 +211,17 @@ function startMatch(playerOptsToBat) {
 }
 
 function continueToMatch() {
-    tossScreen.style.display = 'none';
+    if (tossScreen) tossScreen.style.display = 'none';
     matchScreen.style.display = 'block';
     updateMatchUI();
     
-    gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS ---`);
+    let formatText = gameState.maxBalls === Infinity ? "Classic (Unlimited Overs)" : `T${gameState.maxBalls/6} (${gameState.maxWickets} Wickets)`;
+    gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS | ${formatText} ---`);
     writeCommentary(gameState.isPlayerBatting ? "You are Batting first. Put up a massive total!" : "You are Bowling first. Take early wickets!");
+}
+
+function ballsToOvers(balls) {
+    return Math.floor(balls / 6) + "." + (balls % 6);
 }
 
 function updateMatchUI() {
@@ -217,8 +233,31 @@ function updateMatchUI() {
         targetScoreUi.innerText = gameState.target;
     }
     
-    playerHandScoreUi.innerText = gameState.playerStats.runs;
-    computerHandScoreUi.innerText = gameState.compStats.runs;
+    const playerHandScore = document.getElementById('player-hand-score');
+    if (playerHandScore) playerHandScore.innerText = gameState.playerStats.runs;
+    
+    const playerHandWickets = document.getElementById('player-hand-wickets');
+    if (playerHandWickets) playerHandWickets.innerText = gameState.playerStats.wicketsLost;
+    
+    const playerOvers = document.getElementById('player-overs');
+    if (playerOvers) playerOvers.innerText = ballsToOvers(gameState.playerStats.balls);
+    
+    const compHandScore = document.getElementById('computer-hand-score');
+    if (compHandScore) compHandScore.innerText = gameState.compStats.runs;
+    
+    const compHandWickets = document.getElementById('computer-hand-wickets');
+    if (compHandWickets) compHandWickets.innerText = gameState.compStats.wicketsLost;
+    
+    const compOvers = document.getElementById('computer-overs');
+    if (compOvers) compOvers.innerText = ballsToOvers(gameState.compStats.balls);
+
+    const maxOversText = gameState.maxBalls === Infinity ? " (Unlimited)" : ` / ${gameState.maxBalls/6}.0`;
+    
+    const playerMaxOvers = document.getElementById('player-max-overs');
+    if (playerMaxOvers) playerMaxOvers.innerText = maxOversText;
+    
+    const compMaxOvers = document.getElementById('computer-max-overs');
+    if (compMaxOvers) compMaxOvers.innerText = maxOversText;
 
     if (zeroBtn) {
         if (gameState.isPlayerBatting) {
@@ -233,20 +272,48 @@ function updateMatchUI() {
     }
 }
 
-// --- CORE GAMEPLAY LOGIC ---
+function getComputerThrow() {
+    let compNum;
+    let isCompBatting = !gameState.isPlayerBatting;
+
+    if (gameState.compConsecZeros >= 2) return Math.floor(Math.random() * 6) + 1;
+    if (gameState.aiDifficulty === 'easy' || gameState.playerHistory.length < 3) return Math.floor(Math.random() * 7);
+
+    let counts = {};
+    let maxCount = 0;
+    let predictedThrow = 1;
+    
+    for (let num of gameState.playerHistory) {
+        counts[num] = (counts[num] || 0) + 1;
+        if (counts[num] > maxCount) {
+            maxCount = counts[num];
+            predictedThrow = num;
+        }
+    }
+
+    if (Math.random() < 0.60) {
+        if (!isCompBatting) {
+            compNum = predictedThrow;
+        } else {
+            compNum = Math.floor(Math.random() * 7);
+            while (compNum === predictedThrow) {
+                compNum = Math.floor(Math.random() * 7);
+            }
+        }
+    } else {
+        compNum = Math.floor(Math.random() * 7);
+    }
+    
+    return compNum;
+}
+
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
-    let compNum;
-    if (!gameState.isPlayerBatting) { 
-        if (gameState.compConsecZeros >= 2) {
-            compNum = Math.random() < 0.1 ? 0 : Math.floor(Math.random() * 6) + 1; 
-        } else {
-            compNum = Math.floor(Math.random() * 7); 
-        }
-    } else { 
-        compNum = Math.floor(Math.random() * 7); 
-    }
+    const compNum = getComputerThrow();
+    
+    gameState.playerHistory.push(playerNum);
+    if (gameState.playerHistory.length > 15) gameState.playerHistory.shift();
 
     if (gameState.isPlayerBatting) {
         gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0;
@@ -264,105 +331,48 @@ function playHand(playerNum) {
     const currentBalls = (gameState.isPlayerBatting ? gameState.playerStats.balls : gameState.compStats.balls) + 1;
     gameState.commentaryHistory.push(`[Ball ${currentBalls}] Bowler threw ${bowlNum}, Batter threw ${batNum}`);
 
-    // Check Logic
-    if (gameState.isPlayerBatting && gameState.playerConsecZeros === 3) {
-        handleWicket(0, 'HIT_WICKET');
-    }
-    else if (!gameState.isPlayerBatting && gameState.compConsecZeros === 3) {
-        handleWicket(0, 'HIT_WICKET');
-    }
-    else if (playerNum === 0 && compNum === 0) {
-        handleWicket(0, 'STUMPED'); 
-    }
-    else if (playerNum === compNum) {
-        handleWicket(playerNum, 'CAUGHT/BOWLED');
-    }
-    else if ((gameState.isPlayerBatting && compNum === 0) || (!gameState.isPlayerBatting && playerNum === 0)) {
-        handleWide();
-    }
-    else if ((gameState.isPlayerBatting && playerNum === 0) || (!gameState.isPlayerBatting && compNum === 0)) {
-        handleDefense();
-    }
-    else {
-        handleRuns(gameState.isPlayerBatting ? playerNum : compNum);
-    }
+    if (gameState.isPlayerBatting && gameState.playerConsecZeros === 3) handleWicket(0, 'HIT_WICKET');
+    else if (!gameState.isPlayerBatting && gameState.compConsecZeros === 3) handleWicket(0, 'HIT_WICKET');
+    else if (playerNum === 0 && compNum === 0) handleWicket(0, 'STUMPED'); 
+    else if (playerNum === compNum) handleWicket(playerNum, 'CAUGHT/BOWLED');
+    else if ((gameState.isPlayerBatting && compNum === 0) || (!gameState.isPlayerBatting && playerNum === 0)) handleWide();
+    else if ((gameState.isPlayerBatting && playerNum === 0) || (!gameState.isPlayerBatting && compNum === 0)) handleDefense();
+    else handleRuns(gameState.isPlayerBatting ? playerNum : compNum);
 
-    if (!gameState.isTransitioning) {
+    if (!gameState.isTransitioning && !gameState.gameOver) {
         updateMatchUI();
+        checkMatchState();
     }
+}
+
+function getRandomCommentary(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.balls++;
+    currentBatterStats.wicketsLost++;
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
     
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
-    if (type === 'STUMPED') {
-        const comments = [
-            `🚨 WIDE AND STUMPED! Lightning-fast glovework removes ${batterName}!`,
-            `🧤 Beaten by the flight! The keeper whips the bails off in a flash. STUMPED!`,
-            `⚡ Oh, what a stumping! Dragged wide and ${batterName} dragged their foot out. OUT!`,
-            `🏏 Stepped out for a wild swing on a wide! ${batterName} is stumped by a mile!`,
-            `😱 Bowled wide, batter loses balance, and the keeper does the rest! OUT!`
-        ];
-        writeCommentary(getRandomCommentary(comments));
-    } else if (type === 'HIT_WICKET') {
-        const comments = [
-            `🏏💥 HIT WICKET! ${batterName} defended too deep (3x 0s) and stepped on the stumps! OUT!`,
-            `🤦‍♂️ What a disaster! ${batterName} played back too far and dislodged the bails. Hit Wicket!`,
-            `😲 Unbelievable! ${batterName} crushes their own stumps after defending endlessly!`,
-            `🪵 Oh dear... A clumsy foot movement brings ${batterName}'s downfall. Hit Wicket!`,
-            `🛑 That's a tragic way to go! Stepped on the stumps while trying to defend again.`
-        ];
-        writeCommentary(getRandomCommentary(comments));
-    } else {
-        const comments = [
-            `💥 WICKET! Clean bowled! ${batterName} has to walk back!`,
-            `🏏 Edged and taken! What a spectacular catch to dismiss ${batterName}!`,
-            `🎯 Bullseye! The stumps are absolutely shattered!`,
-            `🧤 Caught in the deep! Absolute blinder of a catch to send ${batterName} packing.`,
-            `😱 What a delivery! Bamboozled completely. OUT!`
-        ];
-        writeCommentary(getRandomCommentary(comments));
-    }
-    
-    triggerInningsChange(currentBatterStats);
+    if (type === 'STUMPED') writeCommentary(`🚨 WIDE AND STUMPED! Lightning-fast glovework removes ${batterName}!`);
+    else if (type === 'HIT_WICKET') writeCommentary(`🏏💥 HIT WICKET! ${batterName} defended too deep (3x 0s) and stepped on the stumps! OUT!`);
+    else writeCommentary(`💥 WICKET! Clean bowled! Both threw ${num}. ${batterName} departs!`);
 }
 
 function handleWide() {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.runs += 1;
     currentBatterStats.extras += 1;
-    const team = gameState.isPlayerBatting ? "You" : "Computer";
-    
-    const comments = [
-        `↔️ WIDE BALL! Slipped out of the hand. +1 Extra to ${team}.`,
-        `🙅‍♂️ Umpire stretches the arms! Free run added for ${team}.`,
-        `🏏 Way down the leg side! That's a Wide. +1 Extra.`,
-        `😬 Poor line from the bowler! Umpire calls it WIDE.`,
-        `🎁 A complete gift for ${team}! Wide called. +1 Run.`
-    ];
-    writeCommentary(getRandomCommentary(comments));
-
-    if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) {
-        endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
-    }
+    writeCommentary(`↔️ WIDE BALL! Slipped out of the hand. +1 Extra to ${gameState.isPlayerBatting ? "You" : "Computer"}.`);
 }
 
 function handleDefense() {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.balls++;
-    
-    const comments = [
-        `🛡️ SOLID DEFENSE! Batter blocked the ball safely. 0 runs.`,
-        `🧱 Like a wall! Batter defends perfectly.`,
-        `🏏 Played with a straight bat. Safe forward defense. No runs.`,
-        `🛑 Respects the good delivery. Drops it onto the pitch. 0 runs.`,
-        `👀 Left alone outside off stump! Well judged by the batter.`
-    ];
-    writeCommentary(getRandomCommentary(comments));
+    writeCommentary(`🛡️ SOLID DEFENSE! Batter blocked the ball safely. 0 runs.`);
 }
 
 function handleRuns(runs) {
@@ -373,69 +383,56 @@ function handleRuns(runs) {
     if (runs === 4) currentBatterStats.fours++;
     if (runs === 6) currentBatterStats.sixes++;
 
-    let comments = [];
-    if (runs === 4) {
-        comments = [
-            `🔥 +4 Runs! Glorious cover drive to the boundary!`,
-            `🏏 +4 Runs! Pulled away beautifully into the gap!`,
-            `⚡ +4 Runs! Pierced the infield like a tracer bullet!`,
-            `💥 +4 Runs! Smacked straight down the ground for a one-bounce four!`,
-            `🤌 +4 Runs! Pure timing, didn't even try to hit it hard.`
-        ];
-    } else if (runs === 6) {
-        comments = [
-            `🚀 +6 Runs! MASSIVE HIT! Out of the stadium!`,
-            `🛸 +6 Runs! That went into orbit! Absolute monster of a shot!`,
-            `🤯 +6 Runs! Stand and deliver! Dispatched into the top tier.`,
-            `🏏 +6 Runs! Clean strike, right off the absolute meat of the bat!`,
-            `🔥 +6 Runs! What a colossal maximum! Bowler looks stunned.`
-        ];
-    } else {
-        comments = [
-            `🏃 +${runs} Runs! Quick running between the wickets.`,
-            `🏏 +${runs} Runs! Pushed gently into the gap.`,
-            `👀 +${runs} Runs! Nicely timed, they scurry through.`,
-            `⚡ +${runs} Runs! Great placement yields some easy runs.`,
-            `🏃‍♂️ +${runs} Runs! Played softly with soft hands.`
-        ];
-    }
-    writeCommentary(getRandomCommentary(comments));
+    if (runs === 4) writeCommentary(`🔥 +4 Runs! Glorious cover drive to the boundary!`);
+    else if (runs === 6) writeCommentary(`🚀 +6 Runs! MASSIVE HIT! Out of the stadium!`);
+    else writeCommentary(`🏃 +${runs} Runs! Quick running between the wickets.`);
+}
 
-    if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) {
+function checkMatchState() {
+    const stats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
+    
+    const isAllOut = stats.wicketsLost >= gameState.maxWickets;
+    const isOversDone = stats.balls >= gameState.maxBalls;
+    const isTargetReached = gameState.innings === 2 && stats.runs >= gameState.target;
+
+    if (isTargetReached) {
         endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
+        return;
+    }
+
+    if (isAllOut || isOversDone) {
+        const reason = isAllOut ? "ALL OUT" : "OVERS COMPLETED";
+        
+        if (gameState.innings === 1) {
+            triggerInningsChange(stats, reason);
+        } else {
+            if (stats.runs < gameState.target - 1) endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS");
+            else if (stats.runs === gameState.target - 1) endGame("TIE");
+        }
     }
 }
 
-function triggerInningsChange(currentBatterStats) {
-    if (gameState.innings === 1) {
-        gameState.innings = 2;
-        gameState.target = currentBatterStats.runs + 1;
-        gameState.isPlayerBatting = !gameState.isPlayerBatting;
-        
-        gameState.playerConsecZeros = 0;
-        gameState.compConsecZeros = 0;
-        
-        gameState.isTransitioning = true; 
-        
-        setTimeout(() => {
-            const breakMsg = `Innings Break! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`;
-            gameState.commentaryHistory.push(`\n--- INNINGS BREAK ---`);
-            gameState.commentaryHistory.push(`--- MATCH START | 2ND INNINGS THE CHASE ---`);
-            writeCommentary(breakMsg);
+function triggerInningsChange(currentBatterStats, reason) {
+    gameState.innings = 2;
+    gameState.target = currentBatterStats.runs + 1;
+    gameState.isPlayerBatting = !gameState.isPlayerBatting;
+    
+    gameState.playerConsecZeros = 0;
+    gameState.compConsecZeros = 0;
+    gameState.playerHistory = []; 
+    gameState.isTransitioning = true; 
+    
+    setTimeout(() => {
+        const breakMsg = `${reason}! Innings Break! Target is ${gameState.target}. ${gameState.isPlayerBatting ? "Time to chase!" : "Defend this total!"}`;
+        gameState.commentaryHistory.push(`\n--- INNINGS BREAK (${reason}) ---`);
+        gameState.commentaryHistory.push(`--- MATCH START | 2ND INNINGS THE CHASE ---`);
+        writeCommentary(breakMsg);
 
-            document.getElementById('player-hand').innerText = '✊';
-            document.getElementById('computer-hand').innerText = '✊';
-            gameState.isTransitioning = false; 
-            updateMatchUI(); 
-        }, 2000);
-    } else {
-        const battingSecondStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-        if (battingSecondStats.runs < gameState.target - 1) {
-            endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS");
-        } else if (battingSecondStats.runs === gameState.target - 1) {
-            endGame("TIE");
-        }
-    }
+        document.getElementById('player-hand').innerText = '✊';
+        document.getElementById('computer-hand').innerText = '✊';
+        gameState.isTransitioning = false; 
+        updateMatchUI(); 
+    }, 2500);
 }
 
 function writeCommentary(text) {
@@ -445,7 +442,6 @@ function writeCommentary(text) {
     setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
 }
 
-// --- POST MATCH ANALYSIS & DATA SAVING ---
 function endGame(result) {
     gameState.gameOver = true;
     actionArea.style.display = 'none';
@@ -467,7 +463,6 @@ function endGame(result) {
     populateStats('an-p', gameState.playerStats, gameState.compStats);
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     generateAIInsight(result);
-    
     saveLifetimeStats(result);
 }
 
@@ -484,25 +479,16 @@ function saveLifetimeStats(result) {
     
     stats.totalRuns += gameState.playerStats.runs;
     stats.totalBallsFaced += gameState.playerStats.balls;
-    if (gameState.playerStats.runs > stats.highestScore) {
-        stats.highestScore = gameState.playerStats.runs;
-    }
+    if (gameState.playerStats.runs > stats.highestScore) stats.highestScore = gameState.playerStats.runs;
     
-    // TRACK DISMISSALS FOR BATTING AVERAGE
-    if (gameState.playerStats.outOn !== '-') {
-        stats.totalDismissals = (stats.totalDismissals || 0) + 1;
-        
-        // Track Ducks
-        if (gameState.playerStats.runs === 0) {
-            stats.ducks += 1;
-        }
-    }
+    stats.totalDismissals = (stats.totalDismissals || 0) + gameState.playerStats.wicketsLost;
+    if (gameState.playerStats.runs === 0 && gameState.playerStats.wicketsLost > 0) stats.ducks += 1;
     
     stats.totalRunsConceded += gameState.compStats.runs;
     stats.totalBallsBowled += gameState.compStats.balls;
     
-    if (gameState.compStats.outOn !== '-') {
-        stats.totalWicketsTaken += 1;
+    if (gameState.compStats.wicketsLost > 0) {
+        stats.totalWicketsTaken += gameState.compStats.wicketsLost;
         if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) {
             stats.bestSpellRuns = gameState.compStats.runs;
         }
@@ -511,33 +497,50 @@ function saveLifetimeStats(result) {
     usersDB[currentUser] = stats;
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
+
 function populateStats(prefix, batterStats, bowlerStats) {
-    document.getElementById(`${prefix}-runs`).innerText = batterStats.runs;
-    document.getElementById(`${prefix}-balls`).innerText = batterStats.balls;
-    document.getElementById(`${prefix}-sr`).innerText = batterStats.balls > 0 ? ((batterStats.runs / batterStats.balls) * 100).toFixed(2) : "0.00";
-    document.getElementById(`${prefix}-rr`).innerText = batterStats.balls > 0 ? ((batterStats.runs / (batterStats.balls/6))).toFixed(2) : "0.00";
-    document.getElementById(`${prefix}-bounds`).innerText = batterStats.fours + batterStats.sixes;
-    document.getElementById(`${prefix}-4s`).innerText = batterStats.fours;
-    document.getElementById(`${prefix}-6s`).innerText = batterStats.sixes;
-    document.getElementById(`${prefix}-out`).innerText = batterStats.outOn; 
-    document.getElementById(`${prefix}-extras`).innerText = batterStats.extras;
+    const rElement = document.getElementById(`${prefix}-runs`);
+    if(rElement) rElement.innerText = batterStats.runs;
+    
+    const wElement = document.getElementById(`${prefix}-wickets`);
+    if(wElement) wElement.innerText = batterStats.wicketsLost;
+    
+    const bElement = document.getElementById(`${prefix}-balls`);
+    if(bElement) bElement.innerText = batterStats.balls;
+    
+    const srElement = document.getElementById(`${prefix}-sr`);
+    if(srElement) srElement.innerText = batterStats.balls > 0 ? ((batterStats.runs / batterStats.balls) * 100).toFixed(2) : "0.00";
+    
+    const rrElement = document.getElementById(`${prefix}-rr`);
+    if(rrElement) rrElement.innerText = batterStats.balls > 0 ? ((batterStats.runs / (batterStats.balls/6))).toFixed(2) : "0.00";
+    
+    const boundsElement = document.getElementById(`${prefix}-bounds`);
+    if(boundsElement) boundsElement.innerText = batterStats.fours + batterStats.sixes;
+    
+    const foursElement = document.getElementById(`${prefix}-4s`);
+    if(foursElement) foursElement.innerText = batterStats.fours;
+    
+    const sixesElement = document.getElementById(`${prefix}-6s`);
+    if(sixesElement) sixesElement.innerText = batterStats.sixes;
+    
+    const outElement = document.getElementById(`${prefix}-out`);
+    if(outElement) outElement.innerText = batterStats.outOn; 
+    
+    const extrasElement = document.getElementById(`${prefix}-extras`);
+    if(extrasElement) extrasElement.innerText = batterStats.extras;
     
     const oversBowled = bowlerStats.balls / 6;
-    const economy = oversBowled > 0 ? (bowlerStats.runs / oversBowled).toFixed(2) : "0.00";
-    document.getElementById(`${prefix}-eco`).innerText = economy;
+    const ecoElement = document.getElementById(`${prefix}-eco`);
+    if(ecoElement) ecoElement.innerText = oversBowled > 0 ? (bowlerStats.runs / oversBowled).toFixed(2) : "0.00";
 }
 
 function generateAIInsight(result) {
     const insightBox = document.getElementById('ai-insight-text');
-    const pSR = gameState.playerStats.balls > 0 ? (gameState.playerStats.runs / gameState.playerStats.balls) * 100 : 0;
-    
-    if (result === "PLAYER_WINS") {
-        if (pSR > 200) insightBox.innerText = "Incredible aggression! You dismantled the AI with sheer boundary-hitting power. A true T20 masterclass.";
-        else insightBox.innerText = "A well-calculated victory. You utilized the defense mechanic perfectly and kept your nerve under pressure.";
-    } else if (result === "COM_WINS") {
-        insightBox.innerText = "The AI read your patterns like a book. Watch out for those Stumpings and try to randomize your throws more next time!";
+    if (!insightBox) return;
+    if (gameState.aiDifficulty === 'hard') {
+        insightBox.innerText = "Pro AI Engine Active: The computer analyzed your throw history to predict your moves. Keep randomizing your patterns!";
     } else {
-        insightBox.innerText = "A thriller that goes down to the wire! Nothing separates human and machine today.";
+        insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
     }
 }
 
@@ -545,7 +548,6 @@ function resetToToss() { location.reload(); }
 function openAnalysis() { document.getElementById('analysis-modal').style.display = 'flex'; }
 function closeAnalysis() { document.getElementById('analysis-modal').style.display = 'none'; }
 
-// --- PDF GENERATION LOGIC (HIGH CONTRAST TABLE LAYOUT) ---
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn');
     const originalText = btn.innerHTML;
@@ -556,106 +558,72 @@ function downloadPDF() {
     
     let pdfHTML = `
         <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
-            
             <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
                 <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
                 <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
             </div>
-
             <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
                 <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️]/g, '').trim()}</h3>
             </div>
-
             <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
                 <tr>
                     <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
                         <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
                         <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
                             <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.playerStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.playerStats.balls} balls)</span></td></tr>
+                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.playerStats.wicketsLost}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-sr').innerText}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-eco').innerText}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.playerStats.extras}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Dismissed On</td><td style="text-align: right; font-weight: 900; color: #dc2626;">${gameState.playerStats.outOn}</td></tr>
                         </table>
                     </td>
                     <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 20px;">
                         <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">COM PERFORMANCE</h3>
                         <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
                             <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.compStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.compStats.balls} balls)</span></td></tr>
+                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.compStats.wicketsLost}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-sr').innerText}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-eco').innerText}</td></tr>
                             <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.compStats.extras}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Dismissed On</td><td style="text-align: right; font-weight: 900; color: #dc2626;">${gameState.compStats.outOn}</td></tr>
                         </table>
                     </td>
                 </tr>
             </table>
-
-            <div style="background: #f0fdf4; border: 2px solid #166534; border-left: 8px solid #166534; padding: 20px; border-radius: 8px; margin-bottom: 40px; page-break-inside: avoid;">
-                <h4 style="margin: 0 0 8px 0; color: #14532d; font-size: 16px; font-weight: 900;">EXPERT AI INSIGHT</h4>
-                <p style="margin: 0; color: #000000; font-size: 15px; font-weight: 700;">${document.getElementById('ai-insight-text').innerText}</p>
-            </div>
-
             <div style="page-break-before: auto;">
                 <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
                 <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000;">
     `;
 
     let currentGroup = '';
-
     gameState.commentaryHistory.forEach(log => {
         let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵]/g, '').trim();
         safeText = safeText.replace('↳', '>').trim();
-
         let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
-        
-        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
-            lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
-        } else if (safeText.includes("+4") || safeText.includes("+6")) {
-            lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
-        } else if (safeText.includes("---")) {
-            lineStyle = "margin: 20px 0 10px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
-        }
-
+        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+        else if (safeText.includes("+4") || safeText.includes("+6")) lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+        else if (safeText.includes("---")) lineStyle = "margin: 20px 0 10px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
         if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
-            if (currentGroup !== '') {
-                pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
-            }
+            if (currentGroup !== '') pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
             currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
         } else {
             currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
         }
     });
+    if (currentGroup !== '') pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
 
-    if (currentGroup !== '') {
-        pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
-    }
-
-    pdfHTML += `
-                </div>
-            </div>
-
-            <div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">
-                Generated by Hand Clash Arena &bull; &copy; 2026
-            </div>
-        </div>
-    `;
+    pdfHTML += `</div></div><div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">Generated by Hand Clash Arena &bull; &copy; 2026</div></div>`;
 
     printElement.innerHTML = pdfHTML;
 
     const opt = {
-        margin:       0.4, 
-        filename:     'Hand_Clash_Match_Report.pdf',
-        image:        { type: 'jpeg', quality: 1 },
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, 
-        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] } 
+        margin: 0.4, filename: 'Hand_Clash_Match_Report.pdf', image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
     };
 
     html2pdf().set(opt).from(printElement).save().then(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        btn.innerHTML = originalText; btn.disabled = false;
     });
 }
