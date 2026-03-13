@@ -25,7 +25,7 @@ let currentUser = null;
 let srChartInstance = null;
 let pieChartInstance = null;
 
-const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
+const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
 // DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
