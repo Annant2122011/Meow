@@ -51,7 +51,6 @@
 
             <div id="tab-achievements" class="tab-content">
                 <div class="achievements-grid">
-                    
                     <div class="badge" id="badge-wall"><div class="badge-icon">🧱</div><div class="badge-title">The Wall</div><div class="badge-desc">Defend 15 times</div><div class="progress-container"><div class="progress-fill" id="prog-fill-wall"></div></div><div class="progress-text" id="prog-text-wall">0 / 15</div></div>
                     <div class="badge" id="badge-hitman"><div class="badge-icon">🏏</div><div class="badge-title">Hitman</div><div class="badge-desc">Score a century</div><div class="progress-container"><div class="progress-fill" id="prog-fill-hitman"></div></div><div class="progress-text" id="prog-text-hitman">0 / 100</div></div>
                     <div class="badge" id="badge-sniper"><div class="badge-icon">🎯</div><div class="badge-title">Sniper</div><div class="badge-desc">Wicket at 0 runs</div><div class="progress-container"><div class="progress-fill" id="prog-fill-sniper"></div></div><div class="progress-text" id="prog-text-sniper">0 / 1</div></div>
@@ -67,7 +66,6 @@
                     <div class="badge" id="badge-marathon"><div class="badge-icon">🥵</div><div class="badge-title">Marathon</div><div class="badge-desc">Face 500 balls</div><div class="progress-container"><div class="progress-fill" id="prog-fill-marathon"></div></div><div class="progress-text" id="prog-text-marathon">0 / 500</div></div>
                     <div class="badge" id="badge-unbreakable"><div class="badge-icon">🛡️</div><div class="badge-title">Unbreakable</div><div class="badge-desc">10 Not-Outs</div><div class="progress-container"><div class="progress-fill" id="prog-fill-unbreakable"></div></div><div class="progress-text" id="prog-text-unbreakable">0 / 10</div></div>
                     <div class="badge" id="badge-economical"><div class="badge-icon">📉</div><div class="badge-title">Economical</div><div class="badge-desc">Bowl 100 dot balls</div><div class="progress-container"><div class="progress-fill" id="prog-fill-economical"></div></div><div class="progress-text" id="prog-text-economical">0 / 100</div></div>
-
                 </div>
             </div>
 
@@ -76,9 +74,13 @@
                     <p style="text-align:center; font-weight:bold; color:var(--accent-neon); margin-bottom:10px; text-transform:uppercase; letter-spacing: 1px;">Strike Rate (Last 10 Matches)</p>
                     <canvas id="srLineChart"></canvas>
                 </div>
-                <div class="chart-wrapper" style="width: 80%; margin: 0 auto;">
-                    <p style="text-align:center; font-weight:bold; color:var(--accent-red); margin-bottom:10px; text-transform:uppercase; letter-spacing: 1px;">Dismissal Types</p>
-                    <canvas id="outPieChart"></canvas>
+                <div class="chart-wrapper">
+                    <p style="text-align:center; font-weight:bold; color:var(--accent-blue); margin-bottom:10px; text-transform:uppercase; letter-spacing: 1px;">Runs Scored (Last 10 Matches)</p>
+                    <canvas id="runsBarChart"></canvas>
+                </div>
+                <div class="chart-wrapper" style="width: 90%; margin: 0 auto;">
+                    <p style="text-align:center; font-weight:bold; color:var(--accent-red); margin-bottom:10px; text-transform:uppercase; letter-spacing: 1px;">Batting Throw DNA (Career)</p>
+                    <canvas id="throwDnaChart"></canvas>
                 </div>
             </div>
 
