@@ -1,5 +1,5 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | PRO AI & OVERS SYSTEM
+   CRICPULSE FUN-GUN ARENA | DYNAMIC GAME LOGIC & AUTH
    ========================================================= */
 
 // Game State Object
@@ -548,6 +548,7 @@ function resetToToss() { location.reload(); }
 function openAnalysis() { document.getElementById('analysis-modal').style.display = 'flex'; }
 function closeAnalysis() { document.getElementById('analysis-modal').style.display = 'none'; }
 
+// --- COMPLETELY BULLETPROOF PDF ENGINE ---
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn');
     const originalText = btn.innerHTML;
@@ -556,41 +557,46 @@ function downloadPDF() {
 
     const printElement = document.createElement('div');
     
+    // Wrapped the initial scorecards into a log-group to protect them from splitting
     let pdfHTML = `
         <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
-            <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
-                <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
-                <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
+            
+            <div class="log-group" style="display: block; width: 100%; page-break-inside: avoid !important; break-inside: avoid;">
+                <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
+                    <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
+                </div>
+                <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
+                    <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️]/g, '').trim()}</h3>
+                </div>
+                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
+                                <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.playerStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.playerStats.balls} balls)</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.playerStats.wicketsLost}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-sr').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-eco').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.playerStats.extras}</td></tr>
+                            </table>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 20px;">
+                            <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">COM PERFORMANCE</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
+                                <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.compStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.compStats.balls} balls)</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.compStats.wicketsLost}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-sr').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-eco').innerText}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.compStats.extras}</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
-                <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️]/g, '').trim()}</h3>
-            </div>
-            <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
-                <tr>
-                    <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
-                        <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
-                            <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.playerStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.playerStats.balls} balls)</span></td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.playerStats.wicketsLost}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-sr').innerText}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.playerStats.fours} | 6s: ${gameState.playerStats.sixes})</span></td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-p-eco').innerText}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.playerStats.extras}</td></tr>
-                        </table>
-                    </td>
-                    <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 20px;">
-                        <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">COM PERFORMANCE</h3>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
-                            <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${gameState.compStats.runs} <span style="font-size:13px; font-weight:bold;">(${gameState.compStats.balls} balls)</span></td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${gameState.compStats.wicketsLost}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-sr').innerText}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-bounds').innerText} <span style="font-size:13px; font-weight:bold;">(4s: ${gameState.compStats.fours} | 6s: ${gameState.compStats.sixes})</span></td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${document.getElementById('an-c-eco').innerText}</td></tr>
-                            <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${gameState.compStats.extras}</td></tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+
             <div style="page-break-before: auto;">
                 <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
                 <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000;">
@@ -600,30 +606,53 @@ function downloadPDF() {
     gameState.commentaryHistory.forEach(log => {
         let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵]/g, '').trim();
         safeText = safeText.replace('↳', '>').trim();
+        
         let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
-        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
-        else if (safeText.includes("+4") || safeText.includes("+6")) lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
-        else if (safeText.includes("---")) lineStyle = "margin: 20px 0 10px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
+        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
+            lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+        } else if (safeText.includes("+4") || safeText.includes("+6")) {
+            lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+        } else if (safeText.includes("---")) {
+            lineStyle = "margin: 20px 0 10px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
+        }
+
+        // We assign "log-group" class and "display: block" to explicitly force the PDF generator to read this as a solid, uncuttable box!
         if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
-            if (currentGroup !== '') pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
+            if (currentGroup !== '') {
+                pdfHTML += `<div class="log-group" style="display: block; width: 100%; page-break-inside: avoid !important; break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px; overflow: hidden;">${currentGroup}</div>`;
+            }
             currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
         } else {
             currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
         }
     });
-    if (currentGroup !== '') pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px;">${currentGroup}</div>`;
+    
+    if (currentGroup !== '') {
+        pdfHTML += `<div class="log-group" style="display: block; width: 100%; page-break-inside: avoid !important; break-inside: avoid; border-left: 4px solid #000000; padding-left: 15px; margin-bottom: 10px; background: #f9fafb; padding-top: 8px; padding-bottom: 8px; overflow: hidden;">${currentGroup}</div>`;
+    }
 
-    pdfHTML += `</div></div><div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">Generated by Hand Clash Arena &bull; &copy; 2026</div></div>`;
+    pdfHTML += `
+                </div>
+            </div>
+            <div class="log-group" style="display: block; width: 100%; margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid !important; break-inside: avoid;">
+                Generated by Hand Clash Arena &bull; &copy; 2026
+            </div>
+        </div>`;
 
     printElement.innerHTML = pdfHTML;
 
+    // THE MAGIC FIX: We tell html2pdf to NEVER cut through elements using the '.log-group' class!
     const opt = {
-        margin: 0.4, filename: 'Hand_Clash_Match_Report.pdf', image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } 
+        margin: 0.4, 
+        filename: 'Hand_Clash_Match_Report.pdf', 
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: 'css', avoid: '.log-group' } 
     };
 
     html2pdf().set(opt).from(printElement).save().then(() => {
-        btn.innerHTML = originalText; btn.disabled = false;
+        btn.innerHTML = originalText; 
+        btn.disabled = false;
     });
 }
