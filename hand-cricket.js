@@ -1,7 +1,8 @@
 /* =========================================================
-   CRICPULSE FUN-GUN ARENA | CAREER AI & PERFECT PDF ENGINE
+   CRICPULSE FUN-GUN ARENA | ULTIMATE STATS ENGINE
    ========================================================= */
 
+// Game State Object
 let gameState = {
     maxWickets: 3,
     maxBalls: 30,
@@ -24,9 +25,12 @@ let currentUser = null;
 let srChartInstance = null;
 let runsChartInstance = null;
 let throwDnaInstance = null;
+let fatalChartInstance = null;
 
-const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '🤙' };
+// UPDATED EMOJI FOR 6 TO THUMBS UP
+const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
+// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -73,10 +77,15 @@ function syncUserData(username) {
     u.totalRuns = u.totalRuns || 0; u.totalBallsFaced = u.totalBallsFaced || 0; u.totalDismissals = u.totalDismissals || 0;
     u.totalRunsConceded = u.totalRunsConceded || 0; u.totalBallsBowled = u.totalBallsBowled || 0;
     u.totalWicketsTaken = u.totalWicketsTaken || 0; u.ducks = u.ducks || 0; u.highestScore = u.highestScore || 0;
-    u.bestSpellRuns = u.bestSpellRuns !== undefined ? u.bestSpellRuns : null;
     
+    // NEW: Corrected Best Spell Tracker (Wickets/Runs format)
+    if (!u.bestSpell) {
+        u.bestSpell = { wickets: 0, runs: 0 };
+    }
+
     if (!u.battingThrows) u.battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     if (!u.bowlingThrows) u.bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
+    if (!u.fatalThrows) u.fatalThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     
     u.careerDefenses = u.careerDefenses || 0;
     u.careerSixes = u.careerSixes || 0;
@@ -92,7 +101,7 @@ function syncUserData(username) {
     for(let key in defAch) { if(u.achievements[key] === undefined) u.achievements[key] = defAch[key]; }
     
     if (!u.last10SR) u.last10SR = [];
-    if (!u.last10Runs) u.last10Runs = []; // NEW STAT
+    if (!u.last20Innings) u.last20Innings = []; 
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -161,9 +170,10 @@ function renderProfilePage() {
     
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
-    document.getElementById('prof-best-spell').innerText = stats.bestSpellRuns === null ? "-" : `Wkt/${stats.bestSpellRuns}`;
+    
+    // UPDATED PRO BEST SPELL LOGIC RENDERER
+    document.getElementById('prof-best-spell').innerText = stats.bestSpell.wickets > 0 ? `${stats.bestSpell.wickets}/${stats.bestSpell.runs}` : "-";
 
-    // 15 Achievements Math & Progress Bar Animation
     const achData = [
         { id: 'wall', current: stats.careerDefenses, max: 15, unlocked: stats.achievements.theWall },
         { id: 'hitman', current: stats.highestScore, max: 100, unlocked: stats.achievements.hitman },
@@ -196,10 +206,11 @@ function renderProfilePage() {
         });
     }, 100);
 
-    // NEW CHARTS GENERATION
+    // --- CHART.JS GENERATION ---
     if(srChartInstance) srChartInstance.destroy();
     if(runsChartInstance) runsChartInstance.destroy();
     if(throwDnaInstance) throwDnaInstance.destroy();
+    if(fatalChartInstance) fatalChartInstance.destroy();
 
     const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
@@ -209,11 +220,19 @@ function renderProfilePage() {
         });
     }
 
+    // UPDATED: Last 20 Matches with Asterisk for Not-Out
     const runsCtxElement = document.getElementById('runsBarChart');
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
-            type: 'bar', data: { labels: stats.last10Runs ? stats.last10Runs.map((_, i) => `M${i+1}`) : [], datasets: [{ label: 'Runs Scored', data: stats.last10Runs || [], backgroundColor: '#00d2ff', borderRadius: 4 }] },
-            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'} } }, color: '#fff' }
+            type: 'bar', data: { 
+                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `M${i+1}${inn.notOut ? '*' : ''}`) : [], 
+                datasets: [{ label: 'Runs Scored', data: stats.last20Innings ? stats.last20Innings.map(inn => inn.runs) : [], backgroundColor: '#00d2ff', borderRadius: 4 }] 
+            },
+            options: { 
+                plugins: { legend: { display: false }, tooltip: { callbacks: { title: function(c) { return c[0].label.includes('*') ? c[0].label + ' (Not Out)' : c[0].label; } } } }, 
+                scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } }, 
+                color: '#fff' 
+            }
         });
     }
 
@@ -223,7 +242,20 @@ function renderProfilePage() {
         throwDnaInstance = new Chart(dnaCtxElement.getContext('2d'), {
             type: 'radar', data: { 
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
-                datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#00ff88', borderWidth: 2 }] 
+                datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(0, 255, 136, 0.2)', borderColor: '#00ff88', pointBackgroundColor: '#fff', borderWidth: 2 }] 
+            },
+            options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
+        });
+    }
+
+    // NEW: FATAL FLAWS WEB CHART (How you get out)
+    const fatalCtxElement = document.getElementById('fatalThrowsChart');
+    if (fatalCtxElement && stats.fatalThrows) {
+        const ft = stats.fatalThrows;
+        fatalChartInstance = new Chart(fatalCtxElement.getContext('2d'), {
+            type: 'radar', data: { 
+                labels: ['1', '2', '3', '4', '5', '6', '0 (Wkt/Stmp)'], 
+                datasets: [{ label: 'Got Out On', data: [ft['1'], ft['2'], ft['3'], ft['4'], ft['5'], ft['6'], ft['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
             options: { plugins: { legend: { display: false } }, scales: { r: { angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
         });
@@ -239,7 +271,6 @@ function switchTab(tabId) {
     if (activeContent) activeContent.classList.add('active-content');
 }
 
-// --- VISUAL EFFECTS ---
 function fireConfetti() {
     if (typeof confetti !== 'undefined') {
         var duration = 3000; var end = Date.now() + duration;
@@ -304,7 +335,6 @@ function playToss(playerNum) {
     const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
     gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
 
-    // LUCKY COIN TRACKER
     if (playerWins && currentUser) {
         let uDB = JSON.parse(localStorage.getItem('hc_usersDB'));
         uDB[currentUser].tossesWon += 1;
@@ -361,7 +391,6 @@ function updateMatchUI() {
     updateAtmosphere();
 }
 
-// --- PRO AI ENGINE ---
 function getComputerThrow() {
     let compNum; let isCompBatting = !gameState.isPlayerBatting;
     if (gameState.compConsecZeros >= 2) return Math.floor(Math.random() * 6) + 1;
@@ -396,10 +425,7 @@ function playHand(playerNum) {
     }
 
     const compNum = getComputerThrow();
-
-    if (gameState.isPlayerBatting) gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0;
-    else gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
-
+    gameState.isPlayerBatting ? gameState.playerConsecZeros = (playerNum === 0) ? gameState.playerConsecZeros + 1 : 0 : gameState.compConsecZeros = (compNum === 0) ? gameState.compConsecZeros + 1 : 0;
     if (navigator.vibrate) navigator.vibrate([50]);
 
     document.getElementById('player-hand').innerText = handEmojis[playerNum];
@@ -444,8 +470,7 @@ function handleWicket(num, type) {
 
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
-    const runsToAdd = batterNum + 1;
-    currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
+    const runsToAdd = batterNum + 1; currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
     writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs to ${team}. (Ball not counted)`);
     if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
@@ -460,7 +485,7 @@ function handleDefense() {
     if (gameState.isPlayerBatting && currentUser) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
         if (usersDB[currentUser]) {
-            usersDB[currentUser].careerDefenses = (usersDB[currentUser].careerDefenses || 0) + 1;
+            usersDB[currentUser].careerDefenses += 1;
             if (usersDB[currentUser].careerDefenses >= 15 && !usersDB[currentUser].achievements.theWall) {
                 usersDB[currentUser].achievements.theWall = true; showToast("🧱 ACHIEVEMENT UNLOCKED: The Wall (15 Defenses)");
             }
@@ -494,10 +519,11 @@ function checkMatchState() {
     
     const isAllOut = stats.wicketsLost >= gameState.maxWickets; const isOversDone = stats.balls >= gameState.maxBalls;
     if (isAllOut || isOversDone) {
-        if (gameState.innings === 1) triggerInningsChange(stats, isAllOut ? "ALL OUT" : "OVERS COMPLETED");
+        const reason = isAllOut ? "ALL OUT" : "OVERS COMPLETED";
+        if (gameState.innings === 1) triggerInningsChange(stats, reason);
         else {
             if (stats.runs < gameState.target - 1) endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS");
-            else endGame("TIE");
+            else if (stats.runs === gameState.target - 1) endGame("TIE");
         }
     }
 }
@@ -563,11 +589,30 @@ function saveLifetimeStats(result) {
     stats.totalRuns += gameState.playerStats.runs; stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; stats.careerFours += gameState.playerStats.fours;
     stats.careerDotsBowled += gameState.compStats.dots; 
+    
     if (gameState.playerStats.runs > stats.highestScore) stats.highestScore = gameState.playerStats.runs;
     if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) stats.successfulChases += 1;
 
+    let isNotOut = gameState.playerStats.wicketsLost < gameState.maxWickets;
+    
+    if (!stats.last20Innings) stats.last20Innings = []; 
+    stats.last20Innings.push({ runs: gameState.playerStats.runs, notOut: isNotOut });
+    if(stats.last20Innings.length > 20) stats.last20Innings.shift();
+
+    // Log the EXACT number you got out on for the Fatal Flaws graph
     if (gameState.playerStats.outOn !== '-') {
         stats.totalDismissals += 1; if (gameState.playerStats.runs === 0) stats.ducks += 1;
+        
+        let outStr = gameState.playerStats.outOn.toString();
+        let outNum = '0';
+        if (outStr.includes('1')) outNum = '1';
+        else if (outStr.includes('2')) outNum = '2';
+        else if (outStr.includes('3')) outNum = '3';
+        else if (outStr.includes('4')) outNum = '4';
+        else if (outStr.includes('5')) outNum = '5';
+        else if (outStr.includes('6')) outNum = '6';
+
+        stats.fatalThrows[outNum] = (stats.fatalThrows[outNum] || 0) + 1;
     } else {
         stats.notOutMatches += 1; 
     }
@@ -575,15 +620,17 @@ function saveLifetimeStats(result) {
     stats.totalRunsConceded += gameState.compStats.runs; stats.totalBallsBowled += gameState.compStats.balls;
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.aiDucksGivens += 1;
 
+    // Corrected Best Spell Math (Wickets/Runs)
     if (gameState.compStats.wicketsLost > 0) {
-        stats.totalWicketsTaken += gameState.compStats.wicketsLost;
-        if (stats.bestSpellRuns === null || gameState.compStats.runs < stats.bestSpellRuns) stats.bestSpellRuns = gameState.compStats.runs;
+        let currentWkts = gameState.compStats.wicketsLost;
+        let currentRuns = gameState.compStats.runs;
+        if (currentWkts > stats.bestSpell.wickets || (currentWkts === stats.bestSpell.wickets && currentRuns < stats.bestSpell.runs) || stats.bestSpell.wickets === 0) {
+            stats.bestSpell = { wickets: currentWkts, runs: currentRuns };
+        }
     }
     
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
     if (!stats.last10SR) stats.last10SR = []; stats.last10SR.push(parseFloat(pSR)); if(stats.last10SR.length > 10) stats.last10SR.shift();
-
-    if (!stats.last10Runs) stats.last10Runs = []; stats.last10Runs.push(gameState.playerStats.runs); if(stats.last10Runs.length > 10) stats.last10Runs.shift();
 
     evaluateAchievements(stats);
     usersDB[currentUser] = stats; localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
@@ -662,7 +709,7 @@ function downloadPDF() {
 
     let currentGroup = '';
     gameState.commentaryHistory.forEach(log => {
-        let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝]/g, '').trim();
+        let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
         safeText = safeText.replace('↳', '>').trim();
         let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
         if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
