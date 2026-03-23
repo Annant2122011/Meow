@@ -1408,7 +1408,9 @@ function playHand(playerNum) {
         checkMatchState(); 
     }
 }
-
+function getRandomCommentary(arr) { 
+    return arr[Math.floor(Math.random() * arr.length)]; 
+}
 function writeCommentary(text, triggerType = null) {
     let finalOutput = `> ${text}`;
     
