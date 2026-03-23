@@ -17,7 +17,6 @@ let gameState = {
     playerConsecZeros: 0,
     compConsecZeros: 0,
     commentaryHistory: [], 
-    // NEW ALGORITHM TRACKERS ADDED: currentWicketRuns, dismissalHistory, wicketRunsHistory
     playerStats: { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, hitCentury: false, dots: 0, currentWicketRuns: 0, dismissalHistory: [], wicketRunsHistory: [] },
     compStats:   { runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0, wicketsLost: 0, dots: 0, currentWicketRuns: 0, dismissalHistory: [], wicketRunsHistory: [] }
 };
@@ -28,7 +27,6 @@ let runsChartInstance = null;
 let throwDnaInstance = null;
 let fatalChartInstance = null;
 
-// EMOJI FOR 6 IS THUMBS UP
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
 const tossStep1 = document.getElementById('toss-step-1');
@@ -47,7 +45,6 @@ const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
 const zeroBtn = document.getElementById('zero-btn'); 
 
-// --- INITIALIZATION & PAGE ROUTER ---
 window.onload = function() {
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
@@ -67,7 +64,6 @@ window.onload = function() {
     }
 };
 
-// --- DATA AUTO-PATCHER ---
 function syncUserData(username) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     if (!usersDB[username]) usersDB[username] = {};
@@ -78,29 +74,24 @@ function syncUserData(username) {
     u.totalRunsConceded = u.totalRunsConceded || 0; u.totalBallsBowled = u.totalBallsBowled || 0;
     u.totalWicketsTaken = u.totalWicketsTaken || 0; u.ducks = u.ducks || 0; u.highestScore = u.highestScore || 0;
     
-    if (!u.bestSpell) {
-        u.bestSpell = { wickets: 0, runs: 0 };
-    }
-
+    if (!u.bestSpell) u.bestSpell = { wickets: 0, runs: 0 };
     if (!u.battingThrows) u.battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     if (!u.bowlingThrows) u.bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     if (!u.fatalThrows) u.fatalThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     
-    u.careerDefenses = u.careerDefenses || 0;
-    u.careerSixes = u.careerSixes || 0;
-    u.careerFours = u.careerFours || 0;
-    u.aiDucksGivens = u.aiDucksGivens || 0;
-    u.successfulChases = u.successfulChases || 0;
-    u.tossesWon = u.tossesWon || 0;
-    u.notOutMatches = u.notOutMatches || 0;
-    u.careerDotsBowled = u.careerDotsBowled || 0;
+    u.careerDefenses = u.careerDefenses || 0; u.careerSixes = u.careerSixes || 0; u.careerFours = u.careerFours || 0;
+    u.aiDucksGivens = u.aiDucksGivens || 0; u.successfulChases = u.successfulChases || 0; u.tossesWon = u.tossesWon || 0;
+    u.notOutMatches = u.notOutMatches || 0; u.careerDotsBowled = u.careerDotsBowled || 0;
     
     if (!u.achievements) u.achievements = {};
     const defAch = { theWall: false, hitman: false, sniper: false, veteran: false, champion: false, runMachine: false, wicketTaker: false, sixerKing: false, boundaryHitter: false, duckHunter: false, chaser: false, luckyCoin: false, marathon: false, unbreakable: false, economical: false };
     for(let key in defAch) { if(u.achievements[key] === undefined) u.achievements[key] = defAch[key]; }
     
     if (!u.last10SR) u.last10SR = [];
-    if (!u.last20Innings) u.last20Innings = []; 
+    if (!u.last20Innings) {
+        u.last20Innings = [];
+        if (u.last10Runs) u.last10Runs.forEach(r => u.last20Innings.push({runs: r, notOut: false}));
+    }
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -114,30 +105,17 @@ function loginUser() {
 }
 
 function loadUser(username) {
-    currentUser = username;
-    syncUserData(username);
-    
-    const loginModal = document.getElementById('login-modal');
-    const profileBtn = document.getElementById('user-profile-btn');
-    const avatarText = document.getElementById('avatar-text');
-    
+    currentUser = username; syncUserData(username);
+    const loginModal = document.getElementById('login-modal'); const profileBtn = document.getElementById('user-profile-btn'); const avatarText = document.getElementById('avatar-text');
     if (loginModal) loginModal.style.display = 'none';
     if (profileBtn) profileBtn.style.display = 'block';
     if (avatarText) avatarText.innerText = username.charAt(0);
-    
     if (setupScreen) setupScreen.style.display = 'block';
 }
 
-function logoutUser() {
-    localStorage.removeItem('hc_currentUser');
-    window.location.href = 'index.html';
-}
+function logoutUser() { localStorage.removeItem('hc_currentUser'); window.location.href = 'index.html'; }
+function goToProfile() { window.location.href = 'profile.html'; }
 
-function goToProfile() {
-    window.location.href = 'profile.html';
-}
-
-// --- PROFILE PAGE & PROGRESS BARS ---
 function renderProfilePage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
@@ -154,7 +132,7 @@ function renderProfilePage() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
-    // NEW BATTING AVERAGE ALGORITHM (Total Runs / Total Matches)
+    // MATHEMATICALLY CORRECTED BATTING AVERAGE (Total Runs / Total Matches)
     let batAvg = "0.00";
     if (stats.matches > 0) batAvg = (stats.totalRuns / stats.matches).toFixed(2);
     document.getElementById('prof-bat-avg').innerText = batAvg;
@@ -168,7 +146,6 @@ function renderProfilePage() {
     
     document.getElementById('prof-sr').innerText = avgSR;
     document.getElementById('prof-eco').innerText = avgEco;
-    
     document.getElementById('prof-best-spell').innerText = stats.bestSpell.wickets > 0 ? `${stats.bestSpell.wickets}/${stats.bestSpell.runs}` : "-";
 
     const achData = [
@@ -196,7 +173,6 @@ function renderProfilePage() {
             const fillEl = document.getElementById(`prog-fill-${ach.id}`);
             const textEl = document.getElementById(`prog-text-${ach.id}`);
             const badgeEl = document.getElementById(`badge-${ach.id}`);
-            
             if(fillEl) fillEl.style.width = `${pct}%`;
             if(textEl) textEl.innerText = `${prog} / ${ach.max}`;
             if(badgeEl && (prog >= ach.max || ach.unlocked)) badgeEl.classList.add('unlocked');
@@ -221,14 +197,10 @@ function renderProfilePage() {
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
             type: 'bar', data: { 
-                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `Inn ${i+1}${inn.notOut ? '*' : ''}`) : [], 
+                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
                 datasets: [{ label: 'Runs Scored', data: stats.last20Innings ? stats.last20Innings.map(inn => inn.runs) : [], backgroundColor: '#00d2ff', borderRadius: 4 }] 
             },
-            options: { 
-                plugins: { legend: { display: false }, tooltip: { callbacks: { title: function(c) { return c[0].label.includes('*') ? c[0].label + ' (Not Out)' : c[0].label; } } } }, 
-                scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } }, 
-                color: '#fff' 
-            }
+            options: { plugins: { legend: { display: false }, tooltip: { callbacks: { title: function(c) { return c[0].label.includes('*') ? c[0].label + ' (Not Out)' : c[0].label; } } } }, scales: { y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } }, color: '#fff' }
         });
     }
 
@@ -240,7 +212,8 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
                 datasets: [{ label: 'Times Thrown', data: [t['1'], t['2'], t['3'], t['4'], t['5'], t['6'], t['0']], backgroundColor: 'rgba(0, 255, 136, 0.2)', borderColor: '#00ff88', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
+            // FORCE ABSOLUTE ZERO CENTER FOR RADAR CHART
+            options: { plugins: { legend: { display: false } }, scales: { r: { beginAtZero: true, suggestedMin: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false, min: 0, beginAtZero: true } } } }
         });
     }
 
@@ -252,7 +225,8 @@ function renderProfilePage() {
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Wkt/Stmp)'], 
                 datasets: [{ label: 'Got Out On', data: [ft['1'], ft['2'], ft['3'], ft['4'], ft['5'], ft['6'], ft['0']], backgroundColor: 'rgba(255, 42, 42, 0.2)', borderColor: '#ff2a2a', pointBackgroundColor: '#fff', borderWidth: 2 }] 
             },
-            options: { plugins: { legend: { display: false } }, scales: { r: { min: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false } } } }
+            // FORCE ABSOLUTE ZERO CENTER FOR RADAR CHART
+            options: { plugins: { legend: { display: false } }, scales: { r: { beginAtZero: true, suggestedMin: 0, angleLines: { color: 'rgba(255,255,255,0.1)' }, grid: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: '#fff', font: {size: 14, family: "'Orbitron', sans-serif"} }, ticks: { display: false, min: 0, beginAtZero: true } } } }
         });
     }
 }
@@ -408,7 +382,6 @@ function getComputerThrow() {
     }
 }
 
-// --- CORE GAMEPLAY LOGIC ---
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) return;
 
@@ -452,13 +425,11 @@ function handleWicket(num, type) {
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
-    // ALGORITHM CORRECTION: PUSH EVERY SINGLE WICKET INTO HISTORY DURING MATCH
+    // MID-MATCH WICKET LOGGING FOR INNINGS BAR & FATAL FLAWS WEB
     let outNum = (type === 'HIT_WICKET' || type === 'STUMPED') ? '0' : num.toString();
     currentBatterStats.dismissalHistory.push({ num: outNum, type: type });
-    
-    // ALGORITHM CORRECTION: PUSH INNINGS SCORE FOR THE FALLEN WICKET
     currentBatterStats.wicketRunsHistory.push({ runs: currentBatterStats.currentWicketRuns, notOut: false });
-    currentBatterStats.currentWicketRuns = 0; // Reset runs for the next batter
+    currentBatterStats.currentWicketRuns = 0;
 
     if (type === 'STUMPED') writeCommentary(`🚨 WIDE AND STUMPED! Lightning-fast glovework removes ${batterName}!`);
     else if (type === 'HIT_WICKET') writeCommentary(`🏏💥 HIT WICKET! ${batterName} defended too deep (3x 0s) and stepped on the stumps! OUT!`);
@@ -476,7 +447,7 @@ function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     const runsToAdd = batterNum + 1; 
     currentBatterStats.runs += runsToAdd; currentBatterStats.extras += runsToAdd; 
-    currentBatterStats.currentWicketRuns += runsToAdd; // Track per wicket
+    currentBatterStats.currentWicketRuns += runsToAdd;
     
     const team = gameState.isPlayerBatting ? "You" : "Computer";
     writeCommentary(`↔️ WIDE BALL! Bowler threw 0. Batter threw ${batterNum}. +${runsToAdd} Runs to ${team}. (Ball not counted)`);
@@ -504,7 +475,7 @@ function handleDefense() {
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     currentBatterStats.runs += runs; currentBatterStats.balls++;
-    currentBatterStats.currentWicketRuns += runs; // Track per wicket
+    currentBatterStats.currentWicketRuns += runs;
     
     if (runs === 4) { currentBatterStats.fours++; writeCommentary(`🔥 +4 Runs! Glorious cover drive!`); }
     else if (runs === 6) { currentBatterStats.sixes++; writeCommentary(`🚀 👍 +6 Runs! MASSIVE HIT!`); }
@@ -603,22 +574,19 @@ function saveLifetimeStats(result) {
 
     if (!stats.last20Innings) stats.last20Innings = []; 
 
-    // PROCESS ALL WICKETS FOR FATAL FLAWS
+    // FATAL FLAWS & DISMISSAL LOGIC
     gameState.playerStats.dismissalHistory.forEach(d => {
         stats.totalDismissals += 1;
         stats.fatalThrows[d.num] = (stats.fatalThrows[d.num] || 0) + 1;
-        if (d.type === 'HIT_WICKET') stats.dismissalTypes['Hit Wicket']++;
-        else if (d.type === 'STUMPED') stats.dismissalTypes['Stumped']++;
-        else stats.dismissalTypes['Caught/Bowled']++;
     });
 
-    // PROCESS RUNS PER WICKET FOR INNINGS SCORE CHART
+    // INNINGS CHART LOGIC (Runs per Wicket)
     gameState.playerStats.wicketRunsHistory.forEach(w => {
         if (w.runs === 0) stats.ducks += 1;
         stats.last20Innings.push({ runs: w.runs, notOut: false });
     });
 
-    // PUSH FINAL NOT-OUT SCORE
+    // PUSH NOT OUT SCORE
     if (gameState.playerStats.wicketsLost < gameState.maxWickets) {
         stats.notOutMatches += 1; 
         stats.last20Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true });
@@ -711,7 +679,7 @@ function downloadPDF() {
             </div>
             <div style="page-break-before: auto;">
                 <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
-                <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-family: 'Courier学习', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
                     <tbody>
     `;
 
