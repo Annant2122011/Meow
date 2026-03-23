@@ -1461,17 +1461,7 @@ function handleWicket(num, type) {
     }
     
     writeCommentary(comment, tType);
-    
-    if (!gameState.isPlayerBatting && gameState.compStats.runs === 0 && currentUser) { 
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-        if (usersDB[currentUser] && !usersDB[currentUser].achievements.sniper) { 
-            usersDB[currentUser].achievements.sniper = true; 
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
-            showToast("🎯 ACHIEVEMENT UNLOCKED: Sniper (Wicket on 0 Runs!)"); 
-        } 
-    }
 }
-
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     const runsToAdd = batterNum + 1; 
@@ -1513,15 +1503,10 @@ function handleDefense() {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
         if (usersDB[currentUser]) { 
             usersDB[currentUser].careerDefenses += 1; 
-            if (usersDB[currentUser].careerDefenses >= 15 && !usersDB[currentUser].achievements.theWall) { 
-                usersDB[currentUser].achievements.theWall = true; 
-                showToast("🧱 ACHIEVEMENT UNLOCKED: The Wall (15 Defenses)"); 
-            } 
             localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
         } 
     }
 }
-
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     
@@ -1553,15 +1538,6 @@ function handleRuns(runs) {
     if (gameState.isPlayerBatting && currentBatterStats.runs >= 100 && !currentBatterStats.hitCentury) { 
         currentBatterStats.hitCentury = true; 
         fireConfetti(); 
-        
-        if (currentUser) { 
-            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-            if (usersDB[currentUser] && !usersDB[currentUser].achievements.hitman) { 
-                usersDB[currentUser].achievements.hitman = true; 
-                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
-                showToast("🏏 ACHIEVEMENT UNLOCKED: Hitman (Scored a Century!)"); 
-            } 
-        } 
     }
 }
 
