@@ -1985,7 +1985,25 @@ function generateAIInsight(result) {
         insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
     }
 }
+function resetToToss() { 
+    localStorage.removeItem('hc_tourney_boss'); 
+    location.reload(); 
+}
 
+function openAnalysis() { 
+    const modal = document.getElementById('analysis-modal');
+    if (modal) {
+        modal.style.display = 'flex'; 
+        drawWormChart(); 
+    }
+}
+
+function closeAnalysis() { 
+    const modal = document.getElementById('analysis-modal');
+    if (modal) {
+        modal.style.display = 'none'; 
+    }
+}
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn'); 
     if (!btn) return;
