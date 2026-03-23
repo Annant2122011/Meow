@@ -2,7 +2,10 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 
-// Game State Object
+// ==========================================
+// 1. GAME STATE & DATABASES
+// ==========================================
+
 let gameState = {
     maxWickets: 3,
     maxBalls: 30,
@@ -36,7 +39,6 @@ let gameState = {
     }
 };
 
-// MULTI-VARIATION COMMENTARY DATABASE
 const commentaryDB = {
     wkt_stumped: [
         "🚨 WIDE AND STUMPED! Lightning-fast glovework removes [BATTER]!",
@@ -112,7 +114,6 @@ const commentaryDB = {
     ]
 };
 
-// EXPANDED BOSS DATABASE (10 Bosses)
 const bossInfo = [
     { 
         name: "The Rookie", icon: "🟢", color: "gray", desc: "Plays entirely randomly. A good warmup.", 
@@ -156,6 +157,26 @@ const bossInfo = [
     }
 ];
 
+const shopItems = {
+    avatars: [
+        { id: '👤', name: 'Default', price: 0 }, 
+        { id: '🐯', name: 'Tiger', price: 500 },
+        { id: '👽', name: 'Alien', price: 1000 }, 
+        { id: '🤖', name: 'Robot', price: 1500 },
+        { id: '👑', name: 'King', price: 3000 }
+    ],
+    themes: [
+        { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
+        { id: 'synthwave', name: 'Synthwave', price: 1500, icon: '🟪' },
+        { id: 'blood', name: 'Blood Red', price: 2000, icon: '🟥' }
+    ],
+    coins: [
+        { id: 'default', name: 'Gold Coin', price: 0, icon: '🟡' },
+        { id: 'silver', name: 'Silver Coin', price: 1000, icon: '⚪' },
+        { id: 'bitcoin', name: 'Crypto Coin', price: 2500, icon: '₿' }
+    ]
+};
+
 let tossData = { caller: null, call: null, result: null };
 let currentUser = null;
 let srChartInstance = null;
@@ -166,7 +187,6 @@ let wormChartInstance = null;
 
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
-// DOM Elements
 const tossStep1 = document.getElementById('toss-step-1');
 const tossStep2 = document.getElementById('toss-step-2');
 const tossChoiceText = document.getElementById('toss-choice-text');
@@ -183,9 +203,11 @@ const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
 const zeroBtn = document.getElementById('zero-btn'); 
 
-// --- INITIALIZATION & PAGE ROUTER ---
+// ==========================================
+// 2. INITIALIZATION & DATA MANAGEMENT
+// ==========================================
+
 window.onload = function() {
-   
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
@@ -198,11 +220,11 @@ window.onload = function() {
         
         currentUser = storedUser;
         syncUserData(currentUser);
-       applyCosmetics();
+        applyCosmetics();
         
         if (isProfilePage) {
             renderProfilePage();
-           renderShop();
+            renderShop();
         }
         
         if (isTournamentPage) {
@@ -218,10 +240,8 @@ window.onload = function() {
             }
         }
     }
-   
 };
 
-// --- DATA AUTO-PATCHER ---
 function syncUserData(username) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     
@@ -247,15 +267,12 @@ function syncUserData(username) {
     if (!u.bestSpell) {
         u.bestSpell = { wickets: 0, runs: 0 };
     }
-    
     if (!u.battingThrows) {
         u.battingThrows = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 };
     }
-    
     if (!u.bowlingThrows) {
         u.bowlingThrows = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 };
     }
-    
     if (!u.fatalThrows) {
         u.fatalThrows = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 };
     }
@@ -268,11 +285,14 @@ function syncUserData(username) {
     u.tossesWon = u.tossesWon || 0;
     u.notOutMatches = u.notOutMatches || 0;
     u.careerDotsBowled = u.careerDotsBowled || 0;
-   u.xp = u.xp || 0;
+    u.xp = u.xp || 0;
     u.tournamentLevel = u.tournamentLevel || 0;
 
-    // PASTE THIS HERE:
-    if (u.coins === undefined) u.coins = Math.floor((u.xp || 0) * 0.5);
+    // COSMETICS INIT
+    if (u.coins === undefined) {
+        u.coins = Math.floor((u.xp || 0) * 0.5);
+    }
+    
     u.unlockedAvatars = u.unlockedAvatars || ['👤']; 
     u.unlockedThemes = u.unlockedThemes || ['default']; 
     u.unlockedCoins = u.unlockedCoins || ['default'];
@@ -283,11 +303,9 @@ function syncUserData(username) {
     if (!u.achLevels) {
         u.achLevels = {};
     }
-    
     if (!u.last10SR) {
         u.last10SR = [];
     }
-    
     if (!u.last20Innings) {
         u.last20Innings = [];
     }
@@ -306,33 +324,6 @@ function loginUser() {
     syncUserData(username);
     localStorage.setItem('hc_currentUser', username);
     loadUser(username);
-}
-
-function getRankDetails(xp) {
-    if (xp < 1000) {
-        return { title: 'Gully Cricketer', class: 'rank-gully' };
-    }
-    if (xp < 3000) {
-        return { title: 'Club Player', class: 'rank-club' };
-    }
-    if (xp < 7000) {
-        return { title: 'State Pro', class: 'rank-state' };
-    }
-    return { title: 'Cricket God', class: 'rank-god' };
-}
-
-function applyRankUI(username, avatarBoxId) {
-    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
-    const xp = usersDB[username].xp || 0;
-    const rank = getRankDetails(xp);
-    const avatarBox = document.getElementById(avatarBoxId);
-    
-    if (avatarBox) {
-        avatarBox.className = '';
-        avatarBox.classList.add(rank.class);
-    }
-    
-    return { rank, xp };
 }
 
 function loadUser(username) {
@@ -356,8 +347,8 @@ function loadUser(username) {
     }
     
     applyRankUI(username, 'header-avatar-box');
+    applyCosmetics();
     
-    // TOURNAMENT INTERCEPTOR
     const activeBoss = localStorage.getItem('hc_tourney_boss');
     
     if (activeBoss !== null) {
@@ -387,8 +378,6 @@ function loadUser(username) {
     }
 }
 
-// --- NEW LOGOUT & RESTART WITH PERMISSION ---
-
 function logoutUser() {
     if (confirm("Are you sure you want to log out and switch accounts?")) {
         localStorage.removeItem('hc_currentUser');
@@ -396,17 +385,133 @@ function logoutUser() {
     }
 }
 
-function resetGauntlet() {
+// ==========================================
+// 3. UI, SHOP & COSMETICS
+// ==========================================
+
+function applyCosmetics() {
     if (!currentUser) return;
     
-    if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-        if (usersDB[currentUser]) {
-            usersDB[currentUser].tournamentLevel = 0;
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-            renderTournamentPage();
-            showToast("🔄 The Gauntlet has been restarted!");
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    
+    document.body.classList.remove('theme-synthwave', 'theme-blood');
+    if (u.equippedTheme !== 'default') {
+        document.body.classList.add('theme-' + u.equippedTheme);
+    }
+    
+    let headerAv = document.getElementById('avatar-text'); 
+    if (headerAv) headerAv.innerText = u.equippedAvatar;
+    
+    let profAv = document.getElementById('prof-avatar-letter'); 
+    if (profAv) profAv.innerText = u.equippedAvatar;
+    
+    let coinHeads = document.querySelector('.coin-heads'); 
+    let coinTails = document.querySelector('.coin-tails');
+    
+    if (coinHeads && coinTails) {
+        coinHeads.className = 'coin-face coin-heads'; 
+        coinTails.className = 'coin-face coin-tails';
+        
+        if (u.equippedCoin !== 'default') { 
+            coinHeads.classList.add('coin-' + u.equippedCoin); 
+            coinTails.classList.add('coin-' + u.equippedCoin); 
         }
+        
+        if (u.equippedCoin === 'bitcoin') { 
+            coinHeads.innerHTML = '₿'; 
+            coinTails.innerHTML = '₿'; 
+        } else { 
+            coinHeads.innerHTML = 'HEADS'; 
+            coinTails.innerHTML = 'TAILS'; 
+        }
+    }
+}
+
+function renderShop() {
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    
+    const buildSection = (items, typeStr, unlockedArr, equippedId) => {
+        let html = '';
+        items.forEach(item => {
+            let isUnlocked = unlockedArr.includes(item.id);
+            let isEquipped = equippedId === item.id;
+            let btnHtml = '';
+            
+            if (isEquipped) { 
+                btnHtml = `<button class="shop-btn equipped" disabled>EQUIPPED</button>`; 
+            } else if (isUnlocked) { 
+                btnHtml = `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`; 
+            } else {
+                let canAfford = u.coins >= item.price;
+                let disabledStr = !canAfford ? 'disabled' : '';
+                btnHtml = `<button class="shop-btn buy" ${disabledStr} onclick="buyItem('${typeStr}', '${item.id}', ${item.price})">🪙 ${item.price}</button>`;
+            }
+            
+            let equipClass = isEquipped ? 'equipped' : '';
+            let iconDisplay = item.icon || item.id;
+            
+            html += `<div class="shop-item ${equipClass}">
+                        <div class="shop-item-icon">${iconDisplay}</div>
+                        <div class="shop-item-name">${item.name}</div>
+                        ${btnHtml}
+                     </div>`;
+        });
+        return html;
+    };
+    
+    document.getElementById('shop-avatars').innerHTML = buildSection(shopItems.avatars, 'avatar', u.unlockedAvatars, u.equippedAvatar);
+    document.getElementById('shop-themes').innerHTML = buildSection(shopItems.themes, 'theme', u.unlockedThemes, u.equippedTheme);
+    document.getElementById('shop-coins').innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
+}
+
+function buyItem(type, itemId, price) {
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+    let u = usersDB[currentUser];
+    
+    if (u.coins >= price) {
+        u.coins -= price;
+        
+        if (type === 'avatar') u.unlockedAvatars.push(itemId);
+        if (type === 'theme') u.unlockedThemes.push(itemId);
+        if (type === 'coin') u.unlockedCoins.push(itemId);
+        
+        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+        showToast(`🛍️ Successfully Purchased!`);
+        document.getElementById('prof-coins').innerText = u.coins;
+        renderShop();
+    }
+}
+
+function equipItem(type, itemId) {
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+    let u = usersDB[currentUser];
+    
+    if (type === 'avatar') u.equippedAvatar = itemId;
+    if (type === 'theme') u.equippedTheme = itemId;
+    if (type === 'coin') u.equippedCoin = itemId;
+    
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    applyCosmetics(); 
+    renderShop();
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active-tab');
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active-content');
+    });
+    
+    const eventObj = window.event;
+    if (eventObj && eventObj.target) {
+        eventObj.target.classList.add('active-tab');
+    }
+    
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) {
+        activeContent.classList.add('active-content');
     }
 }
 
@@ -414,7 +519,26 @@ function goToProfile() {
     window.location.href = 'profile.html';
 }
 
-// --- THE GAUNTLET MENU LOGIC ---
+function getRankDetails(xp) {
+    if (xp < 1000) return { title: 'Gully Cricketer', class: 'rank-gully' };
+    if (xp < 3000) return { title: 'Club Player', class: 'rank-club' };
+    if (xp < 7000) return { title: 'State Pro', class: 'rank-state' };
+    return { title: 'Cricket God', class: 'rank-god' };
+}
+
+function getLevelColor(level) {
+    if (level === 1) return '#9e9e9e'; // Grey
+    if (level === 2) return '#4ade80'; // Green
+    if (level === 3) return '#60a5fa'; // Blue
+    if (level === 4) return '#c084fc'; // Purple
+    if (level === 5) return '#f87171'; // Red
+    return '#fbbf24'; // Gold (MAX)
+}
+
+// ==========================================
+// 4. TOURNAMENT & PROFILE RENDERING
+// ==========================================
+
 function renderTournamentPage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
@@ -455,22 +579,28 @@ function startBossFight(index) {
     window.location.href = 'index.html';
 }
 
-// --- NEW LEVEL COLORS FUNCTION ---
-function getLevelColor(level) {
-    if (level === 1) return '#9e9e9e'; // Grey (Common)
-    if (level === 2) return '#4ade80'; // Green (Uncommon)
-    if (level === 3) return '#60a5fa'; // Blue (Rare)
-    if (level === 4) return '#c084fc'; // Purple (Epic)
-    if (level === 5) return '#f87171'; // Red (Legendary)
-    return '#fbbf24'; // Gold (MAX)
+function resetGauntlet() {
+    if (!currentUser) return;
+    
+    if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        if (usersDB[currentUser]) {
+            usersDB[currentUser].tournamentLevel = 0;
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            renderTournamentPage();
+            showToast("🔄 The Gauntlet has been restarted!");
+        }
+    }
 }
 
-// --- PROFILE PAGE RENDERER ---
 function renderProfilePage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
-   const cText = document.getElementById('prof-coins'); 
-if (cText) cText.innerText = stats.coins;
+    
+    const cText = document.getElementById('prof-coins'); 
+    if (cText) {
+        cText.innerText = stats.coins;
+    }
     
     if (!stats) {
         return logoutUser();
@@ -591,7 +721,6 @@ if (cText) cText.innerText = stats.coins;
             pct = 100;
         }
 
-        // Apply Custom Colors Based on Level
         let color = getLevelColor(level);
         let borderStyle = `border: 2px solid ${color}; box-shadow: inset 0 0 10px ${color}40, 0 0 15px ${color}30; opacity: 1 !important; filter: none !important;`;
 
@@ -613,7 +742,7 @@ if (cText) cText.innerText = stats.coins;
         achContainer.innerHTML = achHtml;
     }
 
-    // --- CHART.JS GENERATION ---
+    // CHARTS GENERATION
     if (srChartInstance) srChartInstance.destroy();
     if (runsChartInstance) runsChartInstance.destroy();
     if (throwDnaInstance) throwDnaInstance.destroy();
@@ -744,89 +873,10 @@ if (cText) cText.innerText = stats.coins;
     }
 }
 
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active-tab');
-    });
-    
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active-content');
-    });
-    
-    const eventObj = window.event;
-    if (eventObj && eventObj.target) {
-        eventObj.target.classList.add('active-tab');
-    }
-    
-    const activeContent = document.getElementById(tabId);
-    if (activeContent) {
-        activeContent.classList.add('active-content');
-    }
-}
+// ==========================================
+// 5. GAME SETUP & TOSS
+// ==========================================
 
-// --- VISUAL EFFECTS ---
-function fireConfetti() {
-    if (typeof confetti !== 'undefined') {
-        var duration = 3000; 
-        var end = Date.now() + duration;
-        
-        (function frame() {
-            confetti({ 
-                particleCount: 5, 
-                angle: 60, 
-                spread: 55, 
-                origin: { x: 0 }, 
-                colors: ['#00ff88', '#00d2ff'] 
-            });
-            confetti({ 
-                particleCount: 5, 
-                angle: 120, 
-                spread: 55, 
-                origin: { x: 1 }, 
-                colors: ['#00ff88', '#00d2ff'] 
-            });
-            
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
-    }
-}
-
-function showToast(message) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    
-    const toast = document.createElement('div'); 
-    toast.className = 'toast'; 
-    toast.innerText = message;
-    
-    container.appendChild(toast); 
-    
-    setTimeout(() => { 
-        if (container.contains(toast)) {
-            container.removeChild(toast); 
-        }
-    }, 5000);
-}
-
-function updateAtmosphere() {
-    const body = document.body;
-    
-    if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) {
-        const runsNeeded = gameState.target - gameState.playerStats.runs;
-        const ballsLeft = gameState.maxBalls - gameState.playerStats.balls;
-        
-        if (runsNeeded > 0 && runsNeeded <= 15 && ballsLeft <= 12) { 
-            body.classList.add('danger-pulse'); 
-            return; 
-        }
-    }
-    
-    body.classList.remove('danger-pulse');
-}
-
-// --- GAME UI & SETUP ---
 function setFormat(wickets, balls, btnId) {
     gameState.maxWickets = wickets; 
     gameState.maxBalls = balls;
@@ -910,15 +960,14 @@ function executeCoinFlip() {
     const coin = document.getElementById('coin');
     
     setTimeout(() => {
-        if(coin) {
+        if (coin) {
             coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
         }
         
         tossData.result = Math.random() < 0.5 ? 'heads' : 'tails';
-        
         let rotateAmount = (tossData.result === 'heads') ? 1800 : 1980;
         
-        if(coin) {
+        if (coin) {
             coin.style.transform = `rotateY(${rotateAmount}deg)`;
         }
         
@@ -1018,46 +1067,30 @@ function updateMatchUI() {
     }
     
     const pScore = document.getElementById('player-hand-score'); 
-    if (pScore) {
-        pScore.innerText = gameState.playerStats.runs;
-    }
+    if (pScore) pScore.innerText = gameState.playerStats.runs;
     
     const pWkts = document.getElementById('player-hand-wickets'); 
-    if (pWkts) {
-        pWkts.innerText = gameState.playerStats.wicketsLost;
-    }
+    if (pWkts) pWkts.innerText = gameState.playerStats.wicketsLost;
     
     const pOvers = document.getElementById('player-overs'); 
-    if (pOvers) {
-        pOvers.innerText = ballsToOvers(gameState.playerStats.balls);
-    }
+    if (pOvers) pOvers.innerText = ballsToOvers(gameState.playerStats.balls);
     
     const cScore = document.getElementById('computer-hand-score'); 
-    if (cScore) {
-        cScore.innerText = gameState.compStats.runs;
-    }
+    if (cScore) cScore.innerText = gameState.compStats.runs;
     
     const cWkts = document.getElementById('computer-hand-wickets'); 
-    if (cWkts) {
-        cWkts.innerText = gameState.compStats.wicketsLost;
-    }
+    if (cWkts) cWkts.innerText = gameState.compStats.wicketsLost;
     
     const cOvers = document.getElementById('computer-overs'); 
-    if (cOvers) {
-        cOvers.innerText = ballsToOvers(gameState.compStats.balls);
-    }
+    if (cOvers) cOvers.innerText = ballsToOvers(gameState.compStats.balls);
 
     const maxOversText = gameState.maxBalls === Infinity ? " (Unlimited)" : ` / ${gameState.maxBalls/6}.0`;
     
     const pMaxOvers = document.getElementById('player-max-overs'); 
-    if (pMaxOvers) {
-        pMaxOvers.innerText = maxOversText;
-    }
+    if (pMaxOvers) pMaxOvers.innerText = maxOversText;
     
     const cMaxOvers = document.getElementById('computer-max-overs'); 
-    if (cMaxOvers) {
-        cMaxOvers.innerText = maxOversText;
-    }
+    if (cMaxOvers) cMaxOvers.innerText = maxOversText;
 
     if (zeroBtn) {
         if (gameState.isPlayerBatting) { 
@@ -1074,7 +1107,10 @@ function updateMatchUI() {
     updateAtmosphere();
 }
 
-// --- THE 10 BOSS AI ENGINES ---
+// ==========================================
+// 6. CORE GAMEPLAY & MATCH AI LOGIC
+// ==========================================
+
 function getBossThrow(bossIndex) {
     let isCompBatting = !gameState.isPlayerBatting;
     
@@ -1307,6 +1343,10 @@ function playHand(playerNum) {
     }
 }
 
+function getRandomCommentary(arr) { 
+    return arr[Math.floor(Math.random() * arr.length)]; 
+}
+
 function writeCommentary(text, triggerType = null) {
     let finalOutput = `> ${text}`;
     
@@ -1513,6 +1553,10 @@ function triggerInningsChange(currentBatterStats, reason) {
     }, 2500);
 }
 
+// ==========================================
+// 7. POST MATCH & ANALYTICS
+// ==========================================
+
 function drawWormChart() {
     const ctxElement = document.getElementById('wormChart'); 
     
@@ -1521,7 +1565,7 @@ function drawWormChart() {
     if (wormChartInstance) {
         wormChartInstance.destroy();
     }
-    
+
     let maxB = Math.max(gameState.playerStats.balls, gameState.compStats.balls); 
     let labels = Array.from({length: maxB + 1}, (_, i) => i);
     
@@ -1732,8 +1776,9 @@ function saveLifetimeStats(result) {
     matchXP += (gameState.compStats.wicketsLost * 10);
     
     stats.xp = (stats.xp || 0) + matchXP;
-   let matchCoins = Math.floor(matchXP * 0.5);
-stats.coins = (stats.coins || 0) + matchCoins;
+    
+    let matchCoins = Math.floor(matchXP * 0.5);
+    stats.coins = (stats.coins || 0) + matchCoins;
 
     stats.matches += 1;
     
@@ -1849,7 +1894,7 @@ stats.coins = (stats.coins || 0) + matchCoins;
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
-   showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
+    showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
 }
 
 function populateStats(prefix, bStats, wStats) {
@@ -2074,104 +2119,67 @@ function downloadPDF() {
     }
 }
 
-function logoutUser() {
-    if (confirm("Are you sure you want to log out and switch accounts?")) {
-        localStorage.removeItem('hc_currentUser');
-        window.location.href = 'index.html';
-    }
-}
-
-function resetGauntlet() {
-    if (!currentUser) return;
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active-tab');
+    });
     
-    if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-        if (usersDB[currentUser]) {
-            usersDB[currentUser].tournamentLevel = 0;
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-            renderTournamentPage();
-            showToast("🔄 The Gauntlet has been restarted!");
-        }
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active-content');
+    });
+    
+    const eventObj = window.event;
+    if (eventObj && eventObj.target) {
+        eventObj.target.classList.add('active-tab');
+    }
+    
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) {
+        activeContent.classList.add('active-content');
     }
 }
-// ==========================================
-// SHOP & COSMETICS ENGINE
-// ==========================================
-const shopItems = {
-    avatars: [
-        { id: '👤', name: 'Default', price: 0 }, { id: '🐯', name: 'Tiger', price: 500 },
-        { id: '👽', name: 'Alien', price: 1000 }, { id: '🤖', name: 'Robot', price: 1500 },
-        { id: '👑', name: 'King', price: 3000 }
-    ],
-    themes: [
-        { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
-        { id: 'synthwave', name: 'Synthwave', price: 1500, icon: '🟪' },
-        { id: 'blood', name: 'Blood Red', price: 2000, icon: '🟥' }
-    ],
-    coins: [
-        { id: 'default', name: 'Gold Coin', price: 0, icon: '🟡' },
-        { id: 'silver', name: 'Silver Coin', price: 1000, icon: '⚪' },
-        { id: 'bitcoin', name: 'Crypto Coin', price: 2500, icon: '₿' }
-    ]
-};
 
-function renderShop() {
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
-    const buildSection = (items, typeStr, unlockedArr, equippedId) => {
-        let html = '';
-        items.forEach(item => {
-            let isUnlocked = unlockedArr.includes(item.id);
-            let isEquipped = equippedId === item.id;
-            let btnHtml = '';
-            if (isEquipped) { btnHtml = `<button class="shop-btn equipped" disabled>EQUIPPED</button>`; } 
-            else if (isUnlocked) { btnHtml = `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`; } 
-            else {
-                let canAfford = u.coins >= item.price;
-                btnHtml = `<button class="shop-btn buy" ${!canAfford ? 'disabled' : ''} onclick="buyItem('${typeStr}', '${item.id}', ${item.price})">🪙 ${item.price}</button>`;
+function fireConfetti() {
+    if (typeof confetti !== 'undefined') {
+        var duration = 3000; 
+        var end = Date.now() + duration;
+        
+        (function frame() {
+            confetti({ 
+                particleCount: 5, 
+                angle: 60, 
+                spread: 55, 
+                origin: { x: 0 }, 
+                colors: ['#00ff88', '#00d2ff'] 
+            });
+            confetti({ 
+                particleCount: 5, 
+                angle: 120, 
+                spread: 55, 
+                origin: { x: 1 }, 
+                colors: ['#00ff88', '#00d2ff'] 
+            });
+            
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
             }
-            html += `<div class="shop-item ${isEquipped ? 'equipped' : ''}"><div class="shop-item-icon">${item.icon || item.id}</div><div class="shop-item-name">${item.name}</div>${btnHtml}</div>`;
-        });
-        return html;
-    };
-    document.getElementById('shop-avatars').innerHTML = buildSection(shopItems.avatars, 'avatar', u.unlockedAvatars, u.equippedAvatar);
-    document.getElementById('shop-themes').innerHTML = buildSection(shopItems.themes, 'theme', u.unlockedThemes, u.equippedTheme);
-    document.getElementById('shop-coins').innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
-}
-
-function buyItem(type, itemId, price) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); let u = usersDB[currentUser];
-    if (u.coins >= price) {
-        u.coins -= price;
-        if (type === 'avatar') u.unlockedAvatars.push(itemId);
-        if (type === 'theme') u.unlockedThemes.push(itemId);
-        if (type === 'coin') u.unlockedCoins.push(itemId);
-        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-        showToast(`🛍️ Successfully Purchased!`);
-        document.getElementById('prof-coins').innerText = u.coins;
-        renderShop();
+        }());
     }
 }
 
-function equipItem(type, itemId) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); let u = usersDB[currentUser];
-    if (type === 'avatar') u.equippedAvatar = itemId;
-    if (type === 'theme') u.equippedTheme = itemId;
-    if (type === 'coin') u.equippedCoin = itemId;
-    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-    applyCosmetics(); renderShop();
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div'); 
+    toast.className = 'toast'; 
+    toast.innerText = message;
+    
+    container.appendChild(toast); 
+    
+    setTimeout(() => { 
+        if (container.contains(toast)) {
+            container.removeChild(toast); 
+        }
+    }, 5000);
 }
-
-function applyCosmetics() {
-    if (!currentUser) return;
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
-    document.body.classList.remove('theme-synthwave', 'theme-blood');
-    if (u.equippedTheme !== 'default') document.body.classList.add('theme-' + u.equippedTheme);
-    let headerAv = document.getElementById('avatar-text'); if(headerAv) headerAv.innerText = u.equippedAvatar;
-    let profAv = document.getElementById('prof-avatar-letter'); if(profAv) profAv.innerText = u.equippedAvatar;
-    let coinHeads = document.querySelector('.coin-heads'); let coinTails = document.querySelector('.coin-tails');
-    if (coinHeads && coinTails) {
-        coinHeads.className = 'coin-face coin-heads'; coinTails.className = 'coin-face coin-tails';
-        if (u.equippedCoin !== 'default') { coinHeads.classList.add('coin-' + u.equippedCoin); coinTails.classList.add('coin-' + u.equippedCoin); }
-        if (u.equippedCoin === 'bitcoin') { coinHeads.innerHTML = '₿'; coinTails.innerHTML = '₿'; } else { coinHeads.innerHTML = 'HEADS'; coinTails.innerHTML = 'TAILS'; }
-    }
-
