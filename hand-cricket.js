@@ -2156,3 +2156,83 @@ function downloadPDF() {
         }, 3000);
     }
 }
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active-tab');
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active-content');
+    });
+    
+    const eventObj = window.event;
+    if (eventObj && eventObj.target) {
+        eventObj.target.classList.add('active-tab');
+    }
+    
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) {
+        activeContent.classList.add('active-content');
+    }
+}
+
+function fireConfetti() {
+    if (typeof confetti !== 'undefined') {
+        var duration = 3000; 
+        var end = Date.now() + duration;
+        
+        (function frame() {
+            confetti({ 
+                particleCount: 5, 
+                angle: 60, 
+                spread: 55, 
+                origin: { x: 0 }, 
+                colors: ['#00ff88', '#00d2ff'] 
+            });
+            confetti({ 
+                particleCount: 5, 
+                angle: 120, 
+                spread: 55, 
+                origin: { x: 1 }, 
+                colors: ['#00ff88', '#00d2ff'] 
+            });
+            
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+}
+
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div'); 
+    toast.className = 'toast'; 
+    toast.innerText = message;
+    
+    container.appendChild(toast); 
+    
+    setTimeout(() => { 
+        if (container.contains(toast)) {
+            container.removeChild(toast); 
+        }
+    }, 5000);
+}
+
+function updateAtmosphere() {
+    const body = document.body;
+    
+    if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) {
+        const runsNeeded = gameState.target - gameState.playerStats.runs;
+        const ballsLeft = gameState.maxBalls - gameState.playerStats.balls;
+        
+        if (runsNeeded > 0 && runsNeeded <= 15 && ballsLeft <= 12) { 
+            body.classList.add('danger-pulse'); 
+            return; 
+        }
+    }
+    
+    body.classList.remove('danger-pulse');
+}
