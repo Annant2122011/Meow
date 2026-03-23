@@ -2077,3 +2077,84 @@ function resetGauntlet() {
         }
     }
 }
+// ==========================================
+// SHOP & COSMETICS ENGINE
+// ==========================================
+const shopItems = {
+    avatars: [
+        { id: '👤', name: 'Default', price: 0 }, { id: '🐯', name: 'Tiger', price: 500 },
+        { id: '👽', name: 'Alien', price: 1000 }, { id: '🤖', name: 'Robot', price: 1500 },
+        { id: '👑', name: 'King', price: 3000 }
+    ],
+    themes: [
+        { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
+        { id: 'synthwave', name: 'Synthwave', price: 1500, icon: '🟪' },
+        { id: 'blood', name: 'Blood Red', price: 2000, icon: '🟥' }
+    ],
+    coins: [
+        { id: 'default', name: 'Gold Coin', price: 0, icon: '🟡' },
+        { id: 'silver', name: 'Silver Coin', price: 1000, icon: '⚪' },
+        { id: 'bitcoin', name: 'Crypto Coin', price: 2500, icon: '₿' }
+    ]
+};
+
+function renderShop() {
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    const buildSection = (items, typeStr, unlockedArr, equippedId) => {
+        let html = '';
+        items.forEach(item => {
+            let isUnlocked = unlockedArr.includes(item.id);
+            let isEquipped = equippedId === item.id;
+            let btnHtml = '';
+            if (isEquipped) { btnHtml = `<button class="shop-btn equipped" disabled>EQUIPPED</button>`; } 
+            else if (isUnlocked) { btnHtml = `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`; } 
+            else {
+                let canAfford = u.coins >= item.price;
+                btnHtml = `<button class="shop-btn buy" ${!canAfford ? 'disabled' : ''} onclick="buyItem('${typeStr}', '${item.id}', ${item.price})">🪙 ${item.price}</button>`;
+            }
+            html += `<div class="shop-item ${isEquipped ? 'equipped' : ''}"><div class="shop-item-icon">${item.icon || item.id}</div><div class="shop-item-name">${item.name}</div>${btnHtml}</div>`;
+        });
+        return html;
+    };
+    document.getElementById('shop-avatars').innerHTML = buildSection(shopItems.avatars, 'avatar', u.unlockedAvatars, u.equippedAvatar);
+    document.getElementById('shop-themes').innerHTML = buildSection(shopItems.themes, 'theme', u.unlockedThemes, u.equippedTheme);
+    document.getElementById('shop-coins').innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
+}
+
+function buyItem(type, itemId, price) {
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); let u = usersDB[currentUser];
+    if (u.coins >= price) {
+        u.coins -= price;
+        if (type === 'avatar') u.unlockedAvatars.push(itemId);
+        if (type === 'theme') u.unlockedThemes.push(itemId);
+        if (type === 'coin') u.unlockedCoins.push(itemId);
+        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+        showToast(`🛍️ Successfully Purchased!`);
+        document.getElementById('prof-coins').innerText = u.coins;
+        renderShop();
+    }
+}
+
+function equipItem(type, itemId) {
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); let u = usersDB[currentUser];
+    if (type === 'avatar') u.equippedAvatar = itemId;
+    if (type === 'theme') u.equippedTheme = itemId;
+    if (type === 'coin') u.equippedCoin = itemId;
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    applyCosmetics(); renderShop();
+}
+
+function applyCosmetics() {
+    if (!currentUser) return;
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    document.body.classList.remove('theme-synthwave', 'theme-blood');
+    if (u.equippedTheme !== 'default') document.body.classList.add('theme-' + u.equippedTheme);
+    let headerAv = document.getElementById('avatar-text'); if(headerAv) headerAv.innerText = u.equippedAvatar;
+    let profAv = document.getElementById('prof-avatar-letter'); if(profAv) profAv.innerText = u.equippedAvatar;
+    let coinHeads = document.querySelector('.coin-heads'); let coinTails = document.querySelector('.coin-tails');
+    if (coinHeads && coinTails) {
+        coinHeads.className = 'coin-face coin-heads'; coinTails.className = 'coin-face coin-tails';
+        if (u.equippedCoin !== 'default') { coinHeads.classList.add('coin-' + u.equippedCoin); coinTails.classList.add('coin-' + u.equippedCoin); }
+        if (u.equippedCoin === 'bitcoin') { coinHeads.innerHTML = '₿'; coinTails.innerHTML = '₿'; } else { coinHeads.innerHTML = 'HEADS'; coinTails.innerHTML = 'TAILS'; }
+    }
+}
