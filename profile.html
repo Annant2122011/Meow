@@ -27,7 +27,11 @@
                 <h3 class="neon-text" style="font-size: 2.5rem; color: var(--accent-blue); text-shadow: 0 0 10px rgba(0,210,255,0.5); margin-bottom: 5px;"><span id="prof-username">USER</span></h3>
                 
                 <p id="prof-rank" style="font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 2px;"></p>
-               <p style="color: var(--text-dim)</p>
+                
+                <div style="display: flex; justify-content: center; gap: 20px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;">
+                    <span style="color: var(--text-dim);">XP: <span id="prof-xp" style="color: white;">0</span></span>
+                    <span style="color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🪙 <span id="prof-coins">0</span></span>
+                </div>
             </div>
             
             <div class="tab-container">
@@ -35,7 +39,7 @@
                 <button class="tab-btn" onclick="switchTab('tab-achievements')">BADGES</button>
                 <button class="tab-btn" onclick="switchTab('tab-charts')">ANALYTICS</button>
                 <button class="tab-btn" onclick="switchTab('tab-levels')">LEVELS</button>
-                   <button class="tab-btn" style="color: #ffd700;" onclick="switchTab('tab-shop')">SHOP</button>
+                <button class="tab-btn" style="color: #ffd700;" onclick="switchTab('tab-shop')">SHOP</button>
             </div>
 
             <div id="tab-stats" class="tab-content active-content">
@@ -119,16 +123,17 @@
                     </div>
                 </div>
             </div>
-              <div id="tab-shop" class="tab-content">
-    <h4 class="shop-section-title">Player Avatars</h4>
-    <div id="shop-avatars" class="shop-grid"></div>
 
-    <h4 class="shop-section-title">UI Color Themes</h4>
-    <div id="shop-themes" class="shop-grid"></div>
+            <div id="tab-shop" class="tab-content">
+                <h4 class="shop-section-title">Player Avatars</h4>
+                <div id="shop-avatars" class="shop-grid"></div>
 
-    <h4 class="shop-section-title">3D Toss Coins</h4>
-    <div id="shop-coins" class="shop-grid"></div>
-</div>
+                <h4 class="shop-section-title">UI Color Themes</h4>
+                <div id="shop-themes" class="shop-grid"></div>
+
+                <h4 class="shop-section-title">3D Toss Coins</h4>
+                <div id="shop-coins" class="shop-grid"></div>
+            </div>
 
             <button class="btn" style="margin-top: 25px; width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 2px solid var(--accent-red); color: var(--accent-red); font-size: 1.2rem; font-weight: 900; letter-spacing: 2px;" onclick="logoutUser()">LOGOUT / SWITCH ACCOUNT</button>
         </div>
