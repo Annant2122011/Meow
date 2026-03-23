@@ -1849,7 +1849,7 @@ stats.coins = (stats.coins || 0) + matchCoins;
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
-   showToast(⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!);
+   showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
 }
 
 function populateStats(prefix, bStats, wStats) {
