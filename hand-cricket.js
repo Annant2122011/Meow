@@ -190,9 +190,9 @@ window.onload = function() {
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
 
     if (isProfilePage || isTournamentPage) {
-        if (!storedUser) { 
-            window.location.href = 'index.html'; 
-            return; 
+        if (!storedUser) {
+            window.location.href = 'index.html';
+            return;
         }
         
         currentUser = storedUser;
@@ -374,9 +374,27 @@ function loadUser(username) {
     }
 }
 
+// --- NEW LOGOUT & RESTART WITH PERMISSION ---
+
 function logoutUser() {
-    localStorage.removeItem('hc_currentUser');
-    window.location.href = 'index.html';
+    if (confirm("Are you sure you want to log out and switch accounts?")) {
+        localStorage.removeItem('hc_currentUser');
+        window.location.href = 'index.html';
+    }
+}
+
+function resetGauntlet() {
+    if (!currentUser) return;
+    
+    if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        if (usersDB[currentUser]) {
+            usersDB[currentUser].tournamentLevel = 0;
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            renderTournamentPage();
+            showToast("🔄 The Gauntlet has been restarted!");
+        }
+    }
 }
 
 function goToProfile() {
@@ -840,8 +858,8 @@ function goToToss() {
     gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
 
     document.getElementById('toss-result-screen').style.display = 'none';
-    
     const coin = document.getElementById('coin');
+    
     if (coin) {
         coin.style.transition = 'none';
         coin.style.transform = 'rotateY(0deg)';
@@ -1393,7 +1411,6 @@ function handleRuns(runs) {
     currentBatterStats.runs += runs; 
     currentBatterStats.balls++; 
     currentBatterStats.currentWicketRuns += runs;
-    
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
 
     let tType = null;
@@ -1483,12 +1500,13 @@ function triggerInningsChange(currentBatterStats, reason) {
 
 function drawWormChart() {
     const ctxElement = document.getElementById('wormChart'); 
+    
     if (!ctxElement) return;
     
     if (wormChartInstance) {
         wormChartInstance.destroy();
     }
-
+    
     let maxB = Math.max(gameState.playerStats.balls, gameState.compStats.balls); 
     let labels = Array.from({length: maxB + 1}, (_, i) => i);
     
@@ -1507,7 +1525,7 @@ function drawWormChart() {
             pData[i] = pData[i-1]; 
         }
     }
-
+    
     let cData = Array(maxB + 1).fill(null); 
     let cRadii = Array(maxB + 1).fill(0);
     
@@ -1523,7 +1541,7 @@ function drawWormChart() {
             cData[i] = cData[i-1]; 
         }
     }
-
+    
     wormChartInstance = new Chart(ctxElement.getContext('2d'), {
         type: 'line',
         data: {
@@ -1603,21 +1621,23 @@ function endGame(result) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
         let stats = usersDB[currentUser];
         
-        if (result === "PLAYER_WINS" && stats.tournamentLevel === gameState.currentBoss) {
-            stats.tournamentLevel++; 
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-            setTimeout(() => { 
-                showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); 
-            }, 1000);
+        if (result === "PLAYER_WINS") {
+            if (stats.tournamentLevel === gameState.currentBoss) {
+                stats.tournamentLevel++; 
+                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                setTimeout(() => {
+                    showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`);
+                }, 1000);
+            }
         }
         
         const playAgainBtn = endControls.querySelectorAll('button')[1];
-        if (playAgainBtn) { 
-            playAgainBtn.innerText = "🔙 TO GAUNTLET"; 
-            playAgainBtn.onclick = function() { 
-                localStorage.removeItem('hc_tourney_boss'); 
-                window.location.href = 'tournament.html'; 
-            }; 
+        if (playAgainBtn) {
+            playAgainBtn.innerText = "🔙 TO GAUNTLET";
+            playAgainBtn.onclick = function() {
+                localStorage.removeItem('hc_tourney_boss');
+                window.location.href = 'tournament.html';
+            };
         }
     }
 }
@@ -1649,7 +1669,6 @@ function evaluateAchievements(stats) {
         { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
         { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
         { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
-        { id: 'wide_receiver', icon: '👐', title: 'Wide Receiver', desc: 'Extras received', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.totalExtrasReceived || 0 },
         { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
         { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
     ];
@@ -1690,54 +1709,52 @@ function saveLifetimeStats(result) {
     
     let matchXP = 50; 
     
-    if (result === "PLAYER_WINS") { 
-        matchXP += 100; 
+    if (result === "PLAYER_WINS") {
+        matchXP += 100;
     }
     
-    matchXP += gameState.playerStats.runs; 
+    matchXP += gameState.playerStats.runs;
     matchXP += (gameState.compStats.wicketsLost * 10);
+    
     stats.xp = (stats.xp || 0) + matchXP;
 
-    stats.matches += 1; 
+    stats.matches += 1;
     
-    if (result === "PLAYER_WINS") { 
+    if (result === "PLAYER_WINS") {
         stats.wins += 1; 
-    } else if (result === "COM_WINS") { 
+    } else if (result === "COM_WINS") {
         stats.losses += 1; 
-    } else { 
-        stats.ties += 1; 
+    } else {
+        stats.ties += 1;
     }
     
     stats.totalRuns += gameState.playerStats.runs; 
-    stats.totalBallsFaced += gameState.playerStats.balls; 
+    stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
-    stats.careerFours += gameState.playerStats.fours; 
+    stats.careerFours += gameState.playerStats.fours;
     stats.careerDotsBowled += gameState.compStats.dots; 
     
-    if (gameState.playerStats.runs > stats.highestScore) { 
-        stats.highestScore = gameState.playerStats.runs; 
+    if (gameState.playerStats.runs > stats.highestScore) {
+        stats.highestScore = gameState.playerStats.runs;
     }
     
-    if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) { 
-        stats.successfulChases += 1; 
+    if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) {
+        stats.successfulChases += 1;
     }
-    
-    if (!stats.last20Innings) { 
+
+    if (!stats.last20Innings) {
         stats.last20Innings = []; 
     }
 
     if (gameState.playerStats.runs >= 50 && gameState.playerStats.runs < 100) {
         stats.careerFifties = (stats.careerFifties || 0) + 1;
     }
-    
     if (gameState.playerStats.runs >= 100 && gameState.playerStats.runs < 200) {
         stats.careerCenturies = (stats.careerCenturies || 0) + 1;
     }
-    
     if (gameState.playerStats.runs >= 200) {
         stats.careerDoubleCenturies = (stats.careerDoubleCenturies || 0) + 1;
     }
-    
     if (gameState.compStats.wicketsLost >= 5) {
         stats.fiveWicketHauls = (stats.fiveWicketHauls || 0) + 1;
     }
@@ -1856,7 +1873,6 @@ function populateStats(prefix, bStats, wStats) {
 
 function generateAIInsight(result) {
     const insightBox = document.getElementById('ai-insight-text'); 
-    
     if (!insightBox) return;
     
     if (gameState.isTournament) {
@@ -1868,23 +1884,8 @@ function generateAIInsight(result) {
     }
 }
 
-function resetToToss() { 
-    localStorage.removeItem('hc_tourney_boss');
-    location.reload(); 
-}
-
-function openAnalysis() { 
-    document.getElementById('analysis-modal').style.display = 'flex'; 
-    drawWormChart(); 
-}
-
-function closeAnalysis() { 
-    document.getElementById('analysis-modal').style.display = 'none'; 
-}
-
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn'); 
-    
     if (!btn) return;
     
     const originalText = btn.innerHTML; 
@@ -2053,5 +2054,26 @@ function downloadPDF() {
             btn.innerHTML = originalText; 
             btn.disabled = false; 
         }, 3000);
+    }
+}
+
+function logoutUser() {
+    if (confirm("Are you sure you want to log out and switch accounts?")) {
+        localStorage.removeItem('hc_currentUser');
+        window.location.href = 'index.html';
+    }
+}
+
+function resetGauntlet() {
+    if (!currentUser) return;
+    
+    if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        if (usersDB[currentUser]) {
+            usersDB[currentUser].tournamentLevel = 0;
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            renderTournamentPage();
+            showToast("🔄 The Gauntlet has been restarted!");
+        }
     }
 }
