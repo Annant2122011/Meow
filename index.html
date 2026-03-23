@@ -47,14 +47,41 @@
             </div>
 
             <div id="toss-screen" style="display: none; text-align: center; padding: 20px;">
-                <h3 class="neon-text" style="font-size: 2.5rem; margin-bottom: 30px;">🪙 THE TOSS 🪙</h3>
-                <div id="toss-step-1">
-                    <p style="color: var(--text-bright); font-size: 1.5rem; margin-bottom: 20px;">Choose Odd or Even:</p>
-                    <div style="display: flex; justify-content: center; gap: 20px;">
-                        <button class="btn pulse-btn" style="font-size: 1.5rem; padding: 15px 40px;" onclick="chooseToss('odd')">ODD</button>
-                        <button class="btn pulse-btn" style="font-size: 1.5rem; padding: 15px 40px;" onclick="chooseToss('even')">EVEN</button>
+                <h3 class="neon-text" style="font-size: 2.5rem; margin-bottom: 10px;">🪙 THE TOSS 🪙</h3>
+                
+                <div id="toss-status-text" style="font-size: 1.5rem; color: var(--text-bright); margin-bottom: 20px; font-weight: bold; letter-spacing: 1px;"></div>
+                
+                <div class="coin-container">
+                    <div id="coin" class="coin">
+                        <div class="coin-face coin-heads">HEADS</div>
+                        <div class="coin-face coin-tails">TAILS</div>
                     </div>
                 </div>
+
+                <div id="player-call-controls" style="display: none; justify-content: center; gap: 20px; margin-top: 30px;">
+                    <button class="btn pulse-btn" style="font-size: 1.5rem; padding: 15px 40px;" onclick="callCoin('heads')">HEADS</button>
+                    <button class="btn pulse-btn" style="font-size: 1.5rem; padding: 15px 40px;" onclick="callCoin('tails')">TAILS</button>
+                </div>
+
+                <div id="comp-call-controls" style="display: none; justify-content: center; margin-top: 30px;">
+                    <button class="btn pulse-btn" style="font-size: 1.5rem; padding: 15px 40px;" onclick="executeCoinFlip()">FLIP COIN ⬆️</button>
+                </div>
+
+                <div id="toss-result-screen" style="display: none; margin-top: 30px;">
+                    <h3 id="toss-winner-text" style="font-size: 2.2rem; color: var(--text-bright); margin-bottom: 30px; text-transform: uppercase;"></h3>
+
+                    <div id="player-decision-box" style="display: none;">
+                        <p style="color: var(--accent-neon); font-size: 1.5rem; margin-bottom: 20px; text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">What will you do?</p>
+                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                            <button class="btn pulse-btn" style="background: var(--accent-blue); color: black; font-size: 2rem; padding: 20px 50px; border: 3px solid #000; box-shadow: 0 10px 20px rgba(0, 210, 255, 0.4);" onclick="startMatch(true)">🏏 BAT</button>
+                            <button class="btn pulse-btn" style="background: var(--accent-red); color: white; font-size: 2rem; padding: 20px 50px; border: 3px solid #000; box-shadow: 0 10px 20px rgba(255, 42, 42, 0.4);" onclick="startMatch(false)">⚾ BOWL</button>
+                        </div>
+                    </div>
+
+                    <div id="computer-decision-box" style="display: none;">
+                        </div>
+                </div>
+            </div>
                 <div id="toss-step-2" style="display: none;">
                     <p id="toss-choice-text" style="color: var(--accent-neon); font-size: 1.5rem; margin-bottom: 20px; font-weight: bold;"></p>
                     <p style="color: var(--text-bright); margin-bottom: 15px;">Throw a number for the toss:</p>
