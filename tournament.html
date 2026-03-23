@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/cc6DJrZt/Cric-Pulse-Logo-meow.png" sizes="32x32">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gauntlet | Hand Cricket Clash</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
+        <button class="btn pulse-btn" style="font-size: 1rem; padding: 10px 20px;" onclick="window.location.href='index.html'">⬅️ ABANDON RUN</button>
+        <div class="logo">
+            <span class="logo-text" style="font-size: 1.8rem; letter-spacing: 2px; color: var(--accent-red);">THE<span style="color: white; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);">GAUNTLET</span></span>
+        </div>
+    </header>
+
+    <main class="container" id="tournament-page-container">
+        <div class="card" style="max-width: 700px; margin: 0 auto; border-color: var(--accent-red); box-shadow: 0 0 30px rgba(255,42,42,0.2);">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 class="neon-text" style="font-size: 2.5rem; color: var(--accent-red); text-shadow: 0 0 15px rgba(255,42,42,0.5); margin-bottom: 5px;">BOSS RUSH</h3>
+                <p style="color: var(--text-bright); font-size: 1.1rem;">Defeat 5 unique AI personalities to claim the Ultimate Title.</p>
+            </div>
+            
+            <div id="boss-grid-container"></div>
+
+        </div>
+    </main>
+
+    <script src="hand-cricket.js"></script>
+</body>
+</html>
