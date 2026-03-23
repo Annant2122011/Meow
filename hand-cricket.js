@@ -218,9 +218,7 @@ window.onload = function() {
             }
         }
     }
-   if (u.coins === undefined) u.coins = Math.floor((u.xp || 0) * 0.5);
-u.unlockedAvatars = u.unlockedAvatars || ['👤']; u.unlockedThemes = u.unlockedThemes || ['default']; u.unlockedCoins = u.unlockedCoins || ['default'];
-u.equippedAvatar = u.equippedAvatar || '👤'; u.equippedTheme = u.equippedTheme || 'default'; u.equippedCoin = u.equippedCoin || 'default';
+   
 };
 
 // --- DATA AUTO-PATCHER ---
@@ -270,8 +268,17 @@ function syncUserData(username) {
     u.tossesWon = u.tossesWon || 0;
     u.notOutMatches = u.notOutMatches || 0;
     u.careerDotsBowled = u.careerDotsBowled || 0;
-    u.xp = u.xp || 0;
+   u.xp = u.xp || 0;
     u.tournamentLevel = u.tournamentLevel || 0;
+
+    // PASTE THIS HERE:
+    if (u.coins === undefined) u.coins = Math.floor((u.xp || 0) * 0.5);
+    u.unlockedAvatars = u.unlockedAvatars || ['👤']; 
+    u.unlockedThemes = u.unlockedThemes || ['default']; 
+    u.unlockedCoins = u.unlockedCoins || ['default'];
+    u.equippedAvatar = u.equippedAvatar || '👤'; 
+    u.equippedTheme = u.equippedTheme || 'default'; 
+    u.equippedCoin = u.equippedCoin || 'default';
 
     if (!u.achLevels) {
         u.achLevels = {};
