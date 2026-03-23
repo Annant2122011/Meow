@@ -462,6 +462,8 @@ function getLevelColor(level) {
 function renderProfilePage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
+   const cText = document.getElementById('prof-coins'); 
+if (cText) cText.innerText = stats.coins;
     
     if (!stats) {
         return logoutUser();
