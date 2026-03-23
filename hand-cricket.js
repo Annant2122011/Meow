@@ -185,6 +185,7 @@ const zeroBtn = document.getElementById('zero-btn');
 
 // --- INITIALIZATION & PAGE ROUTER ---
 window.onload = function() {
+   
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
@@ -197,9 +198,11 @@ window.onload = function() {
         
         currentUser = storedUser;
         syncUserData(currentUser);
+       applyCosmetics();
         
         if (isProfilePage) {
             renderProfilePage();
+           renderShop();
         }
         
         if (isTournamentPage) {
@@ -215,6 +218,9 @@ window.onload = function() {
             }
         }
     }
+   if (u.coins === undefined) u.coins = Math.floor((u.xp || 0) * 0.5);
+u.unlockedAvatars = u.unlockedAvatars || ['👤']; u.unlockedThemes = u.unlockedThemes || ['default']; u.unlockedCoins = u.unlockedCoins || ['default'];
+u.equippedAvatar = u.equippedAvatar || '👤'; u.equippedTheme = u.equippedTheme || 'default'; u.equippedCoin = u.equippedCoin || 'default';
 };
 
 // --- DATA AUTO-PATCHER ---
