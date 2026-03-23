@@ -46,10 +46,10 @@ let gameState = {
         wicketRunsHistory: [], 
         wormData: [{ball: 0, runs: 0, wkt: false}] 
     }
-   // NEW TOSS LOGIC TRACKER
-let tossData = { caller: null, call: null, result: null };
+ 
 };
-
+  // NEW TOSS LOGIC TRACKER
+let tossData = { caller: null, call: null, result: null };
 let currentUser = null;
 let srChartInstance = null;
 let runsChartInstance = null;
