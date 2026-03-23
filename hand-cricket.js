@@ -181,7 +181,7 @@ const commentaryBox = document.getElementById('hand-commentary');
 const targetBox = document.getElementById('target-box');
 const targetScoreUi = document.getElementById('target-score');
 const actionArea = document.getElementById('hand-action-area');
-const zeroBtn = document.getElementById('zero-btn');
+const zeroBtn = document.getElementById('zero-btn'); 
 
 // --- INITIALIZATION & PAGE ROUTER ---
 window.onload = function() {
@@ -190,9 +190,9 @@ window.onload = function() {
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
 
     if (isProfilePage || isTournamentPage) {
-        if (!storedUser) {
-            window.location.href = 'index.html';
-            return;
+        if (!storedUser) { 
+            window.location.href = 'index.html'; 
+            return; 
         }
         
         currentUser = storedUser;
@@ -424,6 +424,16 @@ function startBossFight(index) {
     window.location.href = 'index.html';
 }
 
+// --- NEW LEVEL COLORS FUNCTION ---
+function getLevelColor(level) {
+    if (level === 1) return '#9e9e9e'; // Grey (Common)
+    if (level === 2) return '#4ade80'; // Green (Uncommon)
+    if (level === 3) return '#60a5fa'; // Blue (Rare)
+    if (level === 4) return '#c084fc'; // Purple (Epic)
+    if (level === 5) return '#f87171'; // Red (Legendary)
+    return '#fbbf24'; // Gold (MAX)
+}
+
 // --- PROFILE PAGE RENDERER ---
 function renderProfilePage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
@@ -491,7 +501,7 @@ function renderProfilePage() {
     }
     document.getElementById('prof-best-spell').innerText = bestSpellText;
 
-    // Build Leveled Achievements
+    // BUILD DYNAMIC 5-TIER ACHIEVEMENTS
     const achievementList = [
         { id: 'veteran', icon: '🎖️', title: 'Veteran', desc: 'Play matches', thresholds: [50, 100, 250, 500, 1000], getVal: s => s.matches },
         { id: 'champion', icon: '🏆', title: 'Champion', desc: 'Win matches', thresholds: [20, 50, 150, 300, 500], getVal: s => s.wins },
@@ -509,50 +519,58 @@ function renderProfilePage() {
         { id: 'centurion', icon: '🏏', title: 'Centurion', desc: 'Score centuries', thresholds: [1, 10, 25, 50, 100], getVal: s => s.careerCenturies || 0 },
         { id: 'fiftymaker', icon: '💥', title: 'Fifty Maker', desc: 'Score half-centuries', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerFifties || 0 },
         { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 }, 
-        { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 10, 25, 50, 100], getVal: s => s.bossesDefeated || 0 },
+        { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 20, 50, 100, 250], getVal: s => s.bossesDefeated || 0 },
         { id: 'xp_farmer', icon: '🌟', title: 'XP Farmer', desc: 'Lifetime XP', thresholds: [5000, 25000, 100000, 250000, 1000000], getVal: s => s.xp || 0 },
         { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
         { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
         { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
-        { id: 'wide_receiver', icon: '👐', title: 'Wide Receiver', desc: 'Extras received', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.totalExtrasReceived || 0 },
         { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
-        { id: 'perfect_ten', icon: '🔥', title: 'Perfect Ten', desc: 'Take 10 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.tenWicketHauls || 0 }
+        { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
     ];
 
     let achHtml = '';
     
     achievementList.forEach(ach => {
         let val = ach.getVal(stats);
-        let level = 0;
+        let level = 1;
         let nextTarget = ach.thresholds[0];
+        let isMaxed = false;
         
         for (let i = 0; i < ach.thresholds.length; i++) {
             if (val >= ach.thresholds[i]) {
-                level = i + 1;
-                nextTarget = ach.thresholds[i+1] || ach.thresholds[i];
+                level = i + 2; 
             } else {
                 nextTarget = ach.thresholds[i];
                 break;
             }
         }
         
+        if (level > ach.thresholds.length) {
+            level = 'MAX';
+            isMaxed = true;
+            nextTarget = ach.thresholds[ach.thresholds.length - 1]; 
+        }
+        
         let prog = val > nextTarget ? nextTarget : val;
         let pct = (prog / nextTarget) * 100;
-        let isMaxed = level === ach.thresholds.length;
         
         if (isMaxed) {
             pct = 100;
         }
 
+        // Apply Custom Colors Based on Level
+        let color = getLevelColor(level);
+        let borderStyle = `border: 2px solid ${color}; box-shadow: inset 0 0 10px ${color}40, 0 0 15px ${color}30; opacity: 1 !important; filter: none !important;`;
+
         achHtml += `
-            <div class="badge ${level > 0 ? 'unlocked' : ''}">
+            <div class="badge" style="${borderStyle}">
                 <div class="badge-icon">${ach.icon}</div>
-                <div class="badge-title">${ach.title}</div>
-                <div class="badge-desc">${ach.desc} <br> <span style="color:var(--accent-neon); font-weight:bold;">Lvl ${level}</span></div>
-                <div class="progress-container">
-                    <div class="progress-fill" style="width: ${pct}%"></div>
+                <div class="badge-title" style="color: white;">${ach.title}</div>
+                <div class="badge-desc" style="color: var(--text-dim);">${ach.desc} <br> <span style="color:${color}; font-weight:bold;">${level === 'MAX' ? 'MAX LEVEL' : 'Lvl ' + level}</span></div>
+                <div class="progress-container" style="background: rgba(255,255,255,0.1);">
+                    <div class="progress-fill" style="width: ${pct}%; background: ${color}; box-shadow: 0 0 10px ${color};"></div>
                 </div>
-                <div class="progress-text">${isMaxed ? 'MAXED OUT' : prog + ' / ' + nextTarget}</div>
+                <div class="progress-text" style="color: white;">${isMaxed ? 'MAXED OUT' : prog + ' / ' + nextTarget}</div>
             </div>
         `;
     });
@@ -562,14 +580,15 @@ function renderProfilePage() {
         achContainer.innerHTML = achHtml;
     }
 
-    if (srChartInstance) srChartInstance.destroy(); 
-    if (runsChartInstance) runsChartInstance.destroy(); 
-    if (throwDnaInstance) throwDnaInstance.destroy(); 
+    // --- CHART.JS GENERATION ---
+    if (srChartInstance) srChartInstance.destroy();
+    if (runsChartInstance) runsChartInstance.destroy();
+    if (throwDnaInstance) throwDnaInstance.destroy();
     if (fatalChartInstance) fatalChartInstance.destroy();
-    
-    const srCtxElement = document.getElementById('srLineChart'); 
-    if (srCtxElement) { 
-        srChartInstance = new Chart(srCtxElement.getContext('2d'), { 
+
+    const srCtxElement = document.getElementById('srLineChart');
+    if (srCtxElement) {
+        srChartInstance = new Chart(srCtxElement.getContext('2d'), {
             type: 'line', 
             data: { 
                 labels: stats.last10SR ? stats.last10SR.map((_, i) => `M${i+1}`) : [], 
@@ -582,7 +601,7 @@ function renderProfilePage() {
                     fill: true, 
                     tension: 0.3 
                 }] 
-            }, 
+            },
             options: { 
                 plugins: { legend: { display: false } }, 
                 scales: { 
@@ -590,13 +609,13 @@ function renderProfilePage() {
                     x: { grid: {color: 'rgba(255,255,255,0.1)'} } 
                 }, 
                 color: '#fff' 
-            } 
-        }); 
+            }
+        });
     }
-    
-    const runsCtxElement = document.getElementById('runsBarChart'); 
-    if (runsCtxElement) { 
-        runsChartInstance = new Chart(runsCtxElement.getContext('2d'), { 
+
+    const runsCtxElement = document.getElementById('runsBarChart');
+    if (runsCtxElement) {
+        runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
             type: 'bar', 
             data: { 
                 labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
@@ -606,7 +625,7 @@ function renderProfilePage() {
                     backgroundColor: '#00d2ff', 
                     borderRadius: 4 
                 }] 
-            }, 
+            },
             options: { 
                 plugins: { 
                     legend: { display: false }, 
@@ -623,14 +642,14 @@ function renderProfilePage() {
                     x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } 
                 }, 
                 color: '#fff' 
-            } 
-        }); 
+            }
+        });
     }
-    
-    const dnaCtxElement = document.getElementById('throwDnaChart'); 
-    if (dnaCtxElement && stats.battingThrows) { 
-        const t = stats.battingThrows; 
-        throwDnaInstance = new Chart(dnaCtxElement.getContext('2d'), { 
+
+    const dnaCtxElement = document.getElementById('throwDnaChart');
+    if (dnaCtxElement && stats.battingThrows) {
+        const t = stats.battingThrows;
+        throwDnaInstance = new Chart(dnaCtxElement.getContext('2d'), {
             type: 'radar', 
             data: { 
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Defend)'], 
@@ -642,7 +661,7 @@ function renderProfilePage() {
                     pointBackgroundColor: '#fff', 
                     borderWidth: 2 
                 }] 
-            }, 
+            },
             options: { 
                 plugins: { legend: { display: false } }, 
                 scales: { 
@@ -655,14 +674,14 @@ function renderProfilePage() {
                         ticks: { display: false } 
                     } 
                 } 
-            } 
-        }); 
+            }
+        });
     }
-    
-    const fatalCtxElement = document.getElementById('fatalThrowsChart'); 
-    if (fatalCtxElement && stats.fatalThrows) { 
-        const ft = stats.fatalThrows; 
-        fatalChartInstance = new Chart(fatalCtxElement.getContext('2d'), { 
+
+    const fatalCtxElement = document.getElementById('fatalThrowsChart');
+    if (fatalCtxElement && stats.fatalThrows) {
+        const ft = stats.fatalThrows;
+        fatalChartInstance = new Chart(fatalCtxElement.getContext('2d'), {
             type: 'radar', 
             data: { 
                 labels: ['1', '2', '3', '4', '5', '6', '0 (Wkt/Stmp)'], 
@@ -674,7 +693,7 @@ function renderProfilePage() {
                     pointBackgroundColor: '#fff', 
                     borderWidth: 2 
                 }] 
-            }, 
+            },
             options: { 
                 plugins: { legend: { display: false } }, 
                 scales: { 
@@ -687,124 +706,125 @@ function renderProfilePage() {
                         ticks: { display: false } 
                     } 
                 } 
-            } 
-        }); 
+            }
+        });
     }
 }
 
-function switchTab(tabId) { 
-    document.querySelectorAll('.tab-btn').forEach(btn => { 
-        btn.classList.remove('active-tab'); 
-    }); 
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active-tab');
+    });
     
-    document.querySelectorAll('.tab-content').forEach(content => { 
-        content.classList.remove('active-content'); 
-    }); 
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active-content');
+    });
     
-    const eventObj = window.event; 
-    if (eventObj && eventObj.target) { 
-        eventObj.target.classList.add('active-tab'); 
-    } 
+    const eventObj = window.event;
+    if (eventObj && eventObj.target) {
+        eventObj.target.classList.add('active-tab');
+    }
     
-    const activeContent = document.getElementById(tabId); 
-    if (activeContent) { 
-        activeContent.classList.add('active-content'); 
-    } 
+    const activeContent = document.getElementById(tabId);
+    if (activeContent) {
+        activeContent.classList.add('active-content');
+    }
 }
 
-function fireConfetti() { 
-    if (typeof confetti !== 'undefined') { 
+// --- VISUAL EFFECTS ---
+function fireConfetti() {
+    if (typeof confetti !== 'undefined') {
         var duration = 3000; 
-        var end = Date.now() + duration; 
+        var end = Date.now() + duration;
         
-        (function frame() { 
+        (function frame() {
             confetti({ 
                 particleCount: 5, 
                 angle: 60, 
                 spread: 55, 
                 origin: { x: 0 }, 
                 colors: ['#00ff88', '#00d2ff'] 
-            }); 
+            });
             confetti({ 
                 particleCount: 5, 
                 angle: 120, 
                 spread: 55, 
                 origin: { x: 1 }, 
                 colors: ['#00ff88', '#00d2ff'] 
-            }); 
+            });
             
-            if (Date.now() < end) { 
-                requestAnimationFrame(frame); 
-            } 
-        }()); 
-    } 
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
 }
 
-function showToast(message) { 
-    const container = document.getElementById('toast-container'); 
-    if (!container) return; 
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
     
     const toast = document.createElement('div'); 
     toast.className = 'toast'; 
-    toast.innerText = message; 
+    toast.innerText = message;
+    
     container.appendChild(toast); 
     
     setTimeout(() => { 
-        if (container.contains(toast)) { 
+        if (container.contains(toast)) {
             container.removeChild(toast); 
-        } 
-    }, 5000); 
+        }
+    }, 5000);
 }
 
-function updateAtmosphere() { 
-    const body = document.body; 
+function updateAtmosphere() {
+    const body = document.body;
     
-    if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) { 
-        const runsNeeded = gameState.target - gameState.playerStats.runs; 
-        const ballsLeft = gameState.maxBalls - gameState.playerStats.balls; 
+    if (gameState.innings === 2 && gameState.isPlayerBatting && !gameState.gameOver) {
+        const runsNeeded = gameState.target - gameState.playerStats.runs;
+        const ballsLeft = gameState.maxBalls - gameState.playerStats.balls;
         
         if (runsNeeded > 0 && runsNeeded <= 15 && ballsLeft <= 12) { 
             body.classList.add('danger-pulse'); 
             return; 
-        } 
-    } 
+        }
+    }
     
-    body.classList.remove('danger-pulse'); 
+    body.classList.remove('danger-pulse');
 }
 
 // --- GAME UI & SETUP ---
-function setFormat(wickets, balls, btnId) { 
+function setFormat(wickets, balls, btnId) {
     gameState.maxWickets = wickets; 
-    gameState.maxBalls = balls; 
+    gameState.maxBalls = balls;
     
     document.querySelectorAll('.setup-btn').forEach(btn => { 
-        if (btn.id && btn.id.startsWith('btn-fmt')) { 
+        if (btn.id && btn.id.startsWith('btn-fmt')) {
             btn.classList.remove('active-setup-btn'); 
-        } 
-    }); 
+        }
+    });
     
     const activeBtn = document.getElementById(btnId); 
-    if (activeBtn) { 
-        activeBtn.classList.add('active-setup-btn'); 
-    } 
+    if (activeBtn) {
+        activeBtn.classList.add('active-setup-btn');
+    }
 }
 
-function setDifficulty(level, btnId) { 
-    gameState.aiDifficulty = level; 
+function setDifficulty(level, btnId) {
+    gameState.aiDifficulty = level;
     
     document.querySelectorAll('.setup-btn').forEach(btn => { 
-        if (btn.id && btn.id.startsWith('btn-diff')) { 
+        if (btn.id && btn.id.startsWith('btn-diff')) {
             btn.classList.remove('active-setup-btn'); 
-        } 
-    }); 
+        }
+    });
     
     const activeBtn = document.getElementById(btnId); 
-    if (activeBtn) { 
-        activeBtn.classList.add('active-setup-btn'); 
-    } 
+    if (activeBtn) {
+        activeBtn.classList.add('active-setup-btn');
+    }
 }
 
-// --- THE ANIMATED COIN TOSS SYSTEM ---
 function goToToss() {
     if (setupScreen) {
         setupScreen.style.display = 'none';
@@ -820,35 +840,36 @@ function goToToss() {
     gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
 
     document.getElementById('toss-result-screen').style.display = 'none';
-    const coin = document.getElementById('coin');
     
-    if (coin) { 
-        coin.style.transition = 'none'; 
-        coin.style.transform = 'rotateY(0deg)'; 
+    const coin = document.getElementById('coin');
+    if (coin) {
+        coin.style.transition = 'none';
+        coin.style.transform = 'rotateY(0deg)';
     }
     
     tossData.caller = Math.random() < 0.5 ? 'player' : 'comp';
+    
     const statusText = document.getElementById('toss-status-text');
     const pControls = document.getElementById('player-call-controls');
     const cControls = document.getElementById('comp-call-controls');
 
     if (tossData.caller === 'player') {
         statusText.innerHTML = "You won the chance to call! <br><span style='color: var(--accent-blue);'>Heads or Tails?</span>";
-        pControls.style.display = 'flex'; 
+        pControls.style.display = 'flex';
         cControls.style.display = 'none';
     } else {
         tossData.call = Math.random() < 0.5 ? 'heads' : 'tails';
         statusText.innerHTML = `Computer is calling... <br><span style='color: var(--accent-red); text-transform: uppercase;'>${tossData.call}</span>`;
-        pControls.style.display = 'none'; 
+        pControls.style.display = 'none';
         cControls.style.display = 'flex';
     }
 }
 
-function callCoin(choice) { 
-    tossData.call = choice; 
-    document.getElementById('player-call-controls').style.display = 'none'; 
-    document.getElementById('toss-status-text').innerHTML = `You called: <span style='color: var(--accent-blue); text-transform: uppercase;'>${choice}</span>`; 
-    executeCoinFlip(); 
+function callCoin(choice) {
+    tossData.call = choice;
+    document.getElementById('player-call-controls').style.display = 'none';
+    document.getElementById('toss-status-text').innerHTML = `You called: <span style='color: var(--accent-blue); text-transform: uppercase;'>${choice}</span>`;
+    executeCoinFlip();
 }
 
 function executeCoinFlip() {
@@ -861,6 +882,7 @@ function executeCoinFlip() {
         }
         
         tossData.result = Math.random() < 0.5 ? 'heads' : 'tails';
+        
         let rotateAmount = (tossData.result === 'heads') ? 1800 : 1980;
         
         if(coin) {
@@ -873,19 +895,20 @@ function executeCoinFlip() {
 
 function processTossResult() {
     const resultScreen = document.getElementById('toss-result-screen');
+    
     if (resultScreen) {
         resultScreen.style.display = 'block';
     }
     
     const playerWins = (tossData.caller === 'player' && tossData.call === tossData.result) || 
                        (tossData.caller === 'comp' && tossData.call !== tossData.result);
-                       
+
     gameState.commentaryHistory.push(`🪙 TOSS: It's ${tossData.result.toUpperCase()}! ${playerWins ? 'You won the toss!' : 'Computer won the toss.'}`);
 
-    if (playerWins && currentUser) { 
-        let uDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-        uDB[currentUser].tossesWon += 1; 
-        localStorage.setItem('hc_usersDB', JSON.stringify(uDB)); 
+    if (playerWins && currentUser) {
+        let uDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+        uDB[currentUser].tossesWon = (uDB[currentUser].tossesWon || 0) + 1;
+        localStorage.setItem('hc_usersDB', JSON.stringify(uDB));
     }
 
     const winText = document.getElementById('toss-winner-text');
@@ -895,7 +918,7 @@ function processTossResult() {
     if (playerWins) {
         winText.innerText = "🎉 YOU WON THE TOSS!"; 
         winText.style.color = 'var(--accent-neon)'; 
-        pDecision.style.display = 'block'; 
+        pDecision.style.display = 'block';
         cDecision.style.display = 'none';
     } else {
         winText.innerText = "🤖 COMPUTER WON THE TOSS!"; 
@@ -904,44 +927,46 @@ function processTossResult() {
         
         gameState.isPlayerBatting = Math.random() < 0.5 ? false : true;
         const compChoice = gameState.isPlayerBatting ? 'BOWL' : 'BAT';
+        
         gameState.commentaryHistory.push(`🤖 Computer elected to ${compChoice} first.`);
         
-        cDecision.innerHTML = `<p style="color: var(--text-bright); font-size: 1.2rem; margin-bottom: 15px;">Computer chooses to <b style="color: var(--accent-red);">${compChoice}</b> first.</p><button class="btn pulse-btn" style="font-size: 1.5rem;" onclick="continueToMatch()">Start Match ➡️</button>`;
+        cDecision.innerHTML = `<p style="color: var(--text-bright); font-size: 1.2rem; margin-bottom: 15px;">Computer chooses to <b style="color: var(--accent-red);">${compChoice}</b> first.</p>
+                               <button class="btn pulse-btn" style="font-size: 1.5rem;" onclick="continueToMatch()">Start Match ➡️</button>`;
         cDecision.style.display = 'block';
     }
 }
 
-function startMatch(playerOptsToBat) { 
-    gameState.isPlayerBatting = playerOptsToBat; 
-    gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`); 
-    continueToMatch(); 
+function startMatch(playerOptsToBat) {
+    gameState.isPlayerBatting = playerOptsToBat;
+    gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
+    continueToMatch();
 }
 
-function continueToMatch() { 
+function continueToMatch() {
     if (tossScreen) {
-        tossScreen.style.display = 'none'; 
+        tossScreen.style.display = 'none';
     }
     
-    matchScreen.style.display = 'block'; 
-    updateMatchUI(); 
+    matchScreen.style.display = 'block';
+    updateMatchUI();
     
     let formatText = gameState.maxBalls === Infinity ? "Classic (Unlimited Overs)" : `T${gameState.maxBalls/6} (${gameState.maxWickets} Wickets)`;
-    gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS | ${formatText} ---`); 
+    gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS | ${formatText} ---`);
     
-    writeCommentary(gameState.isPlayerBatting ? "You are Batting first. Put up a massive total!" : "You are Bowling first. Take early wickets!", null); 
+    writeCommentary(gameState.isPlayerBatting ? "You are Batting first. Put up a massive total!" : "You are Bowling first. Take early wickets!");
 }
 
-function ballsToOvers(balls) { 
-    return Math.floor(balls / 6) + "." + (balls % 6); 
+function ballsToOvers(balls) {
+    return Math.floor(balls / 6) + "." + (balls % 6);
 }
 
 function updateMatchUI() {
     if (gameState.innings === 1) {
-        inningsStatus.innerText = "🏏 1ST INNINGS"; 
-    } else { 
+        inningsStatus.innerText = "🏏 1ST INNINGS";
+    } else {
         inningsStatus.innerText = "⚔️ 2ND INNINGS THE CHASE"; 
         targetBox.style.display = 'block'; 
-        targetScoreUi.innerText = gameState.target; 
+        targetScoreUi.innerText = gameState.target;
     }
     
     const cLabel = document.querySelector('.computer-side .side-label');
@@ -949,13 +974,13 @@ function updateMatchUI() {
     
     if (gameState.isTournament) {
         const boss = bossInfo[gameState.currentBoss];
-        if (cLabel) { 
-            cLabel.innerText = `${boss.icon} ${boss.name}`; 
-            cLabel.style.color = boss.color; 
+        if (cLabel) {
+            cLabel.innerText = `${boss.icon} ${boss.name}`;
+            cLabel.style.color = boss.color;
         }
-        if (cScoreLabel) { 
-            cScoreLabel.innerText = `${boss.name} SCORE`; 
-            cScoreLabel.style.color = boss.color; 
+        if (cScoreLabel) {
+            cScoreLabel.innerText = `${boss.name} SCORE`;
+            cScoreLabel.style.color = boss.color;
         }
     }
     
@@ -988,8 +1013,9 @@ function updateMatchUI() {
     if (cOvers) {
         cOvers.innerText = ballsToOvers(gameState.compStats.balls);
     }
-    
+
     const maxOversText = gameState.maxBalls === Infinity ? " (Unlimited)" : ` / ${gameState.maxBalls/6}.0`;
+    
     const pMaxOvers = document.getElementById('player-max-overs'); 
     if (pMaxOvers) {
         pMaxOvers.innerText = maxOversText;
@@ -1000,7 +1026,7 @@ function updateMatchUI() {
         cMaxOvers.innerText = maxOversText;
     }
 
-    if (zeroBtn) { 
+    if (zeroBtn) {
         if (gameState.isPlayerBatting) { 
             zeroBtn.innerHTML = "🛡️ 0 (DEFEND)"; 
             zeroBtn.style.background = "rgba(0, 210, 255, 0.1)"; 
@@ -1009,7 +1035,7 @@ function updateMatchUI() {
             zeroBtn.innerHTML = "↔️ 0 (WIDE)"; 
             zeroBtn.style.background = "rgba(255, 42, 42, 0.1)"; 
             zeroBtn.style.borderColor = "var(--accent-red)"; 
-        } 
+        }
     }
     
     updateAtmosphere();
@@ -1142,10 +1168,16 @@ function getComputerThrowFallback() {
     if (!isCompBatting) { 
         let pBats = stats.battingThrows; 
         let likelyThrow = Object.keys(pBats).reduce((a, b) => pBats[a] > pBats[b] ? a : b); 
-        return (Math.random() < 0.75) ? parseInt(likelyThrow) : Math.floor(Math.random() * 7); 
+        
+        if (Math.random() < 0.75) {
+            return parseInt(likelyThrow);
+        } else {
+            return Math.floor(Math.random() * 7);
+        }
     } else { 
         let pBowls = stats.bowlingThrows; 
         let likelyThrow = Object.keys(pBowls).reduce((a, b) => pBowls[a] > pBowls[b] ? a : b); 
+        
         let compNum = Math.floor(Math.random() * 7); 
         let attempts = 0; 
         
@@ -1185,7 +1217,7 @@ function playHand(playerNum) {
     } else { 
         gameState.playerMatchBowling[playerNum] = (gameState.playerMatchBowling[playerNum] || 0) + 1; 
     }
-    
+
     if (currentUser) { 
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
         let stats = usersDB[currentUser]; 
@@ -1198,7 +1230,7 @@ function playHand(playerNum) {
         
         localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
     }
-    
+
     const compNum = getComputerThrow();
     
     if (gameState.isPlayerBatting) {
@@ -1210,16 +1242,16 @@ function playHand(playerNum) {
     if (navigator.vibrate) {
         navigator.vibrate([50]);
     }
-    
+
     document.getElementById('player-hand').innerText = handEmojis[playerNum]; 
     document.getElementById('computer-hand').innerText = handEmojis[compNum];
-    
+
     const batNum = gameState.isPlayerBatting ? playerNum : compNum; 
     const bowlNum = gameState.isPlayerBatting ? compNum : playerNum; 
     const currentBalls = (gameState.isPlayerBatting ? gameState.playerStats.balls : gameState.compStats.balls) + 1;
     
     gameState.commentaryHistory.push(`[Ball ${currentBalls}] Bowler threw ${bowlNum}, Batter threw ${batNum}`);
-    
+
     if (gameState.isPlayerBatting && gameState.playerConsecZeros === 3) {
         handleWicket(0, 'HIT_WICKET');
     } else if (!gameState.isPlayerBatting && gameState.compConsecZeros === 3) {
@@ -1235,7 +1267,7 @@ function playHand(playerNum) {
     } else {
         handleRuns(gameState.isPlayerBatting ? playerNum : compNum);
     }
-    
+
     if (!gameState.isTransitioning && !gameState.gameOver) { 
         updateMatchUI(); 
         checkMatchState(); 
@@ -1264,6 +1296,7 @@ function writeCommentary(text, triggerType = null) {
 
 function handleWicket(num, type) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
+    
     currentBatterStats.balls++; 
     currentBatterStats.wicketsLost++;
     
@@ -1277,10 +1310,10 @@ function handleWicket(num, type) {
     let outNum = (type === 'HIT_WICKET' || type === 'STUMPED') ? '0' : num.toString();
     currentBatterStats.dismissalHistory.push({ num: outNum, type: type });
     currentBatterStats.wicketRunsHistory.push({ runs: currentBatterStats.currentWicketRuns, notOut: false });
+    
     currentBatterStats.currentWicketRuns = 0; 
-    
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: true });
-    
+
     let tType = gameState.isPlayerBatting ? "wkt" : null;
     let comment = "";
     
@@ -1307,13 +1340,20 @@ function handleWicket(num, type) {
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     const runsToAdd = batterNum + 1; 
+    
     currentBatterStats.runs += runsToAdd; 
     currentBatterStats.extras += runsToAdd; 
     currentBatterStats.currentWicketRuns += runsToAdd;
-    currentBatterStats.wormData[currentBatterStats.wormData.length - 1].runs = currentBatterStats.runs;
     
+    currentBatterStats.wormData[currentBatterStats.wormData.length - 1].runs = currentBatterStats.runs;
+
     const team = gameState.isPlayerBatting ? "You" : "Computer";
-    let comment = getRandomCommentary(commentaryDB.wide).replace("[NUM]", batterNum).replace("[RUNS]", runsToAdd).replace("[TEAM]", team);
+    
+    let comment = getRandomCommentary(commentaryDB.wide)
+        .replace("[NUM]", batterNum)
+        .replace(/\[RUNS\]/g, runsToAdd)
+        .replace(/\[TEAM\]/g, team);
+        
     writeCommentary(comment, null);
     
     if (gameState.innings === 2 && currentBatterStats.runs >= gameState.target) {
@@ -1330,9 +1370,10 @@ function handleDefense() {
     }
     
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
+    
     let comment = getRandomCommentary(commentaryDB.defend);
     writeCommentary(comment, null);
-    
+
     if (gameState.isPlayerBatting && currentUser) { 
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
         if (usersDB[currentUser]) { 
@@ -1348,14 +1389,16 @@ function handleDefense() {
 
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
+    
     currentBatterStats.runs += runs; 
     currentBatterStats.balls++; 
     currentBatterStats.currentWicketRuns += runs;
-    currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
     
-    let tType = null; 
+    currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
+
+    let tType = null;
     if (!gameState.isPlayerBatting && runs === 6) {
-        tType = "six"; 
+        tType = "six";
     }
     
     let comment = "";
@@ -1370,11 +1413,13 @@ function handleRuns(runs) {
     } else { 
         comment = getRandomCommentary(commentaryDB.run_1_3).replace(/\[RUNS\]/g, runs);
     }
-    writeCommentary(comment, tType);
     
+    writeCommentary(comment, tType);
+
     if (gameState.isPlayerBatting && currentBatterStats.runs >= 100 && !currentBatterStats.hitCentury) { 
         currentBatterStats.hitCentury = true; 
         fireConfetti(); 
+        
         if (currentUser) { 
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
             if (usersDB[currentUser] && !usersDB[currentUser].achievements.hitman) { 
@@ -1415,6 +1460,7 @@ function triggerInningsChange(currentBatterStats, reason) {
     gameState.innings = 2; 
     gameState.target = currentBatterStats.runs + 1; 
     gameState.isPlayerBatting = !gameState.isPlayerBatting;
+    
     gameState.playerConsecZeros = 0; 
     gameState.compConsecZeros = 0; 
     gameState.isTransitioning = true; 
@@ -1437,13 +1483,12 @@ function triggerInningsChange(currentBatterStats, reason) {
 
 function drawWormChart() {
     const ctxElement = document.getElementById('wormChart'); 
-    
     if (!ctxElement) return;
     
     if (wormChartInstance) {
         wormChartInstance.destroy();
     }
-    
+
     let maxB = Math.max(gameState.playerStats.balls, gameState.compStats.balls); 
     let labels = Array.from({length: maxB + 1}, (_, i) => i);
     
@@ -1462,7 +1507,7 @@ function drawWormChart() {
             pData[i] = pData[i-1]; 
         }
     }
-    
+
     let cData = Array(maxB + 1).fill(null); 
     let cRadii = Array(maxB + 1).fill(0);
     
@@ -1478,32 +1523,59 @@ function drawWormChart() {
             cData[i] = cData[i-1]; 
         }
     }
-    
-    wormChartInstance = new Chart(ctxElement.getContext('2d'), { 
-        type: 'line', 
-        data: { 
-            labels: labels, 
-            datasets: [ 
-                { label: 'Your Score', data: pData, borderColor: '#00d2ff', backgroundColor: '#00d2ff', borderWidth: 3, pointRadius: pRadii, pointBackgroundColor: '#ff2a2a', tension: 0.1 }, 
-                { label: 'COM Score', data: cData, borderColor: '#ff2a2a', backgroundColor: '#ff2a2a', borderWidth: 3, pointRadius: cRadii, pointBackgroundColor: '#fff', borderDash: [5, 5], tension: 0.1 } 
-            ] 
-        }, 
+
+    wormChartInstance = new Chart(ctxElement.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                { 
+                    label: 'Your Score', 
+                    data: pData, 
+                    borderColor: '#00d2ff', 
+                    backgroundColor: '#00d2ff', 
+                    borderWidth: 3, 
+                    pointRadius: pRadii, 
+                    pointBackgroundColor: '#ff2a2a', 
+                    tension: 0.1 
+                },
+                { 
+                    label: 'COM Score', 
+                    data: cData, 
+                    borderColor: '#ff2a2a', 
+                    backgroundColor: '#ff2a2a', 
+                    borderWidth: 3, 
+                    pointRadius: cRadii, 
+                    pointBackgroundColor: '#fff', 
+                    borderDash: [5, 5], 
+                    tension: 0.1 
+                }
+            ]
+        },
         options: { 
-            plugins: { legend: { labels: { color: '#fff' } } }, 
+            plugins: { 
+                legend: { labels: { color: '#fff' } } 
+            }, 
             scales: { 
-                y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
-                x: { title: { display: true, text: 'Balls', color: '#a1a1aa' }, grid: {color: 'rgba(255,255,255,0.1)'} } 
+                y: { 
+                    beginAtZero: true, 
+                    grid: {color: 'rgba(255,255,255,0.1)'} 
+                }, 
+                x: { 
+                    title: { display: true, text: 'Balls', color: '#a1a1aa' }, 
+                    grid: {color: 'rgba(255,255,255,0.1)'} 
+                } 
             }, 
             color: '#fff' 
-        } 
+        }
     });
 }
 
 function endGame(result) {
     gameState.gameOver = true; 
     actionArea.style.display = 'none'; 
-    const endControls = document.getElementById('end-game-controls'); 
     
+    const endControls = document.getElementById('end-game-controls'); 
     endControls.style.display = 'flex'; 
     document.body.classList.remove('danger-pulse');
     
@@ -1531,14 +1603,12 @@ function endGame(result) {
         let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
         let stats = usersDB[currentUser];
         
-        if (result === "PLAYER_WINS") {
-            if (stats.tournamentLevel === gameState.currentBoss) {
-                stats.tournamentLevel++; 
-                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-                setTimeout(() => { 
-                    showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); 
-                }, 1000);
-            }
+        if (result === "PLAYER_WINS" && stats.tournamentLevel === gameState.currentBoss) {
+            stats.tournamentLevel++; 
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            setTimeout(() => { 
+                showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); 
+            }, 1000);
         }
         
         const playAgainBtn = endControls.querySelectorAll('button')[1];
@@ -1556,7 +1626,7 @@ function evaluateAchievements(stats) {
     if (!stats.achLevels) {
         stats.achLevels = {};
     }
-    
+
     const achievementList = [
         { id: 'veteran', icon: '🎖️', title: 'Veteran', desc: 'Play matches', thresholds: [50, 100, 250, 500, 1000], getVal: s => s.matches },
         { id: 'champion', icon: '🏆', title: 'Champion', desc: 'Win matches', thresholds: [20, 50, 150, 300, 500], getVal: s => s.wins },
@@ -1573,35 +1643,41 @@ function evaluateAchievements(stats) {
         { id: 'wall', icon: '🧱', title: 'The Wall', desc: 'Defend successfully', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.careerDefenses },
         { id: 'centurion', icon: '🏏', title: 'Centurion', desc: 'Score centuries', thresholds: [1, 10, 25, 50, 100], getVal: s => s.careerCenturies || 0 },
         { id: 'fiftymaker', icon: '💥', title: 'Fifty Maker', desc: 'Score half-centuries', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerFifties || 0 },
-        { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 },
+        { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 }, 
         { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 20, 50, 100, 250], getVal: s => s.bossesDefeated || 0 },
-        { id: 'wealthy', icon: '💎', title: 'Wealthy', desc: 'Lifetime coins', thresholds: [1000, 10000, 50000, 100000, 500000], getVal: s => s.lifetimeCoins || 0 },
         { id: 'xp_farmer', icon: '🌟', title: 'XP Farmer', desc: 'Lifetime XP', thresholds: [5000, 25000, 100000, 250000, 1000000], getVal: s => s.xp || 0 },
         { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
         { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
         { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
         { id: 'wide_receiver', icon: '👐', title: 'Wide Receiver', desc: 'Extras received', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.totalExtrasReceived || 0 },
         { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
-        { id: 'perfect_ten', icon: '🔥', title: 'Perfect Ten', desc: 'Take 10 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.tenWicketHauls || 0 }
+        { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
     ];
 
     achievementList.forEach(ach => {
         let val = ach.getVal(stats);
-        let level = 0;
+        let level = 1;
         
         for (let i = 0; i < ach.thresholds.length; i++) {
             if (val >= ach.thresholds[i]) {
-                level = i + 1;
+                level = i + 2; 
             } else {
                 break;
             }
         }
         
-        let oldLvl = stats.achLevels[ach.id] || 0;
+        if (level > ach.thresholds.length + 1) {
+            level = 'MAX';
+        }
         
-        if (level > oldLvl) {
+        let oldLvl = stats.achLevels[ach.id] || 1;
+        
+        if (level !== 'MAX' && level > oldLvl) {
             stats.achLevels[ach.id] = level;
-            showToast(`🏆 UNLOCKED: ${ach.title} Level ${level}!`);
+            showToast(`🏆 LEVELED UP: ${ach.title} is now Level ${level}!`);
+        } else if (level === 'MAX' && oldLvl !== 'MAX') {
+            stats.achLevels[ach.id] = 'MAX';
+            showToast(`🌟 MAXED OUT: ${ach.title} reached MAX Level!`);
         }
     });
 }
@@ -1653,14 +1729,17 @@ function saveLifetimeStats(result) {
     if (gameState.playerStats.runs >= 50 && gameState.playerStats.runs < 100) {
         stats.careerFifties = (stats.careerFifties || 0) + 1;
     }
+    
     if (gameState.playerStats.runs >= 100 && gameState.playerStats.runs < 200) {
         stats.careerCenturies = (stats.careerCenturies || 0) + 1;
     }
+    
     if (gameState.playerStats.runs >= 200) {
         stats.careerDoubleCenturies = (stats.careerDoubleCenturies || 0) + 1;
     }
-    if (gameState.compStats.wicketsLost >= 10) {
-        stats.tenWicketHauls = (stats.tenWicketHauls || 0) + 1;
+    
+    if (gameState.compStats.wicketsLost >= 5) {
+        stats.fiveWicketHauls = (stats.fiveWicketHauls || 0) + 1;
     }
 
     if (gameState.isTournament && result === "PLAYER_WINS") {
@@ -1688,6 +1767,13 @@ function saveLifetimeStats(result) {
         stats.last20Innings.push({ runs: w.runs, notOut: false }); 
     });
     
+    // FIX FOR AI DUCKS: Check if any AI batter scored 0 before getting out
+    gameState.compStats.wicketRunsHistory.forEach(w => {
+        if (w.runs === 0) {
+            stats.aiDucksGivens = (stats.aiDucksGivens || 0) + 1;
+        }
+    });
+    
     if (gameState.playerStats.wicketsLost < gameState.maxWickets && gameState.playerStats.balls > 0) { 
         stats.notOutMatches += 1; 
         stats.last20Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true }); 
@@ -1699,10 +1785,6 @@ function saveLifetimeStats(result) {
 
     stats.totalRunsConceded += gameState.compStats.runs; 
     stats.totalBallsBowled += gameState.compStats.balls;
-    
-    if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) { 
-        stats.aiDucksGivens += 1; 
-    }
 
     if (gameState.compStats.wicketsLost > 0) {
         let currentWkts = gameState.compStats.wicketsLost; 
@@ -1736,8 +1818,73 @@ function saveLifetimeStats(result) {
     showToast(`⬆️ +${matchXP} XP Earned!`);
 }
 
+function populateStats(prefix, bStats, wStats) {
+    const rElement = document.getElementById(`${prefix}-runs`); 
+    if (rElement) rElement.innerText = bStats.runs;
+    
+    const wElement = document.getElementById(`${prefix}-wickets`); 
+    if (wElement) wElement.innerText = bStats.wicketsLost;
+    
+    const bElement = document.getElementById(`${prefix}-balls`); 
+    if (bElement) bElement.innerText = bStats.balls;
+    
+    const srElement = document.getElementById(`${prefix}-sr`); 
+    if (srElement) srElement.innerText = bStats.balls > 0 ? ((bStats.runs / bStats.balls) * 100).toFixed(2) : "0.00";
+    
+    const rrElement = document.getElementById(`${prefix}-rr`); 
+    if (rrElement) rrElement.innerText = bStats.balls > 0 ? ((bStats.runs / (bStats.balls/6))).toFixed(2) : "0.00";
+    
+    const boundsElement = document.getElementById(`${prefix}-bounds`); 
+    if (boundsElement) boundsElement.innerText = bStats.fours + bStats.sixes;
+    
+    const foursElement = document.getElementById(`${prefix}-4s`); 
+    if (foursElement) foursElement.innerText = bStats.fours;
+    
+    const sixesElement = document.getElementById(`${prefix}-6s`); 
+    if (sixesElement) sixesElement.innerText = bStats.sixes;
+    
+    const outElement = document.getElementById(`${prefix}-out`); 
+    if (outElement) outElement.innerText = bStats.outOn; 
+    
+    const extrasElement = document.getElementById(`${prefix}-extras`); 
+    if (extrasElement) extrasElement.innerText = bStats.extras;
+    
+    const oversBowled = wStats.balls / 6; 
+    const ecoElement = document.getElementById(`${prefix}-eco`); 
+    if (ecoElement) ecoElement.innerText = oversBowled > 0 ? (wStats.runs / oversBowled).toFixed(2) : "0.00";
+}
+
+function generateAIInsight(result) {
+    const insightBox = document.getElementById('ai-insight-text'); 
+    
+    if (!insightBox) return;
+    
+    if (gameState.isTournament) {
+        insightBox.innerText = `Boss Fight Completed. ${result === 'PLAYER_WINS' ? 'You mastered their technique!' : 'Analyze their unique Throw DNA and try again.'}`;
+    } else if (gameState.aiDifficulty === 'hard') {
+        insightBox.innerText = "Pro AI Engine Active: The computer analyzed your entire career throw history to predict your moves. Keep randomizing!";
+    } else {
+        insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
+    }
+}
+
+function resetToToss() { 
+    localStorage.removeItem('hc_tourney_boss');
+    location.reload(); 
+}
+
+function openAnalysis() { 
+    document.getElementById('analysis-modal').style.display = 'flex'; 
+    drawWormChart(); 
+}
+
+function closeAnalysis() { 
+    document.getElementById('analysis-modal').style.display = 'none'; 
+}
+
 function downloadPDF() {
     const btn = document.getElementById('pdf-btn'); 
+    
     if (!btn) return;
     
     const originalText = btn.innerHTML; 
@@ -1748,20 +1895,21 @@ function downloadPDF() {
         if (typeof html2pdf === 'undefined') {
             throw new Error("PDF Engine currently loading. Please wait a moment and click again.");
         }
-        
-        const pStats = gameState.playerStats; 
+
+        const pStats = gameState.playerStats;
         const cStats = gameState.compStats;
-        
-        const pSR = pStats.balls > 0 ? ((pStats.runs / pStats.balls) * 100).toFixed(2) : "0.00"; 
+
+        const pSR = pStats.balls > 0 ? ((pStats.runs / pStats.balls) * 100).toFixed(2) : "0.00";
         const cSR = cStats.balls > 0 ? ((cStats.runs / cStats.balls) * 100).toFixed(2) : "0.00";
-        const pEco = cStats.balls > 0 ? (cStats.runs / (cStats.balls / 6)).toFixed(2) : "0.00"; 
+        
+        const pEco = cStats.balls > 0 ? (cStats.runs / (cStats.balls / 6)).toFixed(2) : "0.00";
         const cEco = pStats.balls > 0 ? (pStats.runs / (pStats.balls / 6)).toFixed(2) : "0.00";
 
-        let innStatusText = "MATCH REPORT"; 
-        const innEl = document.getElementById('innings-status'); 
+        let innStatusText = "MATCH REPORT";
+        const innEl = document.getElementById('innings-status');
         
-        if (innEl) { 
-            innStatusText = innEl.innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim(); 
+        if (innEl) {
+            innStatusText = innEl.innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim();
         }
 
         const wormCanvas = document.getElementById('wormChart');
@@ -1785,13 +1933,16 @@ function downloadPDF() {
         
         let pdfHTML = `
             <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
+                
                 <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
                     <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
                     <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
                 </div>
+
                 <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
                     <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${innStatusText}</h3>
                 </div>
+
                 <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
                     <tr>
                         <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
@@ -1835,28 +1986,32 @@ function downloadPDF() {
             
             let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
             
-            if (safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) { 
-                lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;"; 
-            } else if (safeText.includes("+4") || safeText.includes("+6")) { 
-                lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;"; 
-            } else if (safeText.includes("---")) { 
-                lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;"; 
+            if (safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
+                lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+            } else if (safeText.includes("+4") || safeText.includes("+6")) {
+                lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+            } else if (safeText.includes("---")) {
+                lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
             }
 
             if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
-                if (currentGroup !== '') { 
-                    pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`; 
+                if (currentGroup !== '') {
+                    pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
+                                    <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                                </tr>`;
                 }
                 currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
-            } else { 
-                currentGroup += `<div style="${lineStyle}">${safeText}</div>`; 
+            } else {
+                currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
             }
         });
         
-        if (currentGroup !== '') { 
-            pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;"><td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td></tr>`; 
+        if (currentGroup !== '') {
+            pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
+                            <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                        </tr>`;
         }
-        
+
         pdfHTML += `
                         </tbody>
                     </table>
@@ -1867,34 +2022,36 @@ function downloadPDF() {
             </div>`;
 
         printElement.innerHTML = pdfHTML;
-        
-        const opt = { 
+
+        const opt = {
             margin: 0.4, 
             filename: 'Hand_Clash_Match_Report.pdf', 
-            image: { type: 'jpeg', quality: 0.98 }, 
+            image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true }, 
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }, 
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: 'css', avoid: 'tr' } 
         };
 
-        html2pdf().set(opt).from(printElement).save().then(() => { 
+        html2pdf().set(opt).from(printElement).save().then(() => {
             btn.innerHTML = originalText; 
             btn.disabled = false; 
-        }).catch(err => { 
-            console.error("PDF engine promise caught an error:", err); 
-            btn.innerHTML = "❌ PDF ERROR"; 
-            setTimeout(() => { 
+        }).catch(err => {
+            console.error("PDF engine promise caught an error:", err);
+            btn.innerHTML = "❌ PDF ERROR";
+            
+            setTimeout(() => {
                 btn.innerHTML = originalText; 
                 btn.disabled = false; 
-            }, 3000); 
+            }, 3000);
         });
 
-    } catch(err) { 
-        console.error("DOM access failed before PDF generation:", err); 
-        btn.innerHTML = "❌ SYSTEM ERROR"; 
-        setTimeout(() => { 
+    } catch(err) {
+        console.error("DOM access failed before PDF generation:", err);
+        btn.innerHTML = "❌ SYSTEM ERROR";
+        
+        setTimeout(() => {
             btn.innerHTML = originalText; 
             btn.disabled = false; 
-        }, 3000); 
+        }, 3000);
     }
 }
