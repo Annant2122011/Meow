@@ -1723,6 +1723,8 @@ function saveLifetimeStats(result) {
     matchXP += (gameState.compStats.wicketsLost * 10);
     
     stats.xp = (stats.xp || 0) + matchXP;
+   let matchCoins = Math.floor(matchXP * 0.5);
+stats.coins = (stats.coins || 0) + matchCoins;
 
     stats.matches += 1;
     
@@ -1838,7 +1840,7 @@ function saveLifetimeStats(result) {
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
-    showToast(`⬆️ +${matchXP} XP Earned!`);
+   showToast(⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!);
 }
 
 function populateStats(prefix, bStats, wStats) {
