@@ -46,6 +46,8 @@ let gameState = {
         wicketRunsHistory: [], 
         wormData: [{ball: 0, runs: 0, wkt: false}] 
     }
+   // NEW TOSS LOGIC TRACKER
+let tossData = { caller: null, call: null, result: null };
 };
 
 let currentUser = null;
@@ -649,72 +651,105 @@ function setDifficulty(level, btnId) {
     }
 }
 
+// --- THE ANIMATED COIN TOSS SYSTEM ---
 function goToToss() {
-    if (setupScreen) {
-        setupScreen.style.display = 'none';
-    }
-    
-    if (tossScreen) {
-        tossScreen.style.display = 'block';
-    }
+    if (setupScreen) setupScreen.style.display = 'none';
+    if (tossScreen) tossScreen.style.display = 'block';
     
     let aiMode = gameState.aiDifficulty === 'hard' ? "PRO AI (Career Analysis Active)" : "CASUAL AI (Random)";
     let formatMode = gameState.maxBalls === Infinity ? "CLASSIC FORMAT" : `T${gameState.maxBalls/6} FORMAT`;
-    
     gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
+
+    // Reset UI
+    document.getElementById('toss-result-screen').style.display = 'none';
+    const coin = document.getElementById('coin');
+    if (coin) {
+        coin.style.transition = 'none';
+        coin.style.transform = 'rotateY(0deg)';
+    }
+    
+    // Who gets to call? (50/50)
+    tossData.caller = Math.random() < 0.5 ? 'player' : 'comp';
+    
+    const statusText = document.getElementById('toss-status-text');
+    const pControls = document.getElementById('player-call-controls');
+    const cControls = document.getElementById('comp-call-controls');
+
+    if (tossData.caller === 'player') {
+        statusText.innerHTML = "You won the chance to call! <br><span style='color: var(--accent-blue);'>Heads or Tails?</span>";
+        pControls.style.display = 'flex';
+        cControls.style.display = 'none';
+    } else {
+        tossData.call = Math.random() < 0.5 ? 'heads' : 'tails';
+        statusText.innerHTML = `Computer is calling... <br><span style='color: var(--accent-red); text-transform: uppercase;'>${tossData.call}</span>`;
+        pControls.style.display = 'none';
+        cControls.style.display = 'flex';
+    }
 }
 
-function chooseToss(choice) {
-    gameState.tossChoice = choice; 
-    tossStep1.style.display = 'none'; 
-    tossStep2.style.display = 'block'; 
-    tossChoiceText.innerText = `You chose ${choice.toUpperCase()}`;
+function callCoin(choice) {
+    tossData.call = choice;
+    document.getElementById('player-call-controls').style.display = 'none';
+    document.getElementById('toss-status-text').innerHTML = `You called: <span style='color: var(--accent-blue); text-transform: uppercase;'>${choice}</span>`;
+    executeCoinFlip();
 }
 
-function playToss(playerNum) {
-    tossStep2.style.display = 'none'; 
-    tossResultScreen.style.display = 'block';
+function executeCoinFlip() {
+    document.getElementById('comp-call-controls').style.display = 'none';
+    const coin = document.getElementById('coin');
     
-    const compNum = Math.floor(Math.random() * 6) + 1; 
-    const sum = playerNum + compNum; 
-    const isSumEven = sum % 2 === 0;
+    // Give browser a frame to apply the no-transition reset, then spin
+    setTimeout(() => {
+        if(coin) coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
+        tossData.result = Math.random() < 0.5 ? 'heads' : 'tails';
+        
+        // Heads = 5 spins (1800deg). Tails = 5.5 spins (1980deg).
+        let rotateAmount = (tossData.result === 'heads') ? 1800 : 1980;
+        if(coin) coin.style.transform = `rotateY(${rotateAmount}deg)`;
+        
+        setTimeout(processTossResult, 3200);
+    }, 50);
+}
+
+function processTossResult() {
+    const resultScreen = document.getElementById('toss-result-screen');
+    if (resultScreen) resultScreen.style.display = 'block';
     
-    document.getElementById('toss-player-hand').innerText = handEmojis[playerNum];
-    document.getElementById('toss-computer-hand').innerText = handEmojis[compNum];
-    document.getElementById('toss-sum-text').innerText = `${playerNum} + ${compNum} = ${sum} (${isSumEven ? 'Even' : 'Odd'})`;
-    
-    const playerWins = (gameState.tossChoice === 'even' && isSumEven) || (gameState.tossChoice === 'odd' && !isSumEven);
-    gameState.commentaryHistory.push(`🪙 TOSS: You threw ${playerNum}, Computer threw ${compNum}. ${playerWins ? 'You won!' : 'Computer won.'}`);
+    const playerWins = (tossData.caller === 'player' && tossData.call === tossData.result) || 
+                       (tossData.caller === 'comp' && tossData.call !== tossData.result);
+
+    gameState.commentaryHistory.push(`🪙 TOSS: It's ${tossData.result.toUpperCase()}! ${playerWins ? 'You won the toss!' : 'Computer won the toss.'}`);
 
     if (playerWins && currentUser) {
         let uDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-        uDB[currentUser].tossesWon += 1;
+        uDB[currentUser].tossesWon = (uDB[currentUser].tossesWon || 0) + 1;
         localStorage.setItem('hc_usersDB', JSON.stringify(uDB));
     }
 
+    const winText = document.getElementById('toss-winner-text');
+    const pDecision = document.getElementById('player-decision-box');
+    const cDecision = document.getElementById('computer-decision-box');
+
     if (playerWins) {
-        document.getElementById('toss-winner-text').innerText = "🎉 YOU WON THE TOSS!"; 
-        document.getElementById('toss-winner-text').style.color = 'var(--accent-neon)'; 
-        playerDecisionBox.style.display = 'block';
+        winText.innerText = "🎉 YOU WON THE TOSS!"; 
+        winText.style.color = 'var(--accent-neon)'; 
+        pDecision.style.display = 'block';
+        cDecision.style.display = 'none';
     } else {
-        document.getElementById('toss-winner-text').innerText = "🤖 COMPUTER WON THE TOSS!"; 
-        document.getElementById('toss-winner-text').style.color = 'var(--accent-red)';
+        winText.innerText = "🤖 COMPUTER WON THE TOSS!"; 
+        winText.style.color = 'var(--accent-red)';
+        pDecision.style.display = 'none';
         
         gameState.isPlayerBatting = Math.random() < 0.5 ? false : true;
         const compChoice = gameState.isPlayerBatting ? 'BOWL' : 'BAT';
         
         gameState.commentaryHistory.push(`🤖 Computer elected to ${compChoice} first.`);
         
-        let p = document.createElement('p'); 
-        p.style.color = "var(--text-bright)"; 
-        p.style.fontSize = "1.2rem"; 
-        p.innerHTML = `Computer chooses to <b>${compChoice}</b> first.`;
-        
-        computerDecisionBox.prepend(p); 
-        computerDecisionBox.style.display = 'block';
+        cDecision.innerHTML = `<p style="color: var(--text-bright); font-size: 1.2rem; margin-bottom: 15px;">Computer chooses to <b style="color: var(--accent-red);">${compChoice}</b> first.</p>
+                               <button class="btn pulse-btn" style="font-size: 1.5rem;" onclick="continueToMatch()">Start Match ➡️</button>`;
+        cDecision.style.display = 'block';
     }
 }
-
 function startMatch(playerOptsToBat) {
     gameState.isPlayerBatting = playerOptsToBat;
     gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
