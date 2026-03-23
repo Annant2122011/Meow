@@ -2174,4 +2174,4 @@ function applyCosmetics() {
         if (u.equippedCoin !== 'default') { coinHeads.classList.add('coin-' + u.equippedCoin); coinTails.classList.add('coin-' + u.equippedCoin); }
         if (u.equippedCoin === 'bitcoin') { coinHeads.innerHTML = '₿'; coinTails.innerHTML = '₿'; } else { coinHeads.innerHTML = 'HEADS'; coinTails.innerHTML = 'TAILS'; }
     }
-}
+
