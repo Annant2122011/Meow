@@ -36,7 +36,7 @@ let throwDnaInstance = null;
 let fatalChartInstance = null;
 let wormChartInstance = null;
 
-// UPDATED EMOJI: 6 is now Thumbs Up
+// EMOJI: 6 is now Thumbs Up
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
 // DOM Elements
@@ -216,7 +216,6 @@ function renderProfilePage() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
-    // CORRECTED: Batting Average = Total Runs / Total Matches
     let batAvg = "0.00";
     if (stats.matches > 0) {
         batAvg = (stats.totalRuns / stats.matches).toFixed(2);
@@ -667,7 +666,7 @@ function handleWide(batterNum) {
     currentBatterStats.extras += runsToAdd; 
     currentBatterStats.currentWicketRuns += runsToAdd;
     
-    // UPDATE WORM DATA
+    // UPDATE WORM DATA (Wide doesn't add a ball, so update last point)
     currentBatterStats.wormData[currentBatterStats.wormData.length - 1].runs = currentBatterStats.runs;
 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
@@ -789,6 +788,7 @@ function writeCommentary(text) {
     setTimeout(() => { commentaryBox.style.transform = 'scale(1)'; }, 200);
 }
 
+// --- WORM CHART GRAPHICS ---
 function drawWormChart() {
     const ctxElement = document.getElementById('wormChart');
     if (!ctxElement) return;
@@ -1039,19 +1039,22 @@ function downloadPDF() {
     btn.innerHTML = "⏳ GENERATING REPORT..."; 
     btn.disabled = true;
 
-    const printElement = document.createElement('div');
-    
-    let pdfHTML = `
-        <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
-            <div class="log-group" style="display: block; width: 100%; page-break-inside: avoid !important; break-inside: avoid;">
+    try {
+        const printElement = document.createElement('div');
+        
+        let pdfHTML = `
+            <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
+                
                 <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
                     <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
                     <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
                 </div>
+
                 <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
                     <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${document.getElementById('innings-status').innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim()}</h3>
                 </div>
-                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px;">
+
+                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
                     <tr>
                         <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
                             <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
@@ -1077,68 +1080,79 @@ function downloadPDF() {
                         </td>
                     </tr>
                 </table>
-            </div>
-            <div style="page-break-before: auto;">
-                <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
-                <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
-                    <tbody>
-    `;
 
-    let currentGroup = '';
-    gameState.commentaryHistory.forEach(log => {
-        let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
-        safeText = safeText.replace('↳', '>').trim();
-        
-        let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
-        
-        if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
-            lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
-        } else if (safeText.includes("+4") || safeText.includes("+6")) {
-            lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
-        } else if (safeText.includes("---")) {
-            lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
-        }
+                <div style="page-break-before: auto;">
+                    <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
+                        <tbody>
+        `;
 
-        if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
-            if (currentGroup !== '') {
-                pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                                <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
-                            </tr>`;
+        let currentGroup = '';
+        gameState.commentaryHistory.forEach(log => {
+            let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
+            safeText = safeText.replace('↳', '>').trim();
+            
+            let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
+            
+            if(safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
+                lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+            } else if (safeText.includes("+4") || safeText.includes("+6")) {
+                lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+            } else if (safeText.includes("---")) {
+                lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
             }
-            currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
-        } else {
-            currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
+
+            if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
+                if (currentGroup !== '') {
+                    pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
+                                    <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                                </tr>`;
+                }
+                currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
+            } else {
+                currentGroup += `<div style="${lineStyle}">${safeText}</div>`;
+            }
+        });
+        
+        if (currentGroup !== '') {
+            pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
+                            <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                        </tr>`;
         }
-    });
-    
-    if (currentGroup !== '') {
-        pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                        <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
-                    </tr>`;
+
+        pdfHTML += `
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">
+                    Generated by Hand Clash Arena &bull; &copy; 2026
+                </div>
+            </div>`;
+
+        printElement.innerHTML = pdfHTML;
+
+        // FIXED: Removed the aggressive .log-group wrap that caused the infinite loop.
+        const opt = {
+            margin: 0.4, 
+            filename: 'Hand_Clash_Match_Report.pdf', 
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: 'css', avoid: 'tr' } 
+        };
+
+        html2pdf().set(opt).from(printElement).save().then(() => { 
+            btn.innerHTML = originalText; 
+            btn.disabled = false; 
+        }).catch(err => {
+            console.error(err);
+            btn.innerHTML = "❌ PDF ERROR";
+            setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
+        });
+
+    } catch(err) {
+        console.error(err);
+        btn.innerHTML = "❌ SYSTEM ERROR";
+        setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
     }
-
-    pdfHTML += `
-                    </tbody>
-                </table>
-            </div>
-            <div class="log-group" style="display: block; width: 100%; margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid !important; break-inside: avoid;">
-                Generated by Hand Clash Arena &bull; &copy; 2026
-            </div>
-        </div>`;
-
-    printElement.innerHTML = pdfHTML;
-
-    const opt = {
-        margin: 0.4, 
-        filename: 'Hand_Clash_Match_Report.pdf', 
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true }, 
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: 'css', avoid: ['.log-group', 'tr'] } 
-    };
-
-    html2pdf().set(opt).from(printElement).save().then(() => { 
-        btn.innerHTML = originalText; 
-        btn.disabled = false; 
-    });
 }
