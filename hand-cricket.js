@@ -17,6 +17,13 @@ let gameState = {
     playerConsecZeros: 0,
     compConsecZeros: 0,
     commentaryHistory: [], 
+    
+    // TOURNAMENT STATE
+    isTournament: false,
+    currentBoss: null,
+    playerMatchBatting: { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 }, 
+    playerMatchBowling: { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 }, 
+
     playerStats: { 
         runs: 0, 
         balls: 0, 
@@ -46,9 +53,8 @@ let gameState = {
         wicketRunsHistory: [], 
         wormData: [{ball: 0, runs: 0, wkt: false}] 
     }
- 
 };
-  // NEW TOSS LOGIC TRACKER
+
 let tossData = { caller: null, call: null, result: null };
 let currentUser = null;
 let srChartInstance = null;
@@ -57,7 +63,6 @@ let throwDnaInstance = null;
 let fatalChartInstance = null;
 let wormChartInstance = null;
 
-// EMOJI: 6 is now Thumbs Up
 const handEmojis = { 
     0: '🛡️', 
     1: '☝️', 
@@ -89,23 +94,24 @@ const zeroBtn = document.getElementById('zero-btn');
 window.onload = function() {
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
+    const isTournamentPage = document.getElementById('tournament-page-container') !== null;
 
-    if (isProfilePage) {
+    if (isProfilePage || isTournamentPage) {
         if (!storedUser) { 
             window.location.href = 'index.html'; 
             return; 
         }
         currentUser = storedUser;
         syncUserData(currentUser);
-        renderProfilePage();
+        
+        if (isProfilePage) renderProfilePage();
+        if (isTournamentPage) renderTournamentPage();
     } else {
         if (storedUser) {
             loadUser(storedUser);
         } else {
             const loginModal = document.getElementById('login-modal');
-            if (loginModal) {
-                loginModal.style.display = 'flex';
-            }
+            if (loginModal) loginModal.style.display = 'flex';
         }
     }
 };
@@ -133,21 +139,10 @@ function syncUserData(username) {
     u.ducks = u.ducks || 0; 
     u.highestScore = u.highestScore || 0;
     
-    if (!u.bestSpell) {
-        u.bestSpell = { wickets: 0, runs: 0 };
-    }
-    
-    if (!u.battingThrows) {
-        u.battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
-    }
-    
-    if (!u.bowlingThrows) {
-        u.bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
-    }
-    
-    if (!u.fatalThrows) {
-        u.fatalThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
-    }
+    if (!u.bestSpell) u.bestSpell = { wickets: 0, runs: 0 };
+    if (!u.battingThrows) u.battingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
+    if (!u.bowlingThrows) u.bowlingThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
+    if (!u.fatalThrows) u.fatalThrows = { '0':0, '1':0, '2':0, '3':0, '4':0, '5':0, '6':0 };
     
     u.careerDefenses = u.careerDefenses || 0; 
     u.careerSixes = u.careerSixes || 0; 
@@ -158,27 +153,17 @@ function syncUserData(username) {
     u.notOutMatches = u.notOutMatches || 0; 
     u.careerDotsBowled = u.careerDotsBowled || 0;
     u.xp = u.xp || 0;
+    u.tournamentLevel = u.tournamentLevel || 0;
 
     if (!u.achievements) {
         u.achievements = {};
     }
     
     const defAch = { 
-        theWall: false, 
-        hitman: false, 
-        sniper: false, 
-        veteran: false, 
-        champion: false, 
-        runMachine: false, 
-        wicketTaker: false, 
-        sixerKing: false, 
-        boundaryHitter: false, 
-        duckHunter: false, 
-        chaser: false, 
-        luckyCoin: false, 
-        marathon: false, 
-        unbreakable: false, 
-        economical: false 
+        theWall: false, hitman: false, sniper: false, veteran: false, 
+        champion: false, runMachine: false, wicketTaker: false, sixerKing: false, 
+        boundaryHitter: false, duckHunter: false, chaser: false, luckyCoin: false, 
+        marathon: false, unbreakable: false, economical: false 
     };
     
     for (let key in defAch) { 
@@ -187,13 +172,8 @@ function syncUserData(username) {
         }
     }
     
-    if (!u.last10SR) {
-        u.last10SR = [];
-    }
-    
-    if (!u.last20Innings) {
-        u.last20Innings = []; 
-    }
+    if (!u.last10SR) u.last10SR = [];
+    if (!u.last20Innings) u.last20Innings = []; 
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -212,15 +192,9 @@ function loginUser() {
 }
 
 function getRankDetails(xp) {
-    if (xp < 1000) {
-        return { title: 'Gully Cricketer', class: 'rank-gully' };
-    }
-    if (xp < 3000) {
-        return { title: 'Club Player', class: 'rank-club' };
-    }
-    if (xp < 7000) {
-        return { title: 'State Pro', class: 'rank-state' };
-    }
+    if (xp < 1000) return { title: 'Gully Cricketer', class: 'rank-gully' };
+    if (xp < 3000) return { title: 'Club Player', class: 'rank-club' };
+    if (xp < 7000) return { title: 'State Pro', class: 'rank-state' };
     return { title: 'Cricket God', class: 'rank-god' };
 }
 
@@ -246,22 +220,35 @@ function loadUser(username) {
     const profileBtn = document.getElementById('user-profile-btn');
     const avatarText = document.getElementById('avatar-text');
     
-    if (loginModal) {
-        loginModal.style.display = 'none';
-    }
-    
-    if (profileBtn) {
-        profileBtn.style.display = 'block';
-    }
-    
-    if (avatarText) {
-        avatarText.innerText = username.charAt(0);
-    }
+    if (loginModal) loginModal.style.display = 'none';
+    if (profileBtn) profileBtn.style.display = 'block';
+    if (avatarText) avatarText.innerText = username.charAt(0);
     
     applyRankUI(username, 'header-avatar-box');
     
-    if (setupScreen) {
-        setupScreen.style.display = 'block';
+    // --- TOURNAMENT INTERCEPTOR ---
+    const activeBoss = localStorage.getItem('hc_tourney_boss');
+    
+    if (activeBoss !== null) {
+        gameState.isTournament = true;
+        gameState.currentBoss = parseInt(activeBoss);
+        
+        // Force Standardized Boss Rules: T5 Match
+        gameState.maxWickets = 3; 
+        gameState.maxBalls = 30;
+        
+        if (setupScreen) setupScreen.style.display = 'none';
+        
+        const sub = document.querySelector('.game-subtitle');
+        if (sub) {
+            sub.innerText = `BOSS FIGHT: Level ${gameState.currentBoss + 1}`;
+            sub.style.color = "var(--accent-red)";
+            sub.style.fontWeight = "bold";
+        }
+        
+        goToToss(); 
+    } else {
+        if (setupScreen) setupScreen.style.display = 'block';
     }
 }
 
@@ -274,14 +261,61 @@ function goToProfile() {
     window.location.href = 'profile.html';
 }
 
+// --- THE GAUNTLET MENU LOGIC ---
+function renderTournamentPage() {
+    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+    const stats = usersDB[currentUser];
+    const tLevel = stats.tournamentLevel || 0;
+    
+    const bosses = [
+        { name: "The Rookie", icon: "🟢", desc: "Plays entirely randomly. A good warmup.", color: "gray" },
+        { name: "The Wall", icon: "🧱", desc: "Defends heavily. Hard to score boundaries against.", color: "var(--accent-blue)" },
+        { name: "The Slogger", icon: "🏏", desc: "Highly aggressive. Throws massive numbers.", color: "orange" },
+        { name: "The Sniper", icon: "🎯", desc: "Reads your career stats. Always predicts your most likely move.", color: "var(--accent-red)" },
+        { name: "The Grandmaster", icon: "👑", desc: "Reads your CURRENT match patterns. Learns your strategy in real-time.", color: "var(--accent-neon)" }
+    ];
+
+    let html = '<div class="boss-grid">';
+    
+    bosses.forEach((boss, i) => {
+        let statusClass = 'boss-locked';
+        let actionHtml = `<span class="locked-badge">🔒 LOCKED</span>`;
+        
+        if (i < tLevel) {
+            statusClass = 'boss-defeated';
+            actionHtml = `<span class="defeated-badge">✅ DEFEATED</span> <button class="fight-btn" style="background:gray; margin-left:15px; font-size: 0.9rem;" onclick="startBossFight(${i})">REPLAY</button>`;
+        } else if (i === tLevel) {
+            statusClass = 'boss-active';
+            actionHtml = `<button class="fight-btn" onclick="startBossFight(${i})">⚔️ FIGHT</button>`;
+        }
+
+        html += `
+            <div class="boss-card ${statusClass}" style="border-left: 5px solid ${boss.color};">
+                <div class="boss-icon">${boss.icon}</div>
+                <div class="boss-info">
+                    <div class="boss-name" style="color: ${i === tLevel ? boss.color : 'white'};">${boss.name}</div>
+                    <div class="boss-desc">${boss.desc}</div>
+                </div>
+                <div>${actionHtml}</div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    document.getElementById('boss-grid-container').innerHTML = html;
+}
+
+function startBossFight(index) {
+    localStorage.setItem('hc_tourney_boss', index);
+    window.location.href = 'index.html'; 
+}
+
 // --- PROFILE PAGE RENDERER ---
 function renderProfilePage() {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const stats = usersDB[currentUser];
     
-    if (!stats) {
-        return logoutUser();
-    }
+    if (!stats) return logoutUser();
     
     document.getElementById('prof-username').innerText = currentUser;
     document.getElementById('prof-avatar-letter').innerText = currentUser.charAt(0);
@@ -309,6 +343,7 @@ function renderProfilePage() {
     document.getElementById('prof-hs').innerText = stats.highestScore;
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
+    // CORRECTED: Batting Average
     let batAvg = "0.00";
     if (stats.matches > 0) {
         batAvg = (stats.totalRuns / stats.matches).toFixed(2);
@@ -369,12 +404,8 @@ function renderProfilePage() {
             const textEl = document.getElementById(`prog-text-${ach.id}`);
             const badgeEl = document.getElementById(`badge-${ach.id}`);
             
-            if (fillEl) {
-                fillEl.style.width = `${pct}%`;
-            }
-            if (textEl) {
-                textEl.innerText = `${prog} / ${ach.max}`;
-            }
+            if (fillEl) fillEl.style.width = `${pct}%`;
+            if (textEl) textEl.innerText = `${prog} / ${ach.max}`;
             if (badgeEl && (prog >= ach.max || ach.unlocked)) {
                 badgeEl.classList.add('unlocked');
             }
@@ -382,18 +413,10 @@ function renderProfilePage() {
     }, 100);
 
     // --- CHART.JS GENERATION ---
-    if (srChartInstance) {
-        srChartInstance.destroy();
-    }
-    if (runsChartInstance) {
-        runsChartInstance.destroy();
-    }
-    if (throwDnaInstance) {
-        throwDnaInstance.destroy();
-    }
-    if (fatalChartInstance) {
-        fatalChartInstance.destroy();
-    }
+    if (srChartInstance) srChartInstance.destroy();
+    if (runsChartInstance) runsChartInstance.destroy();
+    if (throwDnaInstance) throwDnaInstance.destroy();
+    if (fatalChartInstance) fatalChartInstance.destroy();
 
     const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
@@ -412,17 +435,10 @@ function renderProfilePage() {
                 }] 
             },
             options: { 
-                plugins: { 
-                    legend: { display: false } 
-                }, 
+                plugins: { legend: { display: false } }, 
                 scales: { 
-                    y: { 
-                        beginAtZero: true, 
-                        grid: {color: 'rgba(255,255,255,0.1)'} 
-                    }, 
-                    x: { 
-                        grid: {color: 'rgba(255,255,255,0.1)'} 
-                    } 
+                    y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
+                    x: { grid: {color: 'rgba(255,255,255,0.1)'} } 
                 }, 
                 color: '#fff' 
             }
@@ -454,14 +470,8 @@ function renderProfilePage() {
                     } 
                 }, 
                 scales: { 
-                    y: { 
-                        beginAtZero: true, 
-                        grid: {color: 'rgba(255,255,255,0.1)'} 
-                    }, 
-                    x: { 
-                        grid: {color: 'rgba(255,255,255,0.1)'}, 
-                        ticks: { font: {size: 10} } 
-                    } 
+                    y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
+                    x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } 
                 }, 
                 color: '#fff' 
             }
@@ -485,9 +495,7 @@ function renderProfilePage() {
                 }] 
             },
             options: { 
-                plugins: { 
-                    legend: { display: false } 
-                }, 
+                plugins: { legend: { display: false } }, 
                 scales: { 
                     r: { 
                         min: 0, 
@@ -519,9 +527,7 @@ function renderProfilePage() {
                 }] 
             },
             options: { 
-                plugins: { 
-                    legend: { display: false } 
-                }, 
+                plugins: { legend: { display: false } }, 
                 scales: { 
                     r: { 
                         min: 0, 
@@ -653,16 +659,23 @@ function setDifficulty(level, btnId) {
 
 // --- THE ANIMATED COIN TOSS SYSTEM ---
 function goToToss() {
-    if (setupScreen) setupScreen.style.display = 'none';
-    if (tossScreen) tossScreen.style.display = 'block';
+    if (setupScreen) {
+        setupScreen.style.display = 'none';
+    }
+    
+    if (tossScreen) {
+        tossScreen.style.display = 'block';
+    }
     
     let aiMode = gameState.aiDifficulty === 'hard' ? "PRO AI (Career Analysis Active)" : "CASUAL AI (Random)";
     let formatMode = gameState.maxBalls === Infinity ? "CLASSIC FORMAT" : `T${gameState.maxBalls/6} FORMAT`;
+    
     gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
 
     // Reset UI
     document.getElementById('toss-result-screen').style.display = 'none';
     const coin = document.getElementById('coin');
+    
     if (coin) {
         coin.style.transition = 'none';
         coin.style.transform = 'rotateY(0deg)';
@@ -698,14 +711,18 @@ function executeCoinFlip() {
     document.getElementById('comp-call-controls').style.display = 'none';
     const coin = document.getElementById('coin');
     
-    // Give browser a frame to apply the no-transition reset, then spin
     setTimeout(() => {
-        if(coin) coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
+        if(coin) {
+            coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
+        }
+        
         tossData.result = Math.random() < 0.5 ? 'heads' : 'tails';
         
-        // Heads = 5 spins (1800deg). Tails = 5.5 spins (1980deg).
         let rotateAmount = (tossData.result === 'heads') ? 1800 : 1980;
-        if(coin) coin.style.transform = `rotateY(${rotateAmount}deg)`;
+        
+        if(coin) {
+            coin.style.transform = `rotateY(${rotateAmount}deg)`;
+        }
         
         setTimeout(processTossResult, 3200);
     }, 50);
@@ -713,7 +730,9 @@ function executeCoinFlip() {
 
 function processTossResult() {
     const resultScreen = document.getElementById('toss-result-screen');
-    if (resultScreen) resultScreen.style.display = 'block';
+    if (resultScreen) {
+        resultScreen.style.display = 'block';
+    }
     
     const playerWins = (tossData.caller === 'player' && tossData.call === tossData.result) || 
                        (tossData.caller === 'comp' && tossData.call !== tossData.result);
@@ -750,6 +769,7 @@ function processTossResult() {
         cDecision.style.display = 'block';
     }
 }
+
 function startMatch(playerOptsToBat) {
     gameState.isPlayerBatting = playerOptsToBat;
     gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
@@ -823,18 +843,87 @@ function updateMatchUI() {
     updateAtmosphere();
 }
 
-function getComputerThrow() {
-    let compNum; 
+// --- THE GAUNTLET BOSS AI LOGIC ---
+function getBossThrow(bossIndex) {
     let isCompBatting = !gameState.isPlayerBatting;
     
     if (gameState.compConsecZeros >= 2) {
         return Math.floor(Math.random() * 6) + 1;
     }
-    
-    if (gameState.aiDifficulty === 'easy' || !currentUser) {
-        return Math.floor(Math.random() * 7);
-    }
 
+    if (bossIndex === 0) {
+        // 1. The Rookie
+        return Math.floor(Math.random() * 6) + 1;
+    } 
+    else if (bossIndex === 1) {
+        // 2. The Wall
+        if (isCompBatting) {
+            const opts = [0, 0, 1, 1, 2, 2, 3, 4];
+            return opts[Math.floor(Math.random() * opts.length)];
+        } else {
+            const opts = [1, 2, 3, 4, 0];
+            return opts[Math.floor(Math.random() * opts.length)];
+        }
+    }
+    else if (bossIndex === 2) {
+        // 3. The Slogger
+        if (isCompBatting) {
+            const opts = [4, 4, 5, 5, 6, 6, 3];
+            return opts[Math.floor(Math.random() * opts.length)];
+        } else {
+            const opts = [4, 5, 6, 1, 2];
+            return opts[Math.floor(Math.random() * opts.length)];
+        }
+    }
+    else if (bossIndex === 3) {
+        // 4. The Sniper
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+        let stats = usersDB[currentUser];
+        
+        if (!stats) return Math.floor(Math.random() * 6) + 1;
+        
+        let pThrows = isCompBatting ? stats.bowlingThrows : stats.battingThrows;
+        let likelyThrow = Object.keys(pThrows).reduce((a, b) => pThrows[a] > pThrows[b] ? a : b);
+        
+        if (isCompBatting) {
+            let safeThrow = Math.floor(Math.random() * 6) + 1;
+            while(safeThrow === parseInt(likelyThrow)) {
+                safeThrow = Math.floor(Math.random() * 6) + 1;
+            }
+            return safeThrow;
+        } else {
+            if (Math.random() < 0.6) return parseInt(likelyThrow);
+            return Math.floor(Math.random() * 6) + 1;
+        }
+    }
+    else if (bossIndex === 4) {
+        // 5. The Grandmaster
+        let pThrows = isCompBatting ? gameState.playerMatchBowling : gameState.playerMatchBatting;
+        let likelyThrow = Object.keys(pThrows).reduce((a, b) => pThrows[a] > pThrows[b] ? a : b);
+        
+        if (pThrows[likelyThrow] < 3) {
+            // Fallback if not enough data
+            return getComputerThrowFallback(); 
+        }
+
+        if (isCompBatting) {
+            let safeThrow = Math.floor(Math.random() * 6) + 1;
+            while(safeThrow === parseInt(likelyThrow)) {
+                safeThrow = Math.floor(Math.random() * 6) + 1;
+            }
+            return safeThrow;
+        } else {
+            if (Math.random() < 0.8) return parseInt(likelyThrow);
+            return Math.floor(Math.random() * 6) + 1;
+        }
+    }
+    
+    return Math.floor(Math.random() * 6) + 1;
+}
+
+function getComputerThrowFallback() {
+    let isCompBatting = !gameState.isPlayerBatting;
+    
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
     let stats = usersDB[currentUser];
     
@@ -845,32 +934,50 @@ function getComputerThrow() {
     if (!isCompBatting) {
         let pBats = stats.battingThrows;
         let likelyThrow = Object.keys(pBats).reduce((a, b) => pBats[a] > pBats[b] ? a : b);
-        
-        if (Math.random() < 0.75) {
-            return parseInt(likelyThrow);
-        } else {
-            return Math.floor(Math.random() * 7);
-        }
+        return (Math.random() < 0.75) ? parseInt(likelyThrow) : Math.floor(Math.random() * 7);
     } else {
         let pBowls = stats.bowlingThrows;
         let likelyThrow = Object.keys(pBowls).reduce((a, b) => pBowls[a] > pBowls[b] ? a : b);
-        
-        compNum = Math.floor(Math.random() * 7);
+        let compNum = Math.floor(Math.random() * 7);
         let attempts = 0;
         
         while (compNum === parseInt(likelyThrow) && attempts < 5) { 
             compNum = Math.floor(Math.random() * 7); 
             attempts++; 
         }
-        
         return compNum;
     }
+}
+
+function getComputerThrow() {
+    if (gameState.isTournament) {
+        return getBossThrow(gameState.currentBoss);
+    }
+
+    let isCompBatting = !gameState.isPlayerBatting;
+    
+    if (gameState.compConsecZeros >= 2) {
+        return Math.floor(Math.random() * 6) + 1;
+    }
+    
+    if (gameState.aiDifficulty === 'easy' || !currentUser) {
+        return Math.floor(Math.random() * 7);
+    }
+
+    return getComputerThrowFallback();
 }
 
 // --- CORE GAMEPLAY LOGIC ---
 function playHand(playerNum) {
     if (gameState.gameOver || gameState.isTransitioning) {
         return;
+    }
+
+    // Track Current Match Stats
+    if (gameState.isPlayerBatting) {
+        gameState.playerMatchBatting[playerNum] = (gameState.playerMatchBatting[playerNum] || 0) + 1;
+    } else {
+        gameState.playerMatchBowling[playerNum] = (gameState.playerMatchBowling[playerNum] || 0) + 1;
     }
 
     if (currentUser) {
@@ -929,8 +1036,8 @@ function playHand(playerNum) {
     }
 }
 
-function getRandomCommentary(arr) { 
-    return arr[Math.floor(Math.random() * arr.length)]; 
+function getRandomCommentary(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function handleWicket(num, type) {
@@ -945,14 +1052,12 @@ function handleWicket(num, type) {
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
     currentBatterStats.outOn = (type === 'HIT_WICKET') ? '0 (Hit Wkt)' : (type === 'STUMPED' ? '0 (Stumped)' : num);
     
-    // MID-MATCH WICKET LOGGING FOR FATAL FLAWS & INNINGS CHART
     let outNum = (type === 'HIT_WICKET' || type === 'STUMPED') ? '0' : num.toString();
     currentBatterStats.dismissalHistory.push({ num: outNum, type: type });
     currentBatterStats.wicketRunsHistory.push({ runs: currentBatterStats.currentWicketRuns, notOut: false });
     
-    currentBatterStats.currentWicketRuns = 0; // Reset for next batter
+    currentBatterStats.currentWicketRuns = 0; 
 
-    // PUSH WORM DATA
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: true });
 
     if (type === 'STUMPED') {
@@ -981,7 +1086,6 @@ function handleWide(batterNum) {
     currentBatterStats.extras += runsToAdd; 
     currentBatterStats.currentWicketRuns += runsToAdd;
     
-    // UPDATE WORM DATA
     currentBatterStats.wormData[currentBatterStats.wormData.length - 1].runs = currentBatterStats.runs;
 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
@@ -1200,7 +1304,10 @@ function drawWormChart() {
 function endGame(result) {
     gameState.gameOver = true; 
     actionArea.style.display = 'none'; 
-    document.getElementById('end-game-controls').style.display = 'flex';
+    
+    const endControls = document.getElementById('end-game-controls');
+    endControls.style.display = 'flex';
+    
     document.body.classList.remove('danger-pulse');
     
     if (result === "PLAYER_WINS") { 
@@ -1222,6 +1329,31 @@ function endGame(result) {
     
     generateAIInsight(result); 
     saveLifetimeStats(result);
+
+    // --- TOURNAMENT POST-MATCH LOGIC ---
+    if (gameState.isTournament) {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let stats = usersDB[currentUser];
+        
+        if (result === "PLAYER_WINS") {
+            if (stats.tournamentLevel === gameState.currentBoss) {
+                stats.tournamentLevel++;
+                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                setTimeout(() => {
+                    showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`);
+                }, 1000);
+            }
+        }
+        
+        const playAgainBtn = endControls.querySelectorAll('button')[1];
+        if (playAgainBtn) {
+            playAgainBtn.innerText = "🔙 TO GAUNTLET";
+            playAgainBtn.onclick = function() {
+                localStorage.removeItem('hc_tourney_boss');
+                window.location.href = 'tournament.html';
+            };
+        }
+    }
 }
 
 function evaluateAchievements(stats) {
@@ -1401,7 +1533,9 @@ function generateAIInsight(result) {
     
     if (!insightBox) return;
     
-    if (gameState.aiDifficulty === 'hard') {
+    if (gameState.isTournament) {
+        insightBox.innerText = `Boss Fight Completed. ${result === 'PLAYER_WINS' ? 'You mastered their technique!' : 'Analyze their unique Throw DNA and try again.'}`;
+    } else if (gameState.aiDifficulty === 'hard') {
         insightBox.innerText = "Pro AI Engine Active: The computer analyzed your entire career throw history to predict your moves. Keep randomizing!";
     } else {
         insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
@@ -1409,6 +1543,7 @@ function generateAIInsight(result) {
 }
 
 function resetToToss() { 
+    localStorage.removeItem('hc_tourney_boss');
     location.reload(); 
 }
 
@@ -1455,14 +1590,17 @@ function downloadPDF() {
         
         let pdfHTML = `
             <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
+                
                 <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
                     <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
                     <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
                 </div>
+
                 <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
                     <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${innStatusText}</h3>
                 </div>
-                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px;">
+
+                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
                     <tr>
                         <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
                             <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
@@ -1488,7 +1626,11 @@ function downloadPDF() {
                         </td>
                     </tr>
                 </table>
-                <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
+
+                <div style="page-break-before: auto;">
+                    <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
+                        <tbody>
         `;
 
         let currentGroup = '';
@@ -1522,6 +1664,9 @@ function downloadPDF() {
         }
 
         pdfHTML += `
+                        </tbody>
+                    </table>
+                </div>
                 <div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">
                     Generated by Hand Clash Arena &bull; &copy; 2026
                 </div>
