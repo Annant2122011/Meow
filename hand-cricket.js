@@ -1739,6 +1739,7 @@ function endGame(result) {
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     
     generateAIInsight(result); 
+}
   function saveLifetimeStats(result) {
     if (!currentUser) return;
     
