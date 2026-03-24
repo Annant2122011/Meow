@@ -173,10 +173,13 @@ const shopItems = {
         { id: 'synthwave', name: 'Synthwave', price: 1500, icon: '🟪' },
         { id: 'blood', name: 'Blood Red', price: 2000, icon: '🟥' }
     ],
-    coins: [
-        { id: 'default', name: 'Gold Coin', price: 0, icon: '🟡' },
-        { id: 'silver', name: 'Silver Coin', price: 1000, icon: '⚪' },
-        { id: 'bitcoin', name: 'Crypto Coin', price: 2500, icon: '₿' }
+   coins: [
+        { id: 'default', name: 'Lead Coin', price: 0, icon: '🪙' }, 
+        { id: 'copper', name: 'Copper Coin', price: 10000, icon: '🟤' },
+        { id: 'silver', name: 'Silver Coin', price: 50000, icon: '⚪' }, 
+        { id: 'gold', name: 'Gold Coin', price: 250000, icon: '🟡' },
+        { id: 'bitcoin', name: 'Crypto Coin', price: 1000000, icon: '₿' }, 
+        { id: 'diamond', name: 'Diamond Coin', price: 5000000, icon: '💎' }
     ]
 };
 
@@ -394,10 +397,30 @@ function logoutUser() {
         window.location.href = 'index.html';
     }
 }
-
+function bindPfpUpload() {
+    let profBox = document.getElementById('prof-avatar-box');
+    if (profBox) {
+        profBox.style.cursor = 'pointer'; profBox.title = "Click to Upload Custom Profile Picture";
+        profBox.onclick = () => {
+            let input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+            input.onchange = e => {
+                let file = e.target.files[0]; let reader = new FileReader();
+                reader.onload = event => {
+                    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+                    usersDB[currentUser].customPFP = event.target.result;
+                    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                    applyCosmetics(); showToast("🖼️ Custom Profile Picture Updated!");
+                };
+                if(file) reader.readAsDataURL(file);
+            };
+            input.click();
+        };
+    }
+}
 // ==========================================
 // 3. UI, SHOP & COSMETICS
 // ==========================================
+
 
 function applyCosmetics() {
     if (!currentUser) return;
@@ -677,7 +700,7 @@ function renderProfilePage() {
     document.getElementById('prof-ties').innerText = stats.ties;
     document.getElementById('prof-total-runs').innerText = stats.totalRuns;
     document.getElementById('prof-total-wickets').innerText = stats.totalWicketsTaken;
-    document.getElementById('prof-hs').innerText = stats.highestScore;
+   document.getElementById('prof-hs').innerText = stats.highestScore + (stats.highestScoreNotOut ? '*' : '');
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
     let batAvg = "0.00";
@@ -927,19 +950,20 @@ function renderProfilePage() {
 // ==========================================
 
 function setFormat(wickets, balls, btnId) {
-    gameState.maxWickets = wickets; 
-    gameState.maxBalls = balls;
-    
-    document.querySelectorAll('.setup-btn').forEach(btn => { 
-        if (btn.id && btn.id.startsWith('btn-fmt')) {
-            btn.classList.remove('active-setup-btn'); 
-        }
-    });
-    
-    const activeBtn = document.getElementById(btnId); 
-    if (activeBtn) {
-        activeBtn.classList.add('active-setup-btn');
+    if (balls === Infinity) {
+        let userWickets = prompt("Classic Mode Selected! How many wickets do you want to play with? (Choose 1 to 5)", "3");
+        let parsed = parseInt(userWickets);
+        if (isNaN(parsed) || parsed < 1 || parsed > 5) { alert("Invalid input. Defaulting to 3 wickets."); parsed = 3; }
+        gameState.maxWickets = parsed; 
+        gameState.maxBalls = Infinity;
+        setDifficulty('easy', 'btn-diff-easy'); // Forces Non-AI Default
+        showToast(`Classic Mode: ${parsed} Wickets, Easy AI!`);
+    } else {
+        gameState.maxWickets = wickets; 
+        gameState.maxBalls = balls;
     }
+    document.querySelectorAll('.setup-btn').forEach(btn => { if (btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn'); });
+    const activeBtn = document.getElementById(btnId); if (activeBtn) activeBtn.classList.add('active-setup-btn');
 }
 
 function setDifficulty(level, btnId) {
@@ -1714,31 +1738,168 @@ function endGame(result) {
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     
     generateAIInsight(result); 
-    saveLifetimeStats(result);
-
-    if (gameState.isTournament) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-        let stats = usersDB[currentUser];
-        
-        if (result === "PLAYER_WINS") {
-            if (stats.tournamentLevel === gameState.currentBoss) {
-                stats.tournamentLevel++; 
-                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-                setTimeout(() => {
-                    showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`);
-                }, 1000);
-            }
+  function saveLifetimeStats(result) {
+    if (!currentUser) return;
+    
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+    let stats = usersDB[currentUser];
+    
+    // INCREASED BASE REWARDS FOR NEW EXPENSIVE ECONOMY
+    let matchXP = 100; 
+    if (result === "PLAYER_WINS") {
+        matchXP += 400;
+    }
+    
+    matchXP += gameState.playerStats.runs;
+    matchXP += (gameState.compStats.wicketsLost * 10);
+    
+    // BOSS TIER REWARDS (For Gauntlet mode)
+    let bossBonusXP = 0;
+    if (gameState.isTournament && result === "PLAYER_WINS") {
+        stats.bossesDefeated = (stats.bossesDefeated || 0) + 1;
+        // Check for Cricket God defeat (Updated for 14 bosses)
+        if (gameState.currentBoss === 9 || gameState.currentBoss === 13) {
+            stats.godDefeats = (stats.godDefeats || 0) + 1;
         }
         
-        const playAgainBtn = endControls.querySelectorAll('button')[1];
-        if (playAgainBtn) {
-            playAgainBtn.innerText = "🔙 TO GAUNTLET";
-            playAgainBtn.onclick = function() {
-                localStorage.removeItem('hc_tourney_boss');
-                window.location.href = 'tournament.html';
-            };
+        // Massive bonuses based on Gauntlet progression
+        if (gameState.currentBoss <= 2) { bossBonusXP = 1000; } 
+        else if (gameState.currentBoss <= 5) { bossBonusXP = 2500; } 
+        else if (gameState.currentBoss <= 8) { bossBonusXP = 10000; } 
+        else if (gameState.currentBoss <= 13) { bossBonusXP = 100000; }
+    }
+    
+    matchXP += bossBonusXP;
+    stats.xp = (stats.xp || 0) + matchXP;
+    
+    let matchCoins = Math.floor(matchXP * 0.5);
+    stats.coins = (stats.coins || 0) + matchCoins;
+
+    // STORE GAINS SO THE UI CAN DISPLAY THEM ON THE REWARD SCREEN
+    gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
+
+    stats.matches += 1;
+    
+    if (result === "PLAYER_WINS") {
+        stats.wins += 1; 
+    } else if (result === "COM_WINS") {
+        stats.losses += 1; 
+    } else {
+        stats.ties += 1;
+    }
+    
+    stats.totalRuns += gameState.playerStats.runs; 
+    stats.totalBallsFaced += gameState.playerStats.balls;
+    stats.careerSixes += gameState.playerStats.sixes; 
+    stats.careerFours += gameState.playerStats.fours;
+    stats.careerDotsBowled += gameState.compStats.dots; 
+    
+    // HIGHEST SCORE ASTERISK (*) TRACKING
+    if (gameState.playerStats.runs > stats.highestScore) {
+        stats.highestScore = gameState.playerStats.runs;
+        stats.highestScoreNotOut = (gameState.playerStats.wicketsLost < gameState.maxWickets);
+    }
+    
+    if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) {
+        stats.successfulChases += 1;
+    }
+
+    // 35 INNINGS TRACKING (Replaced 20 Innings)
+    if (!stats.last35Innings) {
+        stats.last35Innings = []; 
+        // Migrate old data if present to prevent wiping history
+        if (stats.last20Innings) {
+            stats.last35Innings = stats.last20Innings;
+            delete stats.last20Innings;
         }
     }
+
+    if (gameState.playerStats.runs >= 50 && gameState.playerStats.runs < 100) {
+        stats.careerFifties = (stats.careerFifties || 0) + 1;
+    }
+    if (gameState.playerStats.runs >= 100 && gameState.playerStats.runs < 200) {
+        stats.careerCenturies = (stats.careerCenturies || 0) + 1;
+    }
+    if (gameState.playerStats.runs >= 200) {
+        stats.careerDoubleCenturies = (stats.careerDoubleCenturies || 0) + 1;
+    }
+    if (gameState.compStats.wicketsLost >= 5) {
+        stats.fiveWicketHauls = (stats.fiveWicketHauls || 0) + 1;
+    }
+
+    stats.totalExtrasReceived = (stats.totalExtrasReceived || 0) + gameState.playerStats.extras;
+
+    gameState.playerStats.dismissalHistory.forEach(d => { 
+        stats.totalDismissals += 1; 
+        stats.fatalThrows[d.num] = (stats.fatalThrows[d.num] || 0) + 1; 
+    });
+    
+    if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) {
+        stats.careerSnipes = (stats.careerSnipes || 0) + 1;
+    }
+
+    gameState.playerStats.wicketRunsHistory.forEach(w => { 
+        if (w.runs === 0) { 
+            stats.ducks += 1; 
+        } 
+        stats.last35Innings.push({ runs: w.runs, notOut: false }); 
+    });
+    
+    // FIX FOR AI DUCKS: Check if any individual AI batter scored 0 before getting out
+    gameState.compStats.wicketRunsHistory.forEach(w => {
+        if (w.runs === 0) {
+            stats.aiDucksGivens = (stats.aiDucksGivens || 0) + 1;
+        }
+    });
+    
+    if (gameState.playerStats.wicketsLost < gameState.maxWickets && gameState.playerStats.balls > 0) { 
+        stats.notOutMatches += 1; 
+        stats.last35Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true }); 
+    }
+    
+    while (stats.last35Innings.length > 35) { 
+        stats.last35Innings.shift(); 
+    }
+
+    stats.totalRunsConceded += gameState.compStats.runs; 
+    stats.totalBallsBowled += gameState.compStats.balls;
+
+    if (gameState.compStats.wicketsLost > 0) {
+        let currentWkts = gameState.compStats.wicketsLost; 
+        let currentRuns = gameState.compStats.runs;
+        
+        if (!stats.bestSpell) { 
+            stats.bestSpell = { wickets: 0, runs: 0 }; 
+        }
+        
+        if (currentWkts > stats.bestSpell.wickets || (currentWkts === stats.bestSpell.wickets && currentRuns < stats.bestSpell.runs) || (stats.bestSpell.wickets === 0 && stats.bestSpell.runs === 0)) { 
+            stats.bestSpell = { wickets: currentWkts, runs: currentRuns }; 
+        }
+    }
+    
+    // 60 SR TRACKING (Replaced 10 SR)
+    let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
+    
+    if (!stats.last60SR) { 
+        stats.last60SR = []; 
+        // Migrate old data if present
+        if (stats.last10SR) {
+            stats.last60SR = stats.last10SR;
+            delete stats.last10SR;
+        }
+    } 
+    
+    stats.last60SR.push(parseFloat(pSR)); 
+    
+    if (stats.last60SR.length > 60) { 
+        stats.last60SR.shift(); 
+    }
+
+    evaluateAchievements(stats);
+    usersDB[currentUser] = stats; 
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    
+    showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
 }
 
 function evaluateAchievements(stats) {
@@ -1974,16 +2135,24 @@ function populateStats(prefix, bStats, wStats) {
 }
 
 function generateAIInsight(result) {
-    const insightBox = document.getElementById('ai-insight-text'); 
-    if (!insightBox) return;
+    const insightBox = document.getElementById('ai-insight-text'); if (!insightBox) return;
     
+    let pSR = gameState.playerStats.balls > 0 ? (gameState.playerStats.runs / gameState.playerStats.balls) * 100 : 0;
+    let dots = gameState.playerStats.balls - (gameState.playerStats.fours + gameState.playerStats.sixes + gameState.playerStats.runs);
+    
+    let insight = "";
     if (gameState.isTournament) {
-        insightBox.innerText = `Boss Fight Completed. ${result === 'PLAYER_WINS' ? 'You mastered their technique!' : 'Analyze their unique Throw DNA and try again.'}`;
+        insight = result === 'PLAYER_WINS' ? "[GAUNTLET] Exceptional pattern disruption. You broke the boss's core algorithm." : "[GAUNTLET] You fell into their targeted DNA trap. Review your Throw DNA graph before retrying.";
     } else if (gameState.aiDifficulty === 'hard') {
-        insightBox.innerText = "Pro AI Engine Active: The computer analyzed your entire career throw history to predict your moves. Keep randomizing!";
+        if (pSR > 200) insight = "[PRO AI] Your aggressive variance overwhelmed the neural net. Keep swinging!";
+        else if (dots > 10) insight = "[PRO AI] Too many dot balls. The AI recognized your defensive setup and locked you down.";
+        else insight = "[PRO AI] A tightly contested match. The AI analyzed your lifetime frequencies but you managed to stay unpredictable.";
     } else {
-        insightBox.innerText = "Casual Match Completed. Try increasing the AI difficulty to 'Pro' to see how well the computer can read your mind!";
+        if (gameState.playerStats.wicketsLost === 0) insight = "[CASUAL] Clinical execution. Zero dismissals indicates perfect shot selection.";
+        else if (pSR < 100) insight = "[CASUAL] Strike rate under 100. Focus on finding gaps rather than pure defense.";
+        else insight = "[CASUAL] Solid casual performance. Ready to test your true skills against the Pro AI engine?";
     }
+    insightBox.innerText = insight;
 }
 function resetToToss() { 
     localStorage.removeItem('hc_tourney_boss'); 
