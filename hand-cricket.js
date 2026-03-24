@@ -232,6 +232,7 @@ window.onload = function() {
         if (isProfilePage) {
             renderProfilePage();
             renderShop();
+           bindPfpUpload();
         }
         
         if (isTournamentPage) {
