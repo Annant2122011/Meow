@@ -144,14 +144,20 @@
             <span class="close-modal" onclick="closeAnalysis()">&times;</span>
             <h3 class="neon-text" style="font-size: 2.2rem; margin-bottom: 20px; text-align: center;">📊 POST-MATCH ANALYSIS 📊</h3>
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 20px;">
                 <div class="score-card player-bg" style="padding: 15px;">
                     <h4 style="color: var(--accent-blue); font-size: 1.2rem; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">👤 YOUR PERFORMANCE</h4>
                     <ul style="list-style: none; color: var(--text-bright); font-size: 1rem; line-height: 1.8;">
                         <li><b>Runs:</b> <span id="an-p-runs" style="color: var(--accent-blue); font-weight: bold;">0</span></li>
                         <li><b>Wickets:</b> <span id="an-p-wickets" style="color: #ff2a2a; font-weight: bold;">0</span></li>
                         <li><b>Balls:</b> <span id="an-p-balls">0</span></li>
-                        <li><b>SR:</b> <span id="an-p-sr">0.00</span></li>
+                        <li><b>Strike Rate:</b> <span id="an-p-sr">0.00</span></li>
+                        <li><b>Run Rate:</b> <span id="an-p-rr">0.00</span></li>
+                        <li><b>Boundary %:</b> <span id="an-p-bpct">0.00</span>%</li>
+                        <li><b>Running Runs:</b> <span id="an-p-runruns">0</span></li>
+                        <li><b>Balls/Boundary:</b> <span id="an-p-bpb">0.0</span></li>
+                        <li><b>Non-Bound SR:</b> <span id="an-p-nbsr">0.00</span></li>
+                        <li><b>Bowling Eco:</b> <span id="an-p-eco">0.00</span></li>
                         <li><b>Extras Recv:</b> <span id="an-p-extras">0</span></li>
                     </ul>
                 </div>
@@ -161,12 +167,17 @@
                         <li><b>Runs:</b> <span id="an-c-runs" style="color: #ff2a2a; font-weight: bold;">0</span></li>
                         <li><b>Wickets:</b> <span id="an-c-wickets" style="color: #ff2a2a; font-weight: bold;">0</span></li>
                         <li><b>Balls:</b> <span id="an-c-balls">0</span></li>
-                        <li><b>SR:</b> <span id="an-c-sr">0.00</span></li>
+                        <li><b>Strike Rate:</b> <span id="an-c-sr">0.00</span></li>
+                        <li><b>Run Rate:</b> <span id="an-c-rr">0.00</span></li>
+                        <li><b>Boundary %:</b> <span id="an-c-bpct">0.00</span>%</li>
+                        <li><b>Running Runs:</b> <span id="an-c-runruns">0</span></li>
+                        <li><b>Balls/Boundary:</b> <span id="an-c-bpb">0.0</span></li>
+                        <li><b>Non-Bound SR:</b> <span id="an-c-nbsr">0.00</span></li>
+                        <li><b>Bowling Eco:</b> <span id="an-c-eco">0.00</span></li>
                         <li><b>Extras Recv:</b> <span id="an-c-extras">0</span></li>
                     </ul>
                 </div>
             </div>
-
             <div class="chart-wrapper" style="margin-bottom: 20px; background: rgba(0,0,0,0.8); border: 1px solid var(--accent-neon);">
                 <p style="text-align:center; font-weight:bold; color:var(--text-bright); margin-bottom:10px; text-transform:uppercase; letter-spacing: 1px;">The Worm (Run Progression)</p>
                 <canvas id="wormChart"></canvas>
