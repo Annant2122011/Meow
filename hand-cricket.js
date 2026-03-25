@@ -2163,6 +2163,39 @@ function populateStats(prefix, bStats, wStats) {
     const oversBowled = wStats.balls / 6; 
     const ecoElement = document.getElementById(`${prefix}-eco`); 
     if (ecoElement) ecoElement.innerText = oversBowled > 0 ? (wStats.runs / oversBowled).toFixed(2) : "0.00";
+
+    // ==========================================
+    // NEW ADVANCED METRICS 
+    // ==========================================
+    
+    let boundRuns = (bStats.fours * 4) + (bStats.sixes * 6);
+    let totalBounds = bStats.fours + bStats.sixes;
+    let runningRuns = bStats.runs - boundRuns;
+    let nonBoundBalls = bStats.balls - totalBounds;
+
+    // Boundary Percentage (%)
+    const bpctElement = document.getElementById(`${prefix}-bpct`);
+    if (bpctElement) {
+        bpctElement.innerText = bStats.runs > 0 ? ((boundRuns / bStats.runs) * 100).toFixed(2) : "0.00";
+    }
+
+    // Running Runs (1s, 2s, 3s, 5s)
+    const runrunsElement = document.getElementById(`${prefix}-runruns`);
+    if (runrunsElement) {
+        runrunsElement.innerText = runningRuns;
+    }
+
+    // Balls per Boundary
+    const bpbElement = document.getElementById(`${prefix}-bpb`);
+    if (bpbElement) {
+        bpbElement.innerText = totalBounds > 0 ? (bStats.balls / totalBounds).toFixed(1) : "0.0";
+    }
+
+    // Non-Boundary Strike Rate
+    const nbsrElement = document.getElementById(`${prefix}-nbsr`);
+    if (nbsrElement) {
+        nbsrElement.innerText = nonBoundBalls > 0 ? ((runningRuns / nonBoundBalls) * 100).toFixed(2) : "0.00";
+    }
 }
 
 function generateAIInsight(result) {
