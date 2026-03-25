@@ -826,7 +826,7 @@ function renderProfilePage() {
         srChartInstance = new Chart(srCtxElement.getContext('2d'), {
             type: 'line', 
             data: { 
-                labels: stats.last10SR ? stats.last10SR.map((_, i) => `M${i+1}`) : [], 
+                labels: stats.last10SR ? stats.last60SR.map((_, i) => `M${i+1}`) : [], 
                 datasets: [{ 
                     label: 'Strike Rate', 
                     data: stats.last60SR || [], 
