@@ -821,12 +821,12 @@ function renderProfilePage() {
     if (throwDnaInstance) throwDnaInstance.destroy();
     if (fatalChartInstance) fatalChartInstance.destroy();
 
-    const srCtxElement = document.getElementById('srLineChart');
+const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
         srChartInstance = new Chart(srCtxElement.getContext('2d'), {
             type: 'line', 
             data: { 
-                labels: stats.last10SR ? stats.last60SR.map((_, i) => `M${i+1}`) : [], 
+                labels: stats.last60SR ? stats.last60SR.map((_, i) => `M${i+1}`) : [], 
                 datasets: [{ 
                     label: 'Strike Rate', 
                     data: stats.last60SR || [], 
@@ -847,16 +847,15 @@ function renderProfilePage() {
             }
         });
     }
-
-    const runsCtxElement = document.getElementById('runsBarChart');
+   const runsCtxElement = document.getElementById('runsBarChart');
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
             type: 'bar', 
             data: { 
-              labels: stats.last35Innings ? stats.last35Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
-datasets: [{ 
-    label: 'Runs Scored', 
-    data: stats.last35Innings ? stats.last35Innings.map(inn => inn.runs) : [],
+                labels: stats.last35Innings ? stats.last35Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
+                datasets: [{ 
+                    label: 'Runs Scored', 
+                    data: stats.last35Innings ? stats.last35Innings.map(inn => inn.runs) : [], 
                     backgroundColor: '#00d2ff', 
                     borderRadius: 4 
                 }] 
