@@ -163,25 +163,25 @@ const bossInfo = [
 const shopItems = {
     avatars: [
         { id: '👤', name: 'Default', price: 0 },
-        { id: '🐯', name: 'Tiger', price: 500 },
-        { id: '👽', name: 'Alien', price: 1000 },
-        { id: '🤖', name: 'Robot', price: 1500 },
-        { id: '🤫', name: 'Silencer', price: 2000 },
-        { id: '👑', name: 'King', price: 3000 }
+        { id: '🐯', name: 'Tiger', price: 499 },
+        { id: '👽', name: 'Alien', price: 999 },
+        { id: '🤖', name: 'Robot', price: 1499 },
+        { id: '🤫', name: 'Silencer', price: 1999 },
+        { id: '👑', name: 'King', price: 2999 }
     ],
     themes: [
         { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
-        { id: 'synthwave', name: 'Synthwave', price: 1500, icon: '🟪' },
-        { id: 'blood', name: 'Blood Red', price: 2000, icon: '🟥' }
+        { id: 'synthwave', name: 'Synthwave', price: 1499, icon: '🟪' },
+        { id: 'blood', name: 'Blood Red', price: 1999, icon: '🟥' }
     ],
    coins: [
         { id: 'default', name: 'Lead Coin', price: 0, icon: '🪙' }, 
-        { id: 'copper', name: 'Copper Coin', price: 10000, icon: '🟤' },
-        { id: 'silver', name: 'Silver Coin', price: 50000, icon: '⚪' }, 
-        { id: 'gold', name: 'Gold Coin', price: 250000, icon: '🟡' },
-      { id: 'dollar', name: 'Dollar Coin', price: 500000, icon: '💲' },
-        { id: 'bitcoin', name: 'Crypto Coin', price: 1000000, icon: '₿' }, 
-        { id: 'diamond', name: 'Diamond Coin', price: 5000000, icon: '💎' }
+        { id: 'copper', name: 'Copper Coin', price: 2499, icon: '🟤' },
+        { id: 'silver', name: 'Silver Coin', price: 4999, icon: '⚪' }, 
+        { id: 'gold', name: 'Gold Coin', price: 7499, icon: '🟡' },
+      { id: 'dollar', name: 'Dollar Coin', price: 9999, icon: '💲' },
+        { id: 'bitcoin', name: 'Crypto Coin', price: 12499, icon: '₿' }, 
+        { id: 'diamond', name: 'Diamond Coin', price: 15999, icon: '💎' }
     ]
 };
 
@@ -400,19 +400,60 @@ function logoutUser() {
 function bindPfpUpload() {
     let profBox = document.getElementById('prof-avatar-box');
     if (profBox) {
-        profBox.style.cursor = 'pointer'; profBox.title = "Click to Upload Custom Profile Picture";
+        // --- SET YOUR PFP COST HERE ---
+        const PFP_COST = 19999; // Example: 500,000 Coins
+        
+        profBox.style.cursor = 'pointer'; 
+        profBox.title = `Click to Upload Custom Profile Picture (Costs 🪙 ${PFP_COST.toLocaleString()})`;
+        
         profBox.onclick = () => {
-            let input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+            let userStats = usersDB[currentUser];
+            
+            // 1. Check if the user has enough coins
+            if (userStats.coins < PFP_COST) {
+                alert(`Not enough coins! You need 🪙 ${PFP_COST.toLocaleString()} to upload a custom PFP.`);
+                return; // Stop the function here
+            }
+            
+            // 2. Ask for confirmation before spending coins
+            if (!confirm(`Uploading a custom Profile Picture costs 🪙 ${PFP_COST.toLocaleString()}. Do you want to proceed?`)) {
+                return; // Stop if they click "Cancel"
+            }
+
+            // 3. Open the file picker if they agreed and have enough money
+            let input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = 'image/*';
+            
             input.onchange = e => {
-                let file = e.target.files[0]; let reader = new FileReader();
+                let file = e.target.files[0]; 
+                let reader = new FileReader();
+                
                 reader.onload = event => {
-                    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-                    usersDB[currentUser].customPFP = event.target.result;
-                    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-                    applyCosmetics(); showToast("🖼️ Custom Profile Picture Updated!");
+                    // Fetch latest DB state just to be safe
+                    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+                    
+                    // 4. Deduct the coins from the user's account
+                    db[currentUser].coins -= PFP_COST;
+                    
+                    // 5. Save the new image to the database
+                    db[currentUser].customPFP = event.target.result;
+                    localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                    
+                    // 6. Update the UI to show the new coin balance
+                    applyCosmetics(); 
+                    const cText = document.getElementById('prof-coins');
+                    if (cText) {
+                        cText.innerText = db[currentUser].coins.toLocaleString();
+                    }
+                    
+                    showToast(`🖼️ Custom PFP Updated! (-🪙${PFP_COST.toLocaleString()})`);
                 };
-                if(file) reader.readAsDataURL(file);
+                
+                if (file) reader.readAsDataURL(file);
             };
+            
             input.click();
         };
     }
