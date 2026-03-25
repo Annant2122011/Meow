@@ -179,7 +179,7 @@ const shopItems = {
         { id: 'copper', name: 'Copper Coin', price: 10000, icon: '🟤' },
         { id: 'silver', name: 'Silver Coin', price: 50000, icon: '⚪' }, 
         { id: 'gold', name: 'Gold Coin', price: 250000, icon: '🟡' },
-      { id: 'dollar', name: 'Dollar Coin', price: 500000, icon: '💲' }
+      { id: 'dollar', name: 'Dollar Coin', price: 500000, icon: '💲' },
         { id: 'bitcoin', name: 'Crypto Coin', price: 1000000, icon: '₿' }, 
         { id: 'diamond', name: 'Diamond Coin', price: 5000000, icon: '💎' }
     ]
