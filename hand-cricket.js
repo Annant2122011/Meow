@@ -311,17 +311,12 @@ function syncUserData(username) {
     u.equippedTheme = u.equippedTheme || 'default'; 
     u.equippedCoin = u.equippedCoin || 'default';
 
-    if (!u.achLevels) {
-        u.achLevels = {};
-    }
+  if (!u.achLevels) u.achLevels = {};
+    if (!u.last60SR) u.last60SR = [];
+    if (!u.last35Innings) u.last35Innings = [];
     
-    if (!u.last10SR) {
-        u.last10SR = [];
-    }
-    
-    if (!u.last20Innings) {
-        u.last20Innings = [];
-    }
+    u.highestScoreNotOut = u.highestScoreNotOut || false; 
+    u.customPFP = u.customPFP || null;
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -433,15 +428,20 @@ function applyCosmetics() {
         document.body.classList.add('theme-' + u.equippedTheme);
     }
     
-    let headerAv = document.getElementById('avatar-text'); 
-    if (headerAv) {
-        headerAv.innerText = u.equippedAvatar;
-    }
-    
+   let headerAv = document.getElementById('avatar-text'); 
     let profAv = document.getElementById('prof-avatar-letter'); 
-    if (profAv) {
-        profAv.innerText = u.equippedAvatar;
-    }
+    
+    const displayAvatar = (el) => {
+        if (!el) return;
+        if (u.customPFP) {
+            el.innerHTML = `<img src="${u.customPFP}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        } else {
+            el.innerText = u.equippedAvatar;
+        }
+    };
+    
+    displayAvatar(headerAv); 
+    displayAvatar(profAv);
     
     let coinHeads = document.querySelector('.coin-heads'); 
     let coinTails = document.querySelector('.coin-tails');
@@ -1717,7 +1717,7 @@ function endGame(result) {
     actionArea.style.display = 'none'; 
     
     const endControls = document.getElementById('end-game-controls'); 
-    endControls.style.display = 'flex'; 
+    if (endControls) endControls.style.display = 'flex'; 
     document.body.classList.remove('danger-pulse');
     
     if (result === "PLAYER_WINS") { 
@@ -1734,10 +1734,42 @@ function endGame(result) {
 
     gameState.commentaryHistory.push(`\n--- MATCH ENDED | ${inningsStatus.innerText} ---`);
     
+    // CRITICAL: Calculate and save stats FIRST
+    saveLifetimeStats(result);
+
     populateStats('an-p', gameState.playerStats, gameState.compStats); 
     populateStats('an-c', gameState.compStats, gameState.playerStats);
     
+    // Populate Match Rewards UI (XP and Coins)
+    const xpDisplay = document.getElementById('gain-xp');
+    const coinDisplay = document.getElementById('gain-coins');
+    const gains = gameState.lastMatchGains || { xp: 0, coins: 0 };
+    if (xpDisplay && coinDisplay) {
+        xpDisplay.style.color = gains.xp >= 1000 ? "var(--accent-blue)" : "white";
+        xpDisplay.innerText = `+${gains.xp.toLocaleString()} XP`;
+        coinDisplay.innerText = `+${gains.coins.toLocaleString()} Coins`;
+    }
+
     generateAIInsight(result); 
+
+    // Handle Tournament Progress
+    if (gameState.isTournament) {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let stats = usersDB[currentUser];
+        if (result === "PLAYER_WINS" && stats.tournamentLevel === gameState.currentBoss) {
+            stats.tournamentLevel++; 
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            setTimeout(() => { showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); }, 1000);
+        }
+        
+        if (endControls) {
+            const returnBtn = endControls.querySelectorAll('button')[2];
+            if (returnBtn) {
+                returnBtn.innerText = "🔙 TO GAUNTLET";
+                returnBtn.onclick = function() { localStorage.removeItem('hc_tourney_boss'); window.location.href = 'tournament.html'; };
+            }
+        }
+    }
 }
   function saveLifetimeStats(result) {
     if (!currentUser) return;
