@@ -166,6 +166,7 @@ const shopItems = {
         { id: '🐯', name: 'Tiger', price: 500 },
         { id: '👽', name: 'Alien', price: 1000 },
         { id: '🤖', name: 'Robot', price: 1500 },
+        { id: '🤫', name: 'Silencer', price: 2000 },
         { id: '👑', name: 'King', price: 3000 }
     ],
     themes: [
@@ -178,6 +179,7 @@ const shopItems = {
         { id: 'copper', name: 'Copper Coin', price: 10000, icon: '🟤' },
         { id: 'silver', name: 'Silver Coin', price: 50000, icon: '⚪' }, 
         { id: 'gold', name: 'Gold Coin', price: 250000, icon: '🟡' },
+      { id: 'dollar', name: 'Dollar Coin', price: 500000, icon: '💲' }
         { id: 'bitcoin', name: 'Crypto Coin', price: 1000000, icon: '₿' }, 
         { id: 'diamond', name: 'Diamond Coin', price: 5000000, icon: '💎' }
     ]
