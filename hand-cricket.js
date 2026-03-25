@@ -815,20 +815,22 @@ function renderProfilePage() {
         achContainer.innerHTML = achHtml;
     }
 
-    // CHARTS GENERATION
+   // CHARTS GENERATION
     if (srChartInstance) srChartInstance.destroy();
     if (runsChartInstance) runsChartInstance.destroy();
     if (throwDnaInstance) throwDnaInstance.destroy();
     if (fatalChartInstance) fatalChartInstance.destroy();
 
-const srCtxElement = document.getElementById('srLineChart');
+    const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
         srChartInstance = new Chart(srCtxElement.getContext('2d'), {
             type: 'line', 
             data: { 
+                // CHANGED: Now looks for last60SR
                 labels: stats.last60SR ? stats.last60SR.map((_, i) => `M${i+1}`) : [], 
                 datasets: [{ 
                     label: 'Strike Rate', 
+                    // CHANGED: Now pulls data from last60SR
                     data: stats.last60SR || [], 
                     borderColor: '#00ff88', 
                     backgroundColor: 'rgba(0,255,136,0.1)', 
@@ -841,7 +843,44 @@ const srCtxElement = document.getElementById('srLineChart');
                 plugins: { legend: { display: false } }, 
                 scales: { 
                     y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
-                    x: { grid: {color: 'rgba(255,255,255,0.1)'} } 
+                    // Optional: hide x-axis labels if 60 matches looks too crowded
+                    x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { display: false } } 
+                }, 
+                color: '#fff' 
+            }
+        });
+    }
+
+    const runsCtxElement = document.getElementById('runsBarChart');
+    if (runsCtxElement) {
+        runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
+            type: 'bar', 
+            data: { 
+                // CHANGED: Now looks for last35Innings
+                labels: stats.last35Innings ? stats.last35Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
+                datasets: [{ 
+                    label: 'Runs Scored', 
+                    // CHANGED: Now pulls data from last35Innings
+                    data: stats.last35Innings ? stats.last35Innings.map(inn => inn.runs) : [], 
+                    backgroundColor: '#00d2ff', 
+                    borderRadius: 4 
+                }] 
+            },
+            options: { 
+                plugins: { 
+                    legend: { display: false }, 
+                    tooltip: { 
+                        callbacks: { 
+                            title: function(c) { 
+                                return c[0].label.includes('*') ? c[0].label + ' (Not Out)' : c[0].label; 
+                            } 
+                        } 
+                    } 
+                }, 
+                scales: { 
+                    y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
+                    // Optional: hide x-axis labels if 35 innings looks too crowded
+                    x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { display: false } } 
                 }, 
                 color: '#fff' 
             }
