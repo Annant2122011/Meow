@@ -2253,11 +2253,28 @@ function downloadPDF() {
         const pStats = gameState.playerStats;
         const cStats = gameState.compStats;
 
-        const pSR = pStats.balls > 0 ? ((pStats.runs / pStats.balls) * 100).toFixed(2) : "0.00";
-        const cSR = cStats.balls > 0 ? ((cStats.runs / cStats.balls) * 100).toFixed(2) : "0.00";
-        
-        const pEco = cStats.balls > 0 ? (cStats.runs / (cStats.balls / 6)).toFixed(2) : "0.00";
-        const cEco = pStats.balls > 0 ? (pStats.runs / (pStats.balls / 6)).toFixed(2) : "0.00";
+        // FIX 1: Calculate ALL Advanced Stats for the PDF
+        let pBoundRuns = (pStats.fours * 4) + (pStats.sixes * 6);
+        let pTotalBounds = pStats.fours + pStats.sixes;
+        let pRunningRuns = pStats.runs - pBoundRuns;
+        let pNonBoundBalls = pStats.balls - pTotalBounds;
+        let pBpct = pStats.runs > 0 ? ((pBoundRuns / pStats.runs) * 100).toFixed(2) : "0.00";
+        let pBpb = pTotalBounds > 0 ? (pStats.balls / pTotalBounds).toFixed(1) : "0.0";
+        let pNbsr = pNonBoundBalls > 0 ? ((pRunningRuns / pNonBoundBalls) * 100).toFixed(2) : "0.00";
+        let pRR = pStats.balls > 0 ? ((pStats.runs / (pStats.balls/6))).toFixed(2) : "0.00";
+        let pSR = pStats.balls > 0 ? ((pStats.runs / pStats.balls) * 100).toFixed(2) : "0.00";
+        let pEco = cStats.balls > 0 ? (cStats.runs / (cStats.balls / 6)).toFixed(2) : "0.00";
+
+        let cBoundRuns = (cStats.fours * 4) + (cStats.sixes * 6);
+        let cTotalBounds = cStats.fours + cStats.sixes;
+        let cRunningRuns = cStats.runs - cBoundRuns;
+        let cNonBoundBalls = cStats.balls - cTotalBounds;
+        let cBpct = cStats.runs > 0 ? ((cBoundRuns / cStats.runs) * 100).toFixed(2) : "0.00";
+        let cBpb = cTotalBounds > 0 ? (cStats.balls / cTotalBounds).toFixed(1) : "0.0";
+        let cNbsr = cNonBoundBalls > 0 ? ((cRunningRuns / cNonBoundBalls) * 100).toFixed(2) : "0.00";
+        let cRR = cStats.balls > 0 ? ((cStats.runs / (cStats.balls/6))).toFixed(2) : "0.00";
+        let cSR = cStats.balls > 0 ? ((cStats.runs / cStats.balls) * 100).toFixed(2) : "0.00";
+        let cEco = pStats.balls > 0 ? (pStats.runs / (pStats.balls / 6)).toFixed(2) : "0.00";
 
         let innStatusText = "MATCH REPORT";
         const innEl = document.getElementById('innings-status');
@@ -2272,10 +2289,11 @@ function downloadPDF() {
         if (wormCanvas) {
             try {
                 const wormDataUrl = wormCanvas.toDataURL('image/png', 1.0);
+                // FIX 2: Shrunk max-width to 450px and tightened margins to prevent page-splitting
                 wormImgHtml = `
-                    <div style="page-break-inside: avoid; text-align: center; margin-top: 30px; margin-bottom: 30px;">
-                        <h3 style="color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">MATCH WORM CHART</h3>
-                        <img src="${wormDataUrl}" style="width: 100%; max-width: 600px; height: auto; border: 2px solid #000; border-radius: 8px;">
+                    <div style="page-break-inside: avoid; text-align: center; margin-top: 15px; margin-bottom: 15px;">
+                        <h3 style="color: #000000; font-size: 16px; border-bottom: 2px solid #000000; padding-bottom: 5px; font-weight: 900; margin-bottom: 10px;">MATCH WORM CHART</h3>
+                        <img src="${wormDataUrl}" style="width: 100%; max-width: 450px; height: auto; border: 2px solid #000; border-radius: 8px;">
                     </div>
                 `;
             } catch (e) {
@@ -2286,39 +2304,45 @@ function downloadPDF() {
         const printElement = document.createElement('div');
         
         let pdfHTML = `
-            <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 15px; line-height: 1.5;">
+            <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 14px; line-height: 1.4;">
                 
-                <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 20px; margin-bottom: 30px;">
-                    <h1 style="font-size: 32px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
-                    <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
+                <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 15px; margin-bottom: 20px;">
+                    <h1 style="font-size: 28px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
+                    <h2 style="font-size: 16px; font-weight: 800; color: #000000; margin: 5px 0 0 0;">OFFICIAL MATCH REPORT</h2>
                 </div>
 
-                <div style="text-align: center; background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 30px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
-                    <h3 style="margin: 0; font-size: 20px; color: #000000; font-weight: 900;">${innStatusText}</h3>
+                <div style="text-align: center; background: #f3f4f6; padding: 10px; border-radius: 8px; margin-bottom: 20px; border-left: 8px solid #3b82f6; border: 2px solid #000000;">
+                    <h3 style="margin: 0; font-size: 18px; color: #000000; font-weight: 900;">${innStatusText}</h3>
                 </div>
 
-                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px; page-break-inside: avoid;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 15px 0; margin-bottom: 20px; page-break-inside: avoid;">
                     <tr>
-                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">YOUR PERFORMANCE</h3>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
-                                <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${pStats.runs} <span style="font-size:13px; font-weight:bold;">(${pStats.balls} balls)</span></td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${pStats.wicketsLost}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${pSR}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${pStats.fours + pStats.sixes} <span style="font-size:13px; font-weight:bold;">(4s: ${pStats.fours} | 6s: ${pStats.sixes})</span></td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${pEco}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${pStats.extras}</td></tr>
+                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #3b82f6; border-radius: 8px; padding: 15px;">
+                            <h3 style="margin-top: 0; color: #000000; font-size: 16px; border-bottom: 2px solid #000000; padding-bottom: 5px; font-weight: 900;">YOUR PERFORMANCE</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #000000; font-weight: 700;">
+                                <tr><td style="padding: 5px 0;">Runs / Wickets</td><td style="text-align: right; font-weight: 900; font-size: 16px;">${pStats.runs} <span style="font-size:12px; color:#dc2626;">/ ${pStats.wicketsLost}</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Balls Faced</td><td style="text-align: right; font-weight: 900;">${pStats.balls}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Strike Rate / RR</td><td style="text-align: right; font-weight: 900;">${pSR} <span style="font-size:12px; color:#4b5563;">(${pRR})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Bounds (4s/6s)</td><td style="text-align: right; font-weight: 900;">${pTotalBounds} <span style="font-size:12px; color:#4b5563;">(${pStats.fours}/${pStats.sixes})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Boundary %</td><td style="text-align: right; font-weight: 900;">${pBpct}%</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Running Runs</td><td style="text-align: right; font-weight: 900;">${pRunningRuns}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Balls/Boundary</td><td style="text-align: right; font-weight: 900;">${pBpb}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Non-Bound SR</td><td style="text-align: right; font-weight: 900;">${pNbsr}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Bowling Eco</td><td style="text-align: right; font-weight: 900;">${pEco}</td></tr>
                             </table>
                         </td>
-                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 20px;">
-                            <h3 style="margin-top: 0; color: #000000; font-size: 18px; border-bottom: 2px solid #000000; padding-bottom: 10px; font-weight: 900;">COM PERFORMANCE</h3>
-                            <table style="width: 100%; border-collapse: collapse; font-size: 15px; color: #000000; font-weight: 700;">
-                                <tr><td style="padding: 8px 0;">Runs Scored</td><td style="text-align: right; font-weight: 900; font-size: 18px;">${cStats.runs} <span style="font-size:13px; font-weight:bold;">(${cStats.balls} balls)</span></td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Wickets Lost</td><td style="text-align: right; font-weight: 900; color:#dc2626;">${cStats.wicketsLost}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Strike Rate</td><td style="text-align: right; font-weight: 900;">${cSR}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Boundaries</td><td style="text-align: right; font-weight: 900;">${cStats.fours + cStats.sixes} <span style="font-size:13px; font-weight:bold;">(4s: ${cStats.fours} | 6s: ${cStats.sixes})</span></td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Bowling Eco.</td><td style="text-align: right; font-weight: 900;">${cEco}</td></tr>
-                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 8px 0;">Extras Rcvd.</td><td style="text-align: right; font-weight: 900;">${cStats.extras}</td></tr>
+                        <td style="width: 50%; vertical-align: top; background: #ffffff; border: 2px solid #000000; border-top: 8px solid #ef4444; border-radius: 8px; padding: 15px;">
+                            <h3 style="margin-top: 0; color: #000000; font-size: 16px; border-bottom: 2px solid #000000; padding-bottom: 5px; font-weight: 900;">COM PERFORMANCE</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #000000; font-weight: 700;">
+                                <tr><td style="padding: 5px 0;">Runs / Wickets</td><td style="text-align: right; font-weight: 900; font-size: 16px;">${cStats.runs} <span style="font-size:12px; color:#dc2626;">/ ${cStats.wicketsLost}</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Balls Faced</td><td style="text-align: right; font-weight: 900;">${cStats.balls}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Strike Rate / RR</td><td style="text-align: right; font-weight: 900;">${cSR} <span style="font-size:12px; color:#4b5563;">(${cRR})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Bounds (4s/6s)</td><td style="text-align: right; font-weight: 900;">${cTotalBounds} <span style="font-size:12px; color:#4b5563;">(${cStats.fours}/${cStats.sixes})</span></td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Boundary %</td><td style="text-align: right; font-weight: 900;">${cBpct}%</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Running Runs</td><td style="text-align: right; font-weight: 900;">${cRunningRuns}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Balls/Boundary</td><td style="text-align: right; font-weight: 900;">${cBpb}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Non-Bound SR</td><td style="text-align: right; font-weight: 900;">${cNbsr}</td></tr>
+                                <tr style="border-top: 1px solid #d1d5db;"><td style="padding: 5px 0;">Bowling Eco</td><td style="text-align: right; font-weight: 900;">${cEco}</td></tr>
                             </table>
                         </td>
                     </tr>
@@ -2327,8 +2351,8 @@ function downloadPDF() {
                 ${wormImgHtml}
                 
                 <div style="page-break-before: auto;">
-                    <h3 style="color: #000000; font-size: 20px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 10px; margin-bottom: 20px;">BALL-BY-BALL MATCH LOG</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.6; color: #000000; page-break-inside: auto;">
+                    <h3 style="color: #000000; font-size: 18px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 5px; margin-bottom: 15px;">BALL-BY-BALL MATCH LOG</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; color: #000000; page-break-inside: auto;">
                         <tbody>
         `;
 
@@ -2338,20 +2362,25 @@ function downloadPDF() {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
             
-            let lineStyle = "margin: 4px 0; color: #000000; font-weight: 700;";
+            let lineStyle = "margin: 3px 0; color: #000000; font-weight: 700;";
             
-            if (safeText.includes("WICKET") || safeText.includes("STUMPED") || safeText.includes("HOWZAT") || safeText.includes("HIT WICKET")) {
-                lineStyle = "margin: 4px 0; color: #b91c1c; font-weight: 900;";
+            // FIX 4: Advanced Wicket Recognition Array
+            const upperText = safeText.toUpperCase();
+            const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS THE STUMPS", "CASTLED!"];
+            const isWicket = wicketKeywords.some(kw => upperText.includes(kw));
+
+            if (isWicket) {
+                lineStyle = "margin: 3px 0; color: #b91c1c; font-weight: 900;";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                lineStyle = "margin: 4px 0; color: #1d4ed8; font-weight: 900;";
+                lineStyle = "margin: 3px 0; color: #1d4ed8; font-weight: 900;";
             } else if (safeText.includes("---")) {
-                lineStyle = "margin: 15px 0 5px 0; padding: 10px; background: #e5e7eb; border: 3px solid #000000; text-align: center; font-weight: 900; font-size: 16px;";
+                lineStyle = "margin: 10px 0 5px 0; padding: 8px; background: #e5e7eb; border: 2px solid #000000; text-align: center; font-weight: 900; font-size: 14px;";
             }
 
             if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
                 if (currentGroup !== '') {
                     pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                                    <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                                    <td style="border-left: 4px solid #000000; padding-left: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
                                 </tr>`;
                 }
                 currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
@@ -2362,28 +2391,30 @@ function downloadPDF() {
         
         if (currentGroup !== '') {
             pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                            <td style="border-left: 4px solid #000000; padding-left: 15px; padding-bottom: 15px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
+                            <td style="border-left: 4px solid #000000; padding-left: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
                         </tr>`;
         }
 
+        // FIX 3: Added bottom padding to prevent the footer from clipping off the page
         pdfHTML += `
                         </tbody>
                     </table>
                 </div>
-                <div style="margin-top: 50px; text-align: center; color: #000000; font-size: 14px; font-weight: 900; border-top: 3px solid #000000; padding-top: 20px; page-break-inside: avoid;">
+                <div style="margin-top: 30px; margin-bottom: 30px; text-align: center; color: #000000; font-size: 13px; font-weight: 900; border-top: 2px solid #000000; padding-top: 15px; page-break-inside: avoid;">
                     Generated by Hand Clash Arena &bull; &copy; 2026
                 </div>
             </div>`;
 
         printElement.innerHTML = pdfHTML;
 
+        // FIX 3: Added a dedicated bottom margin [0.6] to the page settings
         const opt = {
-            margin: 0.4, 
+            margin: [0.4, 0.4, 0.6, 0.4], 
             filename: 'Hand_Clash_Match_Report.pdf', 
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true }, 
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: 'css', avoid: 'tr' } 
+            pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' } 
         };
 
         html2pdf().set(opt).from(printElement).save().then(() => {
