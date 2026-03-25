@@ -853,41 +853,7 @@ function renderProfilePage() {
         });
     }
 
-    const runsCtxElement = document.getElementById('runsBarChart');
-    if (runsCtxElement) {
-        runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
-            type: 'bar', 
-            data: { 
-                // CHANGED: Now looks for last35Innings
-                labels: stats.last35Innings ? stats.last35Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
-                datasets: [{ 
-                    label: 'Runs Scored', 
-                    // CHANGED: Now pulls data from last35Innings
-                    data: stats.last35Innings ? stats.last35Innings.map(inn => inn.runs) : [], 
-                    backgroundColor: '#00d2ff', 
-                    borderRadius: 4 
-                }] 
-            },
-            options: { 
-                plugins: { 
-                    legend: { display: false }, 
-                    tooltip: { 
-                        callbacks: { 
-                            title: function(c) { 
-                                return c[0].label.includes('*') ? c[0].label + ' (Not Out)' : c[0].label; 
-                            } 
-                        } 
-                    } 
-                }, 
-                scales: { 
-                    y: { beginAtZero: true, grid: {color: 'rgba(255,255,255,0.1)'} }, 
-                    // Optional: hide x-axis labels if 35 innings looks too crowded
-                    x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { display: false } } 
-                }, 
-                color: '#fff' 
-            }
-        });
-    }
+  
    const runsCtxElement = document.getElementById('runsBarChart');
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
