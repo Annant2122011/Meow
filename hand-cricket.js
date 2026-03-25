@@ -829,7 +829,7 @@ function renderProfilePage() {
                 labels: stats.last10SR ? stats.last10SR.map((_, i) => `M${i+1}`) : [], 
                 datasets: [{ 
                     label: 'Strike Rate', 
-                    data: stats.last10SR || [], 
+                    data: stats.last60SR || [], 
                     borderColor: '#00ff88', 
                     backgroundColor: 'rgba(0,255,136,0.1)', 
                     borderWidth: 2, 
@@ -853,10 +853,10 @@ function renderProfilePage() {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
             type: 'bar', 
             data: { 
-                labels: stats.last20Innings ? stats.last20Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
-                datasets: [{ 
-                    label: 'Runs Scored', 
-                    data: stats.last20Innings ? stats.last20Innings.map(inn => inn.runs) : [], 
+              labels: stats.last35Innings ? stats.last35Innings.map((inn, i) => `Wkt ${i+1}${inn.notOut ? '*' : ''}`) : [], 
+datasets: [{ 
+    label: 'Runs Scored', 
+    data: stats.last35Innings ? stats.last35Innings.map(inn => inn.runs) : [],
                     backgroundColor: '#00d2ff', 
                     borderRadius: 4 
                 }] 
