@@ -1860,7 +1860,7 @@ function endGame(result) {
         }
     }
 }
- function saveLifetimeStats(result) {
+function saveLifetimeStats(result) {
     if (!currentUser) return;
     
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
@@ -1900,6 +1900,7 @@ function endGame(result) {
     stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
     stats.careerFours += gameState.playerStats.fours;
+    stats.careerFives = (stats.careerFives || 0) + (gameState.playerStats.fives || 0);
     stats.careerDotsBowled += gameState.compStats.dots; 
     
     if (gameState.playerStats.runs > stats.highestScore) {
@@ -1925,9 +1926,11 @@ function endGame(result) {
     
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.careerSnipes = (stats.careerSnipes || 0) + 1;
 
-    // FIX: PUSH DIRECTLY TO THE NEW 35 INNINGS ARRAY
+    // NO MORE last20Innings! Pushing directly to last35Innings
     gameState.playerStats.wicketRunsHistory.forEach(w => { 
         if (w.runs === 0) stats.ducks += 1; 
+        
+        if (!stats.last35Innings) stats.last35Innings = [];
         stats.last35Innings.push({ runs: w.runs, notOut: false }); 
     });
     
@@ -1937,10 +1940,11 @@ function endGame(result) {
     
     if (gameState.playerStats.wicketsLost < gameState.maxWickets && gameState.playerStats.balls > 0) { 
         stats.notOutMatches += 1; 
+        if (!stats.last35Innings) stats.last35Innings = [];
         stats.last35Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true }); 
     }
     
-    while (stats.last35Innings.length > 35) { stats.last35Innings.shift(); }
+    while (stats.last35Innings && stats.last35Innings.length > 35) { stats.last35Innings.shift(); }
 
     stats.totalRunsConceded += gameState.compStats.runs; 
     stats.totalBallsBowled += gameState.compStats.balls;
@@ -1954,8 +1958,10 @@ function endGame(result) {
         }
     }
     
-    // FIX: PUSH DIRECTLY TO THE NEW 60 SR ARRAY
+    // NO MORE last10SR! Pushing directly to last60SR
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
+    
+    if (!stats.last60SR) stats.last60SR = [];
     stats.last60SR.push(parseFloat(pSR)); 
     while (stats.last60SR.length > 60) { stats.last60SR.shift(); }
 
