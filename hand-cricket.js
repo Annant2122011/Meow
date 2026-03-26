@@ -972,7 +972,7 @@ function renderProfilePage() {
                 labels: ['Running (1s, 2s, 3s and 5s)', 'Runs from 4s', 'Runs from 6s'],
                 datasets: [{
                     data: [runRuns, bound4s, bound6s],
-                    backgroundColor: ['#facc15', '#00ff88', '#ff7300', '#9333ea'], // Added orange for 5s
+                    backgroundColor: ['#facc15', '#00ff88', '#9333ea'], // Added orange for 5s
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
