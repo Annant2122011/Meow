@@ -1906,7 +1906,8 @@ function endGame(result) {
 
     populateStats('an-p', gameState.playerStats, gameState.compStats); 
     populateStats('an-c', gameState.compStats, gameState.playerStats);
-    
+
+   
     // Populate Match Rewards UI (XP and Coins)
     const xpDisplay = document.getElementById('gain-xp');
     const coinDisplay = document.getElementById('gain-coins');
@@ -1944,32 +1945,41 @@ function saveLifetimeStats(result) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
     let stats = usersDB[currentUser];
     
-    let matchXP = 100; 
-    if (result === "PLAYER_WINS") matchXP += 400;
-    
-    matchXP += gameState.playerStats.runs;
-    matchXP += (gameState.compStats.wicketsLost * 10);
-    
-    let bossBonusXP = 0;
-    if (gameState.isTournament && result === "PLAYER_WINS") {
-        stats.bossesDefeated = (stats.bossesDefeated || 0) + 1;
-        if (gameState.currentBoss === 9 || gameState.currentBoss === 13) stats.godDefeats = (stats.godDefeats || 0) + 1;
+    let matchXP = 0;
+    let matchCoins = 0;
+
+    // ONLY calculate XP if they actually finished the match
+    if (result !== "FORFEIT") {
+        matchXP = 100; 
+        if (result === "PLAYER_WINS") matchXP += 400;
         
-        if (gameState.currentBoss <= 2) bossBonusXP = 1000;
-        else if (gameState.currentBoss <= 5) bossBonusXP = 2500;
-        else if (gameState.currentBoss <= 8) bossBonusXP = 10000;
-        else if (gameState.currentBoss <= 13) bossBonusXP = 100000;
+        matchXP += gameState.playerStats.runs;
+        matchXP += (gameState.compStats.wicketsLost * 10);
+        
+        let bossBonusXP = 0;
+        if (gameState.isTournament && result === "PLAYER_WINS") {
+            stats.bossesDefeated = (stats.bossesDefeated || 0) + 1;
+            if (gameState.currentBoss === 9 || gameState.currentBoss === 13) stats.godDefeats = (stats.godDefeats || 0) + 1;
+            
+            if (gameState.currentBoss <= 2) bossBonusXP = 1000;
+            else if (gameState.currentBoss <= 5) bossBonusXP = 2500;
+            else if (gameState.currentBoss <= 8) bossBonusXP = 10000;
+            else if (gameState.currentBoss <= 13) bossBonusXP = 100000;
+        }
+        
+        matchXP += bossBonusXP;
+        matchCoins = Math.floor(matchXP * 0.5);
     }
     
-    matchXP += bossBonusXP;
     stats.xp = (stats.xp || 0) + matchXP;
-    let matchCoins = Math.floor(matchXP * 0.5);
     stats.coins = (stats.coins || 0) + matchCoins;
     gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
 
     stats.matches += 1;
+    
+    // A forfeit counts as a loss on your Win/Loss ratio
     if (result === "PLAYER_WINS") stats.wins += 1; 
-    else if (result === "COM_WINS") stats.losses += 1; 
+    else if (result === "COM_WINS" || result === "FORFEIT") stats.losses += 1; 
     else stats.ties += 1;
     
     stats.totalRuns += gameState.playerStats.runs; 
@@ -1999,7 +2009,6 @@ function saveLifetimeStats(result) {
     
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.careerSnipes = (stats.careerSnipes || 0) + 1;
 
-    // --- FRESH ARRAY PUSHES ---
     if (!stats.last35Innings) stats.last35Innings = [];
     gameState.playerStats.wicketRunsHistory.forEach(w => { 
         if (w.runs === 0) stats.ducks += 1; 
@@ -2011,7 +2020,7 @@ function saveLifetimeStats(result) {
     });
     
     if (gameState.playerStats.wicketsLost < gameState.maxWickets && gameState.playerStats.balls > 0) { 
-        stats.notOutMatches += 1; 
+        if (result !== "FORFEIT") stats.notOutMatches += 1; 
         stats.last35Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true }); 
     }
     while (stats.last35Innings.length > 35) { stats.last35Innings.shift(); }
@@ -2037,7 +2046,12 @@ function saveLifetimeStats(result) {
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
-    showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
+    // DIFFERENT TOAST POPUP FOR FORFEITING
+    if (result === "FORFEIT") {
+        showToast(`⚠️ Match Forfeited. Stats Saved | 0 XP Gained.`);
+    } else {
+        showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
+    }
 }
 function evaluateAchievements(stats) {
     if (!stats.achLevels) {
@@ -2484,4 +2498,64 @@ function exitGameTab() {
         }
         
     }, 300);
+}
+function quitMatch() {
+    const matchStarted = gameState.isPlayerBatting !== null;
+
+    if (!matchStarted) {
+        // PRE-TOSS: Free exit, no stats saved, no penalty
+        showConfirmModal(
+            "CANCEL MATCH", 
+            "Are you sure you want to go back? (No stats affected)", 
+            () => {
+                executeForfeit(false);
+            }
+        );
+    } else {
+        // POST-TOSS: Save stats, 0 XP
+        showConfirmModal(
+            "FORFEIT MATCH", 
+            "Are you sure you want to forfeit? Your runs will be added to your career stats, but you will receive 0 XP.", 
+            () => {
+                executeForfeit(true);
+            }
+        );
+    }
+}
+
+function executeForfeit(applyPenalty) {
+    // 1. IF MIDWAY THROUGH MATCH, SAVE STATS WITH NO XP
+    if (applyPenalty && currentUser) {
+        // We pass "FORFEIT" into the stat saver so it knows to give 0 XP
+        saveLifetimeStats("FORFEIT");
+    } else {
+        showToast("Match Cancelled safely.");
+    }
+
+    // 2. HIDE ALL ACTIVE SCREENS
+    const screensToHide = ['toss-screen', 'game-screen', 'post-match-screen'];
+    screensToHide.forEach(id => {
+        let el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    
+    // 3. SHOW THE SETUP SCREEN
+    const setupScreen = document.getElementById('setup-screen');
+    if (setupScreen) setupScreen.style.display = 'block';
+
+    // 4. WIPE THE GAME STATE CLEAN
+    gameState.isPlayerBatting = null;
+    gameState.tossChoice = null;
+    gameState.innings = 1;
+    gameState.gameOver = false;
+    gameState.commentaryHistory = [];
+    
+    gameState.playerStats = { 
+        runs: 0, balls: 0, fours: 0, sixes: 0, extras: 0, wicketsLost: 0, 
+        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
+    };
+    gameState.compStats = { 
+        runs: 0, balls: 0, fours: 0, sixes: 0, extras: 0, wicketsLost: 0, 
+        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
+    };
 }
