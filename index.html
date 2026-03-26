@@ -195,6 +195,17 @@
     </div>
 
     <div id="toast-container"></div>
+    <div id="wicket-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+        <div style="background: #111827; border: 2px solid var(--accent-blue); padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);">
+            <h3 id="wicket-modal-title" style="color: var(--accent-neon); font-size: 1.5rem; margin-top: 0; margin-bottom: 10px; font-family: var(--font-display); text-transform: uppercase;">Select Format</h3>
+            <p style="color: var(--text-dim); margin-bottom: 25px; font-size: 1rem;">Choose the number of wickets for this match:</p>
+            
+            <div id="wicket-btn-container" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;">
+                </div>
+            
+            <button class="btn" style="background: #374151; color: white; width: 100%; border: none; font-size: 1.2rem;" onclick="closeWicketModal()">Cancel</button>
+        </div>
+    </div>
     <script src="hand-cricket.js"></script>
 </body>
 </html>
