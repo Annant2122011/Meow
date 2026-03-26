@@ -2469,14 +2469,19 @@ function exitGameTab() {
     // Attempt to close the browser tab natively
     window.close();
     
-    // Fallback: If the browser blocks window.close() for security reasons, trigger this
+    // If the browser blocks it, show the sleek info modal instead of redirecting
     setTimeout(() => {
-        showToast("⚠️ Browser security prevents auto-closing. Exiting...");
+        const infoModal = document.getElementById('custom-info-modal');
         
-        // Redirects the user to a blank page to simulate closing the app
-        setTimeout(() => {
-            window.location.href = "about:blank"; 
-        }, 1500);
+        if (infoModal) {
+            // Update the text and show the modal
+            document.getElementById('info-modal-title').innerText = "CANNOT AUTO-EXIT";
+            document.getElementById('info-modal-desc').innerText = "Please close this tab manually. Your browser is blocking auto-exit for security reasons.";
+            infoModal.style.display = 'flex';
+        } else {
+            // Ultimate fallback just in case the HTML isn't loaded
+            alert("Please close this tab manually. Your browser is blocking auto-exit.");
+        }
         
     }, 300);
 }
