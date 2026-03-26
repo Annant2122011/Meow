@@ -256,11 +256,7 @@ window.onload = function() {
 
 function syncUserData(username) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
-    
-    if (!usersDB[username]) {
-        usersDB[username] = {};
-    }
-    
+    if (!usersDB[username]) usersDB[username] = {};
     let u = usersDB[username];
     
     u.matches = u.matches || 0;
@@ -303,30 +299,18 @@ function syncUserData(username) {
 
     if (!u.achLevels) u.achLevels = {};
     
-    // --- FORCE DATA MIGRATION ---
-    // If the old 10-match array exists, force it into the new 60-match array and delete the old one
-    if (u.last10SR && u.last10SR.length > 0) {
-        u.last60SR = u.last10SR;
-        delete u.last10SR;
-    } else if (!u.last60SR) {
-        u.last60SR = [];
-    }
+    // SAFE ONE-TIME MIGRATION
+    if (u.last10SR && u.last10SR.length > 0) { u.last60SR = u.last10SR; delete u.last10SR; } 
+    else if (!u.last60SR) { u.last60SR = []; }
     
-    // If the old 20-innings array exists, force it into the new 35-innings array and delete the old one
-    if (u.last20Innings && u.last20Innings.length > 0) {
-        u.last35Innings = u.last20Innings;
-        delete u.last20Innings;
-    } else if (!u.last35Innings) {
-        u.last35Innings = [];
-    }
-    // -----------------------------
+    if (u.last20Innings && u.last20Innings.length > 0) { u.last35Innings = u.last20Innings; delete u.last20Innings; } 
+    else if (!u.last35Innings) { u.last35Innings = []; }
     
     u.highestScoreNotOut = u.highestScoreNotOut || false; 
     u.customPFP = u.customPFP || null;
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
-
 function loginUser() {
     const username = document.getElementById('username-input').value.trim().toUpperCase();
     
@@ -1894,7 +1878,6 @@ function endGame(result) {
         if (gameState.currentBoss === 9 || gameState.currentBoss === 13) {
             stats.godDefeats = (stats.godDefeats || 0) + 1;
         }
-        
         if (gameState.currentBoss <= 2) { bossBonusXP = 1000; } 
         else if (gameState.currentBoss <= 5) { bossBonusXP = 2500; } 
         else if (gameState.currentBoss <= 8) { bossBonusXP = 10000; } 
@@ -1903,24 +1886,21 @@ function endGame(result) {
     
     matchXP += bossBonusXP;
     stats.xp = (stats.xp || 0) + matchXP;
-    
     let matchCoins = Math.floor(matchXP * 0.5);
     stats.coins = (stats.coins || 0) + matchCoins;
 
     gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
-
     stats.matches += 1;
     
-    if (result === "PLAYER_WINS") { stats.wins += 1; } 
-    else if (result === "COM_WINS") { stats.losses += 1; } 
-    else { stats.ties += 1; }
+    if (result === "PLAYER_WINS") stats.wins += 1; 
+    else if (result === "COM_WINS") stats.losses += 1; 
+    else stats.ties += 1;
     
-   stats.totalRuns += gameState.playerStats.runs; 
+    stats.totalRuns += gameState.playerStats.runs; 
     stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
     stats.careerFours += gameState.playerStats.fours;
-    stats.careerFives = (stats.careerFives || 0) + (gameState.playerStats.fives || 0); // <--- ADDED SAVE
-    stats.careerDotsBowled += gameState.compStats.dots;
+    stats.careerDotsBowled += gameState.compStats.dots; 
     
     if (gameState.playerStats.runs > stats.highestScore) {
         stats.highestScore = gameState.playerStats.runs;
@@ -1943,10 +1923,9 @@ function endGame(result) {
         stats.fatalThrows[d.num] = (stats.fatalThrows[d.num] || 0) + 1; 
     });
     
-    if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) {
-        stats.careerSnipes = (stats.careerSnipes || 0) + 1;
-    }
+    if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.careerSnipes = (stats.careerSnipes || 0) + 1;
 
+    // FIX: PUSH DIRECTLY TO THE NEW 35 INNINGS ARRAY
     gameState.playerStats.wicketRunsHistory.forEach(w => { 
         if (w.runs === 0) stats.ducks += 1; 
         stats.last35Innings.push({ runs: w.runs, notOut: false }); 
@@ -1961,7 +1940,6 @@ function endGame(result) {
         stats.last35Innings.push({ runs: gameState.playerStats.currentWicketRuns, notOut: true }); 
     }
     
-    // Keep arrays at max limits
     while (stats.last35Innings.length > 35) { stats.last35Innings.shift(); }
 
     stats.totalRunsConceded += gameState.compStats.runs; 
@@ -1970,16 +1948,14 @@ function endGame(result) {
     if (gameState.compStats.wicketsLost > 0) {
         let currentWkts = gameState.compStats.wicketsLost; 
         let currentRuns = gameState.compStats.runs;
-        
         if (!stats.bestSpell) stats.bestSpell = { wickets: 0, runs: 0 }; 
-        
         if (currentWkts > stats.bestSpell.wickets || (currentWkts === stats.bestSpell.wickets && currentRuns < stats.bestSpell.runs) || (stats.bestSpell.wickets === 0 && stats.bestSpell.runs === 0)) { 
             stats.bestSpell = { wickets: currentWkts, runs: currentRuns }; 
         }
     }
     
+    // FIX: PUSH DIRECTLY TO THE NEW 60 SR ARRAY
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
-    
     stats.last60SR.push(parseFloat(pSR)); 
     while (stats.last60SR.length > 60) { stats.last60SR.shift(); }
 
