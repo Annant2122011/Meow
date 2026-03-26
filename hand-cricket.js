@@ -2172,82 +2172,84 @@ function downloadPDF() {
             try {
                 const wormDataUrl = wormCanvas.toDataURL('image/png', 1.0);
                 wormImgHtml = `
-                    <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
-                        <h3 style="color: #000; font-size: 16px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 15px;">MATCH WORM CHART</h3>
-                        <img src="${wormDataUrl}" style="width: 100%; max-width: 550px; border: 1px solid #000; border-radius: 4px;">
+                    <div style="text-align: center; margin-top: 40px;">
+                        <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">MATCH WORM CHART</h1>
+                        <p style="color: #666; font-size: 14px; margin-bottom: 30px;">Visual progression of runs per ball</p>
+                        <img src="${wormDataUrl}" style="width: 100%; max-width: 650px; border: 2px solid #ddd; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 10px; background: #fff;">
                     </div>
                 `;
             } catch (e) { console.log("Could not generate worm chart image", e); }
         }
 
-        // Build a perfectly rigid HTML string
         let pdfHTML = `
-            <div style="width: 800px; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; background: #fff; box-sizing: border-box;">
+            <div style="width: 800px; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; background: #fff; box-sizing: border-box;">
                 
-                <div style="text-align: center; border-bottom: 4px solid #000; padding-bottom: 15px; margin-bottom: 25px;">
-                    <h1 style="font-size: 32px; font-weight: bold; margin: 0; text-transform: uppercase;">HAND CLASH</h1>
-                    <h2 style="font-size: 16px; font-weight: normal; color: #444; margin: 5px 0 0 0; text-transform: uppercase;">OFFICIAL MATCH REPORT</h2>
+                <div style="text-align: center; border-bottom: 4px solid #111; padding-bottom: 15px; margin-bottom: 30px;">
+                    <h1 style="font-size: 36px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 2px;">HAND CLASH</h1>
+                    <h2 style="font-size: 14px; font-weight: 600; color: #555; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">OFFICIAL MATCH REPORT</h2>
                 </div>
 
-                <div style="text-align: center; background: #f4f4f5; padding: 15px; border: 2px solid #000; border-left: 8px solid #3b82f6; margin-bottom: 25px;">
-                    <h3 style="margin: 0; font-size: 18px; font-weight: bold;">${innStatusText}</h3>
+                <div style="text-align: center; background: #f8f9fa; padding: 20px; border: 2px solid #222; border-left: 8px solid #3b82f6; border-radius: 4px; margin-bottom: 35px;">
+                    <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #222;">${innStatusText}</h3>
                 </div>
 
-                <table style="width: 100%; border-collapse: separate; border-spacing: 20px 0; margin-bottom: 30px;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 25px 0; margin-bottom: 30px;">
                     <tr>
-                        <td style="width: 50%; vertical-align: top; padding: 20px; border: 2px solid #000; border-top: 6px solid #3b82f6; background: #fafafa;">
-                            <h3 style="margin: 0 0 15px 0; font-size: 16px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">YOUR PERFORMANCE</h3>
-                            <table style="width: 100%; font-size: 14px; line-height: 1.8;">
-                                <tr><td>Runs / Wickets</td><td style="text-align: right; font-weight: bold;">${pStats.runs} <span style="color:#d9534f;">/ ${pStats.wicketsLost}</span></td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Balls Faced</td><td style="text-align: right; font-weight: bold;">${pStats.balls}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Strike Rate</td><td style="text-align: right; font-weight: bold;">${pSR}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Run Rate</td><td style="text-align: right; font-weight: bold;">${pRR}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Boundaries (4s/6s)</td><td style="text-align: right; font-weight: bold;">${pTotalBounds} <span style="font-size: 12px; color:#666;">(${pStats.fours}/${pStats.sixes})</span></td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Boundary %</td><td style="text-align: right; font-weight: bold;">${pBpct}%</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Running Runs</td><td style="text-align: right; font-weight: bold;">${pRunningRuns}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Bowling Eco</td><td style="text-align: right; font-weight: bold;">${pEco}</td></tr>
+                        <td style="width: 50%; vertical-align: top; padding: 25px; border: 2px solid #e5e7eb; border-top: 6px solid #3b82f6; border-radius: 6px; background: #fafafa; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; color: #111;">👤 YOUR PERFORMANCE</h3>
+                            <table style="width: 100%; font-size: 14px; line-height: 2;">
+                                <tr><td style="color:#555;">Runs / Wickets</td><td style="text-align: right; font-weight: bold; font-size: 16px;">${pStats.runs} <span style="color:#ef4444;">/ ${pStats.wicketsLost}</span></td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Balls Faced</td><td style="text-align: right; font-weight: bold;">${pStats.balls}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Strike Rate</td><td style="text-align: right; font-weight: bold;">${pSR}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Run Rate</td><td style="text-align: right; font-weight: bold;">${pRR}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Boundaries</td><td style="text-align: right; font-weight: bold;">${pTotalBounds} <span style="font-size: 12px; color:#888;">(${pStats.fours}x4 / ${pStats.sixes}x6)</span></td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Boundary %</td><td style="text-align: right; font-weight: bold;">${pBpct}%</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Running Runs</td><td style="text-align: right; font-weight: bold;">${pRunningRuns}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Bowling Eco</td><td style="text-align: right; font-weight: bold;">${pEco}</td></tr>
                             </table>
                         </td>
-                        <td style="width: 50%; vertical-align: top; padding: 20px; border: 2px solid #000; border-top: 6px solid #d9534f; background: #fafafa;">
-                            <h3 style="margin: 0 0 15px 0; font-size: 16px; border-bottom: 2px solid #ddd; padding-bottom: 8px;">COM PERFORMANCE</h3>
-                            <table style="width: 100%; font-size: 14px; line-height: 1.8;">
-                                <tr><td>Runs / Wickets</td><td style="text-align: right; font-weight: bold;">${cStats.runs} <span style="color:#d9534f;">/ ${cStats.wicketsLost}</span></td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Balls Faced</td><td style="text-align: right; font-weight: bold;">${cStats.balls}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Strike Rate</td><td style="text-align: right; font-weight: bold;">${cSR}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Run Rate</td><td style="text-align: right; font-weight: bold;">${cRR}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Boundaries (4s/6s)</td><td style="text-align: right; font-weight: bold;">${cTotalBounds} <span style="font-size: 12px; color:#666;">(${cStats.fours}/${cStats.sixes})</span></td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Boundary %</td><td style="text-align: right; font-weight: bold;">${cBpct}%</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Running Runs</td><td style="text-align: right; font-weight: bold;">${cRunningRuns}</td></tr>
-                                <tr style="border-top: 1px solid #e5e7eb;"><td>Bowling Eco</td><td style="text-align: right; font-weight: bold;">${cEco}</td></tr>
+                        <td style="width: 50%; vertical-align: top; padding: 25px; border: 2px solid #e5e7eb; border-top: 6px solid #ef4444; border-radius: 6px; background: #fafafa; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                            <h3 style="margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; color: #111;">🤖 COM PERFORMANCE</h3>
+                            <table style="width: 100%; font-size: 14px; line-height: 2;">
+                                <tr><td style="color:#555;">Runs / Wickets</td><td style="text-align: right; font-weight: bold; font-size: 16px;">${cStats.runs} <span style="color:#ef4444;">/ ${cStats.wicketsLost}</span></td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Balls Faced</td><td style="text-align: right; font-weight: bold;">${cStats.balls}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Strike Rate</td><td style="text-align: right; font-weight: bold;">${cSR}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Run Rate</td><td style="text-align: right; font-weight: bold;">${cRR}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Boundaries</td><td style="text-align: right; font-weight: bold;">${cTotalBounds} <span style="font-size: 12px; color:#888;">(${cStats.fours}x4 / ${cStats.sixes}x6)</span></td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Boundary %</td><td style="text-align: right; font-weight: bold;">${cBpct}%</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Running Runs</td><td style="text-align: right; font-weight: bold;">${cRunningRuns}</td></tr>
+                                <tr style="border-top: 1px dashed #e5e7eb;"><td style="color:#555;">Bowling Eco</td><td style="text-align: right; font-weight: bold;">${cEco}</td></tr>
                             </table>
                         </td>
                     </tr>
                 </table>
+
+                <div class="html2pdf__page-break"></div>
                 
                 ${wormImgHtml}
 
                 <div class="html2pdf__page-break"></div>
                 
-                <div style="margin-top: 20px;">
-                    <h3 style="color: #000; font-size: 18px; font-weight: bold; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase;">BALL-BY-BALL MATCH LOG</h3>
-                    <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.5;">
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #111; font-size: 20px; font-weight: 800; border-bottom: 3px solid #111; padding-bottom: 12px; margin-bottom: 20px; text-transform: uppercase;">BALL-BY-BALL MATCH LOG</h3>
+                    <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.6; border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;">
         `;
 
         gameState.commentaryHistory.forEach(log => {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
             
-            let color = "#000", fontWeight = "normal", bgColor = "transparent", padding = "4px 8px", borderBottom = "1px solid #eee";
+            let color = "#333", fontWeight = "normal", bgColor = "#fff", padding = "8px 12px", borderBottom = "1px solid #e5e7eb";
 
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS", "CASTLED!"];
             
             if (wicketKeywords.some(kw => upperText.includes(kw))) {
-                color = "#d9534f"; fontWeight = "bold"; background = "#fdf2f2";
+                color = "#dc2626"; fontWeight = "bold"; bgColor = "#fef2f2";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                color = "#0275d8"; fontWeight = "bold"; background = "#eff6ff";
+                color = "#2563eb"; fontWeight = "bold"; bgColor = "#eff6ff";
             } else if (safeText.includes("---")) {
-                bgColor = "#f3f4f6"; borderBottom = "2px solid #ccc"; padding = "10px"; fontWeight = "bold"; color = "#333";
+                bgColor = "#f3f4f6"; borderBottom = "2px solid #d1d5db"; padding = "12px"; fontWeight = "800"; color = "#111";
             }
 
             pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom};">${safeText}</div>`;
@@ -2259,15 +2261,14 @@ function downloadPDF() {
             </div>`;
 
         const opt = {
-            margin:       0.5,
+            margin:       0.4,
             filename:     'Hand_Clash_Match_Report.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: 'css' } // Respects the "html2pdf__page-break" class natively
+            pagebreak:    { mode: 'css' }
         };
 
-        // Feed string directly. No hidden divs. No layout shattering.
         html2pdf().set(opt).from(pdfHTML).save().then(() => {
             btn.innerHTML = originalText; 
             btn.disabled = false; 
