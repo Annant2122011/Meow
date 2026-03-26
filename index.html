@@ -13,9 +13,17 @@
 <body>
 
   <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
-<button onclick="exitGameTab()" class="btn" style="background: #dc2626;">Back</button>
+<div style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%; padding: 15px 20px; box-sizing: border-box; min-height: 80px;">
+    
+    <button id="header-back-btn" onclick="exitGameTab()" class="btn" style="position: absolute; left: 20px; background: #dc2626; margin: 0; z-index: 10;">QUIT</button>
 
-<button onclick="quitMatch()" class="btn" style="background: #dc2626;">Forfeit</button>
+    <h1 style="margin: 0; font-size: clamp(1.5rem, 4vw, 2.5rem); font-family: var(--font-display); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; z-index: 1;">
+        HAND<span style="color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.6);">CRICKET</span>
+    </h1>
+
+    <button id="header-forfeit-btn" onclick="quitMatch()" class="btn" style="position: absolute; right: 20px; background: #dc2626; margin: 0; z-index: 10; display: none;">FORFEIT</button>
+
+</div>
         
         <div class="logo" style="margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%);">
             <span class="logo-text" style="font-size: 2rem; letter-spacing: 2px;">HAND<span style="color: var(--accent-neon); text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);">CRICKET</span></span>
