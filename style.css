@@ -539,6 +539,20 @@ header {
     color: var(--text-bright) !important;
     animation: godPulse 2s infinite !important;
 }
+.rank-national {
+    border-color: #a855f7; /* Purple border */
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.rank-world {
+    border-color: #f43f5e; /* Rose/Pink border */
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+}
+
+.rank-legend {
+    border-color: #06b6d4; /* Cyan/Teal border */
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+}
 
 @keyframes godPulse {
     0% { box-shadow: 0 0 20px var(--accent-blue), inset 0 0 10px var(--accent-neon); }
