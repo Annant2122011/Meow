@@ -1926,7 +1926,7 @@ function saveLifetimeStats(result) {
     
     if (gameState.compStats.runs === 0 && gameState.compStats.wicketsLost > 0) stats.careerSnipes = (stats.careerSnipes || 0) + 1;
 
-    // NO MORE last20Innings! Pushing directly to last35Innings
+    // DIRECTLY PUSHES TO NEW 35-INNING ARRAY (Old code removed entirely)
     gameState.playerStats.wicketRunsHistory.forEach(w => { 
         if (w.runs === 0) stats.ducks += 1; 
         
@@ -1958,7 +1958,7 @@ function saveLifetimeStats(result) {
         }
     }
     
-    // NO MORE last10SR! Pushing directly to last60SR
+    // DIRECTLY PUSHES TO NEW 60-SR ARRAY (Old code removed entirely)
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
     
     if (!stats.last60SR) stats.last60SR = [];
@@ -2291,7 +2291,6 @@ function downloadPDF() {
         const pStats = gameState.playerStats;
         const cStats = gameState.compStats;
 
-        // FIX 1: Calculate ALL Advanced Stats for the PDF
         let pBoundRuns = (pStats.fours * 4) + (pStats.sixes * 6);
         let pTotalBounds = pStats.fours + pStats.sixes;
         let pRunningRuns = pStats.runs - pBoundRuns;
@@ -2327,7 +2326,6 @@ function downloadPDF() {
         if (wormCanvas) {
             try {
                 const wormDataUrl = wormCanvas.toDataURL('image/png', 1.0);
-                // FIX 2: Shrunk max-width to 450px and tightened margins to prevent page-splitting
                 wormImgHtml = `
                     <div style="page-break-inside: avoid; text-align: center; margin-top: 15px; margin-bottom: 15px;">
                         <h3 style="color: #000000; font-size: 16px; border-bottom: 2px solid #000000; padding-bottom: 5px; font-weight: 900; margin-bottom: 10px;">MATCH WORM CHART</h3>
@@ -2341,8 +2339,14 @@ function downloadPDF() {
 
         const printElement = document.createElement('div');
         
+        // CRITICAL PDF FIX: Force strict widths and padding so html2canvas doesn't guess
+        printElement.style.width = '800px';
+        printElement.style.padding = '20px';
+        printElement.style.background = '#ffffff';
+        printElement.style.color = '#000000';
+        
         let pdfHTML = `
-            <div style="font-family: Arial, sans-serif; color: #000000; padding: 20px; background: #ffffff; font-size: 14px; line-height: 1.4;">
+            <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.4;">
                 
                 <div style="text-align: center; border-bottom: 4px solid #000000; padding-bottom: 15px; margin-bottom: 20px;">
                     <h1 style="font-size: 28px; font-weight: 900; color: #000000; margin: 0;">HAND CLASH</h1>
@@ -2388,10 +2392,9 @@ function downloadPDF() {
                 
                 ${wormImgHtml}
                 
-                <div style="page-break-before: auto;">
+                <div style="page-break-before: always; margin-top: 20px;">
                     <h3 style="color: #000000; font-size: 18px; font-weight: 900; border-bottom: 4px solid #000000; padding-bottom: 5px; margin-bottom: 15px;">BALL-BY-BALL MATCH LOG</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; color: #000000; page-break-inside: auto;">
-                        <tbody>
+                    <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.5; color: #000000;">
         `;
 
         let currentGroup = '';
@@ -2402,7 +2405,6 @@ function downloadPDF() {
             
             let lineStyle = "margin: 3px 0; color: #000000; font-weight: 700;";
             
-            // FIX 4: Advanced Wicket Recognition Array
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS THE STUMPS", "CASTLED!"];
             const isWicket = wicketKeywords.some(kw => upperText.includes(kw));
@@ -2417,9 +2419,8 @@ function downloadPDF() {
 
             if (safeText.startsWith('[Ball') || safeText.startsWith('---') || safeText.includes('TOSS') || safeText.includes('elected to')) {
                 if (currentGroup !== '') {
-                    pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                                    <td style="border-left: 4px solid #000000; padding-left: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
-                                </tr>`;
+                    // CRITICAL PDF FIX: Switched from a table to standard divs so it doesn't clip
+                    pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</div>`;
                 }
                 currentGroup = `<div style="${lineStyle}">${safeText}</div>`;
             } else {
@@ -2428,15 +2429,11 @@ function downloadPDF() {
         });
         
         if (currentGroup !== '') {
-            pdfHTML += `<tr style="page-break-inside: avoid; page-break-after: auto;">
-                            <td style="border-left: 4px solid #000000; padding-left: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</td>
-                        </tr>`;
+            pdfHTML += `<div style="page-break-inside: avoid; border-left: 4px solid #000000; padding-left: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #d1d5db;">${currentGroup}</div>`;
         }
 
-        // FIX 3: Added bottom padding to prevent the footer from clipping off the page
         pdfHTML += `
-                        </tbody>
-                    </table>
+                    </div>
                 </div>
                 <div style="margin-top: 30px; margin-bottom: 30px; text-align: center; color: #000000; font-size: 13px; font-weight: 900; border-top: 2px solid #000000; padding-top: 15px; page-break-inside: avoid;">
                     Generated by Hand Clash Arena &bull; &copy; 2026
@@ -2444,21 +2441,27 @@ function downloadPDF() {
             </div>`;
 
         printElement.innerHTML = pdfHTML;
+        
+        // CRITICAL PDF FIX: Temporarily add the document to the body so it can measure the EXACT height without chopping the bottom
+        printElement.style.position = 'absolute';
+        printElement.style.top = '-9999px';
+        document.body.appendChild(printElement);
 
-        // FIX 3: Added a dedicated bottom margin [0.6] to the page settings
         const opt = {
-            margin: [0.4, 0.4, 0.6, 0.4], 
+            margin: 0.4, 
             filename: 'Hand_Clash_Match_Report.pdf', 
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true }, 
+            html2canvas: { scale: 2, useCORS: true, windowWidth: 800 }, 
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' } 
+            pagebreak: { mode: ['css', 'legacy'] } 
         };
 
         html2pdf().set(opt).from(printElement).save().then(() => {
+            document.body.removeChild(printElement); // Remove it once done
             btn.innerHTML = originalText; 
             btn.disabled = false; 
         }).catch(err => {
+            document.body.removeChild(printElement); 
             console.error("PDF engine promise caught an error:", err);
             btn.innerHTML = "❌ PDF ERROR";
             
