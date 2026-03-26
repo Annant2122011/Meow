@@ -313,6 +313,37 @@ function syncUserData(username) {
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
+function toggleHeaderButtons(mode) {
+    const backBtn = document.getElementById('header-back-btn');
+    const forfeitBtn = document.getElementById('header-forfeit-btn');
+    
+    if (!backBtn || !forfeitBtn) return;
+
+    if (mode === 'setup') {
+        // Main Menu: Show QUIT on the left, point to tab closer
+        backBtn.style.display = 'block';
+        backBtn.innerText = 'QUIT';
+        backBtn.onclick = exitGameTab; 
+        forfeitBtn.style.display = 'none';
+        
+    } else if (mode === 'toss') {
+        // Toss Screen: Show BACK on the left, point to safe cancel
+        backBtn.style.display = 'block';
+        backBtn.innerText = 'BACK';
+        backBtn.onclick = quitMatch;
+        forfeitBtn.style.display = 'none';
+        
+    } else if (mode === 'match') {
+        // Active Match: Hide left button, show FORFEIT on the right
+        backBtn.style.display = 'none';
+        forfeitBtn.style.display = 'block';
+        
+    } else if (mode === 'end') {
+        // Game Over: Hide both so the player focuses on the stats
+        backBtn.style.display = 'none';
+        forfeitBtn.style.display = 'none';
+    }
+}
 function loginUser() {
     const username = document.getElementById('username-input').value.trim().toUpperCase();
     
@@ -348,6 +379,7 @@ function loadUser(username) {
     
     applyRankUI(username, 'header-avatar-box');
     applyCosmetics();
+   toggleHeaderButtons('setup');
     
     // TOURNAMENT INTERCEPTOR
     const activeBoss = localStorage.getItem('hc_tourney_boss');
@@ -1148,6 +1180,7 @@ function setDifficulty(level, btnId) {
 }
 
 function goToToss() {
+   toggleHeaderButtons('toss');
     if (setupScreen) {
         setupScreen.style.display = 'none';
     }
@@ -1265,6 +1298,7 @@ function startMatch(playerOptsToBat) {
 }
 
 function continueToMatch() {
+   toggleHeaderButtons('match');
     if (tossScreen) {
         tossScreen.style.display = 'none';
     }
@@ -1880,6 +1914,7 @@ function drawWormChart() {
 }
 
 function endGame(result) {
+   toggleHeaderButtons('end');
     gameState.gameOver = true; 
     actionArea.style.display = 'none'; 
     
@@ -2540,9 +2575,11 @@ function executeForfeit(applyPenalty) {
     });
     
     // 3. SHOW THE SETUP SCREEN
+    toggleHeaderButtons('setup');
+
     const setupScreen = document.getElementById('setup-screen');
     if (setupScreen) setupScreen.style.display = 'block';
-
+  
     // 4. WIPE THE GAME STATE CLEAN
     gameState.isPlayerBatting = null;
     gameState.tossChoice = null;
