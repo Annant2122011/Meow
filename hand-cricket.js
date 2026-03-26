@@ -192,6 +192,8 @@ let runsChartInstance = null;
 let throwDnaInstance = null;
 let fatalChartInstance = null;
 let wormChartInstance = null;
+let outcomesChartInstance = null;
+let runsBreakdownChartInstance = null;
 
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
@@ -861,10 +863,13 @@ function renderProfilePage() {
     }
 
    // CHARTS GENERATION
+
     if (srChartInstance) srChartInstance.destroy();
     if (runsChartInstance) runsChartInstance.destroy();
     if (throwDnaInstance) throwDnaInstance.destroy();
     if (fatalChartInstance) fatalChartInstance.destroy();
+    if (outcomesChartInstance) outcomesChartInstance.destroy(); // <--- ADD THIS
+    if (runsBreakdownChartInstance) runsBreakdownChartInstance.destroy(); // <--- ADD THIS
 
     const srCtxElement = document.getElementById('srLineChart');
     if (srCtxElement) {
@@ -926,6 +931,55 @@ function renderProfilePage() {
                     x: { grid: {color: 'rgba(255,255,255,0.1)'}, ticks: { font: {size: 10} } } 
                 }, 
                 color: '#fff' 
+            }
+        });
+    }
+   // 5. Match Outcomes Chart (Doughnut)
+    const outcomesCtx = document.getElementById('outcomesChart');
+    if (outcomesCtx) {
+        outcomesChartInstance = new Chart(outcomesCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Wins', 'Losses', 'Ties'],
+                datasets: [{
+                    data: [stats.wins || 0, stats.losses || 0, stats.ties || 0],
+                    backgroundColor: ['#00d2ff', '#ff2a2a', '#a1a1aa'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { color: '#fff', font: { family: "'Rajdhani', sans-serif", size: 14 } } } },
+                color: '#fff'
+            }
+        });
+    }
+
+    // 6. Career Runs Breakdown Chart (Pie)
+
+    const breakdownCtx = document.getElementById('runsBreakdownChart');
+    if (breakdownCtx) {
+        let bound4s = (stats.careerFours || 0) * 4;
+        let bound6s = (stats.careerSixes || 0) * 6;
+        let runs5s = (stats.careerFives || 0) * 5; // <--- Calculate total runs from 5s
+        
+        let runRuns = (stats.totalRuns || 0) - (bound4s + bound6s + runs5s);
+        if (runRuns < 0) runRuns = 0; 
+
+        runsBreakdownChartInstance = new Chart(breakdownCtx.getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['Running (1s, 2s, 3s)', 'Runs from 4s', 'Runs from 5s', 'Runs from 6s'],
+                datasets: [{
+                    data: [runRuns, bound4s, runs5s, bound6s],
+                    backgroundColor: ['#facc15', '#00ff88', '#ff7300', '#9333ea'], // Added orange for 5s
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom', labels: { color: '#fff', font: { family: "'Rajdhani', sans-serif", size: 14 } } } },
+                color: '#fff'
             }
         });
     }
@@ -1597,13 +1651,14 @@ function handleRuns(runs) {
     }
     
     let comment = "";
-    if (runs === 4) { 
+  if (runs === 4) { 
         currentBatterStats.fours++; 
         comment = getRandomCommentary(commentaryDB.run_4);
     } else if (runs === 6) { 
         currentBatterStats.sixes++; 
         comment = getRandomCommentary(commentaryDB.run_6);
     } else if (runs === 5) {
+        currentBatterStats.fives = (currentBatterStats.fives || 0) + 1; // <--- ADDED TRACKER
         comment = getRandomCommentary(commentaryDB.run_5);
     } else { 
         comment = getRandomCommentary(commentaryDB.run_1_3).replace(/\[RUNS\]/g, runs);
@@ -1860,11 +1915,12 @@ function endGame(result) {
     else if (result === "COM_WINS") { stats.losses += 1; } 
     else { stats.ties += 1; }
     
-    stats.totalRuns += gameState.playerStats.runs; 
+   stats.totalRuns += gameState.playerStats.runs; 
     stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
     stats.careerFours += gameState.playerStats.fours;
-    stats.careerDotsBowled += gameState.compStats.dots; 
+    stats.careerFives = (stats.careerFives || 0) + (gameState.playerStats.fives || 0); // <--- ADDED SAVE
+    stats.careerDotsBowled += gameState.compStats.dots;
     
     if (gameState.playerStats.runs > stats.highestScore) {
         stats.highestScore = gameState.playerStats.runs;
