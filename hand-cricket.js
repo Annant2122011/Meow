@@ -1044,21 +1044,88 @@ function renderProfilePage() {
 // 5. GAME SETUP & TOSS
 // ==========================================
 
+// Variable to temporarily remember what the user clicked while the modal is open
+let pendingFormat = { balls: 30, btnId: '' };
+
 function setFormat(wickets, balls, btnId) {
-    if (balls === Infinity) {
-        let userWickets = prompt("Classic Mode Selected! How many wickets do you want to play with? (Choose 1 to 5)", "3");
-        let parsed = parseInt(userWickets);
-        if (isNaN(parsed) || parsed < 1 || parsed > 5) { alert("Invalid input. Defaulting to 3 wickets."); parsed = 3; }
-        gameState.maxWickets = parsed; 
-        gameState.maxBalls = Infinity;
-        setDifficulty('easy', 'btn-diff-easy'); // Forces Non-AI Default
-        showToast(`Classic Mode: ${parsed} Wickets, Easy AI!`);
+    pendingFormat = { balls: balls, btnId: btnId };
+    
+    const modal = document.getElementById('wicket-modal');
+    const title = document.getElementById('wicket-modal-title');
+    const btnContainer = document.getElementById('wicket-btn-container');
+    
+    if (!modal) return;
+    
+    btnContainer.innerHTML = ''; // Clear old buttons
+    let maxWicketsAllowed = 5;
+    
+    // Dynamic logic based on the format chosen
+    if (balls === 30) {
+        title.innerText = "T5 FORMAT";
+        maxWicketsAllowed = 3; // T5 allows 1 to 3 wickets
+    } else if (balls === 60) {
+        title.innerText = "T10 FORMAT";
+        maxWicketsAllowed = 5; // T10 allows 1 to 5 wickets
+    } else if (balls === Infinity) {
+        title.innerText = "CLASSIC MODE";
+        maxWicketsAllowed = 5; // Classic allows 1 to 5 wickets
     } else {
-        gameState.maxWickets = wickets; 
-        gameState.maxBalls = balls;
+        title.innerText = "CUSTOM FORMAT";
+        maxWicketsAllowed = wickets || 5;
     }
-    document.querySelectorAll('.setup-btn').forEach(btn => { if (btn.id && btn.id.startsWith('btn-fmt')) btn.classList.remove('active-setup-btn'); });
-    const activeBtn = document.getElementById(btnId); if (activeBtn) activeBtn.classList.add('active-setup-btn');
+
+    // Generate the nice circular buttons
+    for (let i = 1; i <= maxWicketsAllowed; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'setup-btn';
+        btn.style.width = '60px';
+        btn.style.height = '60px';
+        btn.style.padding = '0';
+        btn.style.fontSize = '1.5rem';
+        btn.style.borderRadius = '50%';
+        btn.style.display = 'flex';
+        btn.style.justifyContent = 'center';
+        btn.style.alignItems = 'center';
+        btn.innerText = i;
+        
+        btn.onclick = () => confirmFormat(i);
+        btnContainer.appendChild(btn);
+    }
+    
+    // Show the popup
+    modal.style.display = 'flex';
+}
+
+function confirmFormat(selectedWickets) {
+    // Save the choices to the game state
+    gameState.maxWickets = selectedWickets;
+    gameState.maxBalls = pendingFormat.balls;
+    
+    // Remove glow from all format buttons
+    document.querySelectorAll('.setup-btn').forEach(btn => { 
+        if (btn.id && btn.id.startsWith('btn-fmt')) {
+            btn.classList.remove('active-setup-btn'); 
+        }
+    });
+    
+    // Add glow to the chosen format button
+    const activeBtn = document.getElementById(pendingFormat.btnId); 
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
+    
+    // Special rule for Classic mode
+    if (pendingFormat.balls === Infinity) {
+        setDifficulty('easy', 'btn-diff-easy'); // Force Easy AI for unlimited
+        showToast(`Classic Mode: ${selectedWickets} Wkts, Easy AI!`);
+    } else {
+        showToast(`${pendingFormat.balls / 6} Overs | ${selectedWickets} Wickets Set!`);
+    }
+    
+    closeWicketModal();
+}
+
+function closeWicketModal() {
+    const modal = document.getElementById('wicket-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 function setDifficulty(level, btnId) {
