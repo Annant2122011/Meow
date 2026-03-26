@@ -2515,24 +2515,33 @@ function closeConfirmModal() {
     pendingConfirmAction = null;
 }
 function exitGameTab() {
-    // Attempt to close the browser tab natively
-    window.close();
-    
-    // If the browser blocks it, show the sleek info modal instead of redirecting
-    setTimeout(() => {
-        const infoModal = document.getElementById('custom-info-modal');
-        
-        if (infoModal) {
-            // Update the text and show the modal
-            document.getElementById('info-modal-title').innerText = "CANNOT AUTO-EXIT";
-            document.getElementById('info-modal-desc').innerText = "Please close this tab manually. Your browser is blocking auto-exit for security reasons.";
-            infoModal.style.display = 'flex';
-        } else {
-            // Ultimate fallback just in case the HTML isn't loaded
-            alert("Please close this tab manually. Your browser is blocking auto-exit.");
+    // 1. Show the sleek confirmation modal first
+    showConfirmModal(
+        "EXIT ARENA", 
+        "Are you sure you want to leave the game?", 
+        () => {
+            // 2. This runs ONLY if they click "YES"
+            
+            // Attempt to close the browser tab natively
+            window.close();
+            
+            // If the browser blocks it, show the sleek info modal
+            setTimeout(() => {
+                const infoModal = document.getElementById('custom-info-modal');
+                
+                if (infoModal) {
+                    // Update the text and show the modal
+                    document.getElementById('info-modal-title').innerText = "CANNOT AUTO-EXIT";
+                    document.getElementById('info-modal-desc').innerText = "Please close this tab manually. Your browser is blocking auto-exit for security reasons.";
+                    infoModal.style.display = 'flex';
+                } else {
+                    // Ultimate fallback just in case the HTML isn't loaded
+                    alert("Please close this tab manually. Your browser is blocking auto-exit.");
+                }
+                
+            }, 300);
         }
-        
-    }, 300);
+    );
 }
 function quitMatch() {
     const matchStarted = gameState.isPlayerBatting !== null;
