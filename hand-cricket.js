@@ -2436,3 +2436,28 @@ function updateAtmosphere() {
     
     body.classList.remove('danger-pulse');
 }
+// --- UNIVERSAL CONFIRMATION MODAL LOGIC ---
+let pendingConfirmAction = null;
+
+function showConfirmModal(title, desc, onConfirm) {
+    const modal = document.getElementById('custom-confirm-modal');
+    if (!modal) return;
+    
+    document.getElementById('confirm-modal-title').innerText = title;
+    document.getElementById('confirm-modal-desc').innerText = desc;
+    
+    pendingConfirmAction = onConfirm;
+    
+    document.getElementById('confirm-modal-yes').onclick = () => {
+        if (pendingConfirmAction) pendingConfirmAction();
+        closeConfirmModal();
+    };
+    
+    modal.style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('custom-confirm-modal');
+    if (modal) modal.style.display = 'none';
+    pendingConfirmAction = null;
+}
