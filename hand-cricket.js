@@ -961,17 +961,17 @@ function renderProfilePage() {
     if (breakdownCtx) {
         let bound4s = (stats.careerFours || 0) * 4;
         let bound6s = (stats.careerSixes || 0) * 6;
-        let runs5s = (stats.careerFives || 0) * 5; // <--- Calculate total runs from 5s
         
-        let runRuns = (stats.totalRuns || 0) - (bound4s + bound6s + runs5s);
+        
+        let runRuns = (stats.totalRuns || 0) - (bound4s + bound6s );
         if (runRuns < 0) runRuns = 0; 
 
         runsBreakdownChartInstance = new Chart(breakdownCtx.getContext('2d'), {
             type: 'pie',
             data: {
-                labels: ['Running (1s, 2s, 3s)', 'Runs from 4s', 'Runs from 5s', 'Runs from 6s'],
+                labels: ['Running (1s, 2s, 3s and 5s)', 'Runs from 4s', 'Runs from 6s'],
                 datasets: [{
-                    data: [runRuns, bound4s, runs5s, bound6s],
+                    data: [runRuns, bound4s, bound6s],
                     backgroundColor: ['#facc15', '#00ff88', '#ff7300', '#9333ea'], // Added orange for 5s
                     borderWidth: 0,
                     hoverOffset: 4
