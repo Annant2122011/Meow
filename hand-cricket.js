@@ -612,12 +612,17 @@ function goToProfile() {
 }
 
 function getRankDetails(xp) {
-    if (xp < 1000) return { title: 'Gully Cricketer', class: 'rank-gully' };
-    if (xp < 3000) return { title: 'Club Player', class: 'rank-club' };
-    if (xp < 7000) return { title: 'State Pro', class: 'rank-state' };
-    return { title: 'Cricket God', class: 'rank-god' };
+    // TIER 1 to TIER 7 Progression System
+    if (xp < 1000)   return { title: 'Tier 1: Gully Cricketer', class: 'rank-gully' };
+    if (xp < 3000)   return { title: 'Tier 2: Club Player',     class: 'rank-club' };
+    if (xp < 7000)   return { title: 'Tier 3: State Pro',       class: 'rank-state' };
+    if (xp < 15000)  return { title: 'Tier 4: National Star',   class: 'rank-national' };
+    if (xp < 35000)  return { title: 'Tier 5: World Champion',  class: 'rank-world' };
+    if (xp < 100000) return { title: 'Tier 6: Cricket God',   class: 'rank-legend' };
+    
+    // MAX TIER
+    return { title: 'Tier 7: Mythical Master', class: 'rank-god' };
 }
-
 function applyRankUI(username, avatarBoxId) {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const xp = usersDB[username].xp || 0;
