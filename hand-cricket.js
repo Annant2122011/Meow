@@ -2465,3 +2465,18 @@ function closeConfirmModal() {
     if (modal) modal.style.display = 'none';
     pendingConfirmAction = null;
 }
+function exitGameTab() {
+    // Attempt to close the browser tab natively
+    window.close();
+    
+    // Fallback: If the browser blocks window.close() for security reasons, trigger this
+    setTimeout(() => {
+        showToast("⚠️ Browser security prevents auto-closing. Exiting...");
+        
+        // Redirects the user to a blank page to simulate closing the app
+        setTimeout(() => {
+            window.location.href = "about:blank"; 
+        }, 1500);
+        
+    }, 300);
+}
