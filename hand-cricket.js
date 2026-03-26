@@ -256,7 +256,7 @@ window.onload = function() {
 
 function syncUserData(username) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
-    if (!usersDB[username]) usersDB[username] = {};
+    if (!usersDB[username]) { usersDB[username] = {}; }
     let u = usersDB[username];
     
     u.matches = u.matches || 0;
@@ -299,12 +299,13 @@ function syncUserData(username) {
 
     if (!u.achLevels) u.achLevels = {};
     
-    // SAFE ONE-TIME MIGRATION
-    if (u.last10SR && u.last10SR.length > 0) { u.last60SR = u.last10SR; delete u.last10SR; } 
-    else if (!u.last60SR) { u.last60SR = []; }
+    // THE NUCLEAR OPTION: Delete the ghost arrays completely so they NEVER overwrite your charts again
+    delete u.last10SR;
+    delete u.last20Innings;
     
-    if (u.last20Innings && u.last20Innings.length > 0) { u.last35Innings = u.last20Innings; delete u.last20Innings; } 
-    else if (!u.last35Innings) { u.last35Innings = []; }
+    // Safely initialize the new arrays
+    if (!u.last60SR) u.last60SR = [];
+    if (!u.last35Innings) u.last35Innings = [];
     
     u.highestScoreNotOut = u.highestScoreNotOut || false; 
     u.customPFP = u.customPFP || null;
@@ -2291,7 +2292,6 @@ function downloadPDF() {
         const pStats = gameState.playerStats;
         const cStats = gameState.compStats;
 
-        // Calculate Advanced Stats
         let pBoundRuns = (pStats.fours * 4) + (pStats.sixes * 6);
         let pTotalBounds = pStats.fours + pStats.sixes;
         let pRunningRuns = pStats.runs - pBoundRuns;
@@ -2316,9 +2316,7 @@ function downloadPDF() {
 
         let innStatusText = "MATCH REPORT";
         const innEl = document.getElementById('innings-status');
-        if (innEl) {
-            innStatusText = innEl.innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim();
-        }
+        if (innEl) innStatusText = innEl.innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim();
 
         const wormCanvas = document.getElementById('wormChart');
         let wormImgHtml = '';
@@ -2331,17 +2329,12 @@ function downloadPDF() {
                         <img src="${wormDataUrl}" style="width: 100%; max-width: 500px; border: 1px solid #000; border-radius: 4px;">
                     </div>
                 `;
-            } catch (e) {
-                console.log("Could not generate worm chart image", e);
-            }
+            } catch (e) { console.log("Could not generate worm chart image", e); }
         }
 
-        // Creating a clean, standalone container wrapper for the PDF engine
-        const container = document.createElement('div');
-        
-        // Using strict inline styles. No off-screen rendering hacks.
+        // NO DOM APPENDING - Raw HTML string ensures perfect rendering
         let pdfHTML = `
-            <div style="width: 750px; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; background: #fff; box-sizing: border-box;">
+            <div style="width: 750px; padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; background: #fff;">
                 
                 <div style="text-align: center; border-bottom: 3px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
                     <h1 style="font-size: 26px; font-weight: bold; margin: 0;">HAND CLASH</h1>
@@ -2368,7 +2361,8 @@ function downloadPDF() {
                                 <tr style="border-top: 1px solid #eee;"><td>Bowling Eco</td><td style="text-align: right; font-weight: bold;">${pEco}</td></tr>
                             </table>
                         </td>
-                        <td style="width: 4%;"></td> <td style="width: 48%; vertical-align: top; padding: 15px; border: 1px solid #000; border-top: 5px solid #d9534f;">
+                        <td style="width: 4%;"></td>
+                        <td style="width: 48%; vertical-align: top; padding: 15px; border: 1px solid #000; border-top: 5px solid #d9534f;">
                             <h3 style="margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">COM PERFORMANCE</h3>
                             <table style="width: 100%; font-size: 12px; line-height: 1.6;">
                                 <tr><td>Runs / Wickets</td><td style="text-align: right; font-weight: bold;">${cStats.runs} <span style="color:#d9534f;">/ ${cStats.wicketsLost}</span></td></tr>
@@ -2396,31 +2390,19 @@ function downloadPDF() {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
             
-            let color = "#000";
-            let fontWeight = "normal";
-            let bgColor = "transparent";
-            let padding = "2px 0";
-            let borderBottom = "none";
-            let marginBottom = "0";
+            let color = "#000", fontWeight = "normal", bgColor = "transparent", padding = "2px 0", borderBottom = "none", marginBottom = "0";
 
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS THE STUMPS", "CASTLED!"];
             
             if (wicketKeywords.some(kw => upperText.includes(kw))) {
-                color = "#d9534f"; // Red
-                fontWeight = "bold";
+                color = "#d9534f"; fontWeight = "bold";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                color = "#0275d8"; // Blue
-                fontWeight = "bold";
+                color = "#0275d8"; fontWeight = "bold";
             } else if (safeText.includes("---")) {
-                bgColor = "#f9f9f9";
-                borderBottom = "1px solid #ccc";
-                padding = "8px 5px";
-                marginBottom = "5px";
-                fontWeight = "bold";
+                bgColor = "#f9f9f9"; borderBottom = "1px solid #ccc"; padding = "8px 5px"; marginBottom = "5px"; fontWeight = "bold";
             } else if (safeText.startsWith('[Ball')) {
-                borderBottom = "1px dashed #eee";
-                padding = "5px 0 5px 10px";
+                borderBottom = "1px dashed #eee"; padding = "5px 0 5px 10px";
             } else {
                 padding = "2px 0 2px 10px";
             }
@@ -2436,20 +2418,17 @@ function downloadPDF() {
                 </div>
             </div>`;
 
-        container.innerHTML = pdfHTML;
-
-        // Clean options: standard A4 margins, letting the library handle the element directly
         const opt = {
-            margin:       [0.5, 0.5, 0.5, 0.5], // Top, Left, Bottom, Right
-            filename:     'Hand_Clash_Match_Report.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: 'avoid-all' } 
+            margin: [0.5, 0.5, 0.5, 0.5], 
+            filename: 'Hand_Clash_Match_Report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: 'avoid-all' } 
         };
 
-        // We pass the container natively. No appending to document.body needed.
-        html2pdf().set(opt).from(container).save().then(() => {
+        // PASSING HTML STRING DIRECTLY: Fixes the clipping and shattered layout instantly.
+        html2pdf().set(opt).from(pdfHTML).save().then(() => {
             btn.innerHTML = originalText; 
             btn.disabled = false; 
         }).catch(err => {
