@@ -388,8 +388,7 @@ function logoutUser() {
 function bindPfpUpload() {
     let profBox = document.getElementById('prof-avatar-box');
     if (profBox) {
-        // --- SET YOUR PFP COST HERE ---
-        const PFP_COST = 19999; // Example: 500,000 Coins
+        const PFP_COST = 500000; 
         
         profBox.style.cursor = 'pointer'; 
         profBox.title = `Click to Upload Custom Profile Picture (Costs 🪙 ${PFP_COST.toLocaleString()})`;
@@ -398,51 +397,48 @@ function bindPfpUpload() {
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
             let userStats = usersDB[currentUser];
             
-            // 1. Check if the user has enough coins
+            // Replaced ugly alert with sleek Toast
             if (userStats.coins < PFP_COST) {
-                alert(`Not enough coins! You need 🪙 ${PFP_COST.toLocaleString()} to upload a custom PFP.`);
-                return; // Stop the function here
+                showToast(`❌ Not enough coins! You need 🪙 ${PFP_COST.toLocaleString()}`);
+                return; 
             }
             
-            // 2. Ask for confirmation before spending coins
-            if (!confirm(`Uploading a custom Profile Picture costs 🪙 ${PFP_COST.toLocaleString()}. Do you want to proceed?`)) {
-                return; // Stop if they click "Cancel"
-            }
-
-            // 3. Open the file picker if they agreed and have enough money
-            let input = document.createElement('input'); 
-            input.type = 'file'; 
-            input.accept = 'image/*';
-            
-            input.onchange = e => {
-                let file = e.target.files[0]; 
-                let reader = new FileReader();
-                
-                reader.onload = event => {
-                    // Fetch latest DB state just to be safe
-                    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+            // Call our new custom sleek modal
+            showConfirmModal(
+                "CUSTOM AVATAR", 
+                `Uploading a custom Profile Picture costs 🪙 ${PFP_COST.toLocaleString()}. Do you want to proceed?`, 
+                () => {
+                    // This runs ONLY if they click "YES"
+                    let input = document.createElement('input'); 
+                    input.type = 'file'; 
+                    input.accept = 'image/*';
                     
-                    // 4. Deduct the coins from the user's account
-                    db[currentUser].coins -= PFP_COST;
+                    input.onchange = e => {
+                        let file = e.target.files[0]; 
+                        let reader = new FileReader();
+                        
+                        reader.onload = event => {
+                            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+                            
+                            db[currentUser].coins -= PFP_COST;
+                            db[currentUser].customPFP = event.target.result;
+                            localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                            
+                            applyCosmetics(); 
+                            const cText = document.getElementById('prof-coins');
+                            if (cText) {
+                                cText.innerText = db[currentUser].coins.toLocaleString();
+                            }
+                            
+                            showToast(`🖼️ Custom PFP Updated! (-🪙${PFP_COST.toLocaleString()})`);
+                        };
+                        
+                        if (file) reader.readAsDataURL(file);
+                    };
                     
-                    // 5. Save the new image to the database
-                    db[currentUser].customPFP = event.target.result;
-                    localStorage.setItem('hc_usersDB', JSON.stringify(db));
-                    
-                    // 6. Update the UI to show the new coin balance
-                    applyCosmetics(); 
-                    const cText = document.getElementById('prof-coins');
-                    if (cText) {
-                        cText.innerText = db[currentUser].coins.toLocaleString();
-                    }
-                    
-                    showToast(`🖼️ Custom PFP Updated! (-🪙${PFP_COST.toLocaleString()})`);
-                };
-                
-                if (file) reader.readAsDataURL(file);
-            };
-            
-            input.click();
+                    input.click();
+                }
+            );
         };
     }
 }
@@ -551,26 +547,34 @@ function renderShop() {
 }
 
 function buyItem(type, itemId, price) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-    let u = usersDB[currentUser];
-    
-    if (u.coins >= price) {
-        u.coins -= price;
-        
-        if (type === 'avatar') u.unlockedAvatars.push(itemId);
-        if (type === 'theme') u.unlockedThemes.push(itemId);
-        if (type === 'coin') u.unlockedCoins.push(itemId);
-        
-        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-        showToast(`🛍️ Successfully Purchased!`);
-        
-        const cText = document.getElementById('prof-coins');
-        if (cText) {
-            cText.innerText = u.coins;
+    // Call our new custom sleek modal
+    showConfirmModal(
+        "CONFIRM PURCHASE", 
+        `Are you sure you want to spend 🪙 ${price.toLocaleString()} on this item?`, 
+        () => {
+            // This runs ONLY if they click "YES"
+            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+            let u = usersDB[currentUser];
+            
+            if (u.coins >= price) {
+                u.coins -= price;
+                
+                if (type === 'avatar') u.unlockedAvatars.push(itemId);
+                if (type === 'theme') u.unlockedThemes.push(itemId);
+                if (type === 'coin') u.unlockedCoins.push(itemId);
+                
+                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                showToast(`🛍️ Successfully Purchased!`);
+                
+                const cText = document.getElementById('prof-coins');
+                if (cText) {
+                    cText.innerText = u.coins.toLocaleString();
+                }
+                
+                renderShop();
+            }
         }
-        
-        renderShop();
-    }
+    );
 }
 
 function equipItem(type, itemId) {
