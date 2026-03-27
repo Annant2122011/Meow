@@ -12,7 +12,8 @@
 </head>
 <body>
 
-  <header <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%; padding: 15px 20px; box-sizing: border-box; min-height: 80px; overflow: hidden;">
+  <header>
+      <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 100%; padding: 15px 20px; box-sizing: border-box; min-height: 80px; overflow: hidden;">
     
     <button id="header-back-btn" onclick="exitGameTab()" class="btn" style="position: absolute; left: 20px; background: #dc2626; margin: 0; z-index: 999; cursor: pointer;">QUIT</button>
 
@@ -20,8 +21,17 @@
         HAND<span style="color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.6);">CRICKET</span>
     </h1>
 
-    <button id="header-forfeit-btn" onclick="quitMatch()" class="btn" style="position: absolute; right: 20px; background: #dc2626; margin: 0; z-index: 999; display: none; cursor: pointer;">FORFEIT</button>
+    <div style="position: absolute; right: 20px; display: flex; align-items: center; gap: 15px; z-index: 999;">
+        
+        <button id="header-forfeit-btn" onclick="quitMatch()" class="btn" style="background: #dc2626; margin: 0; display: none; cursor: pointer;">FORFEIT</button>
 
+        <div id="user-profile-btn" onclick="goToProfile()" style="cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+            <div id="header-avatar-box" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #555; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; background: rgba(255,255,255,0.1); overflow: hidden;">
+                <span id="avatar-text">👤</span>
+            </div>
+        </div>
+        
+    </div>
 </div>
     </header>
 
