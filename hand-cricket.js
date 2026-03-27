@@ -432,7 +432,7 @@ function bindPfpUpload() {
             
             // 1. Check if they have ever bought a PFP before
             let isFirstTime = !userStats.hasBoughtPFP;
-            let cost = isFirstTime ? 500000 : 0;
+            let cost = isFirstTime ? 0 : 0;
             
             // 2. If they currently have a PFP active, ask if they want to remove it first
             if (userStats.customPFP) {
