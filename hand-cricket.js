@@ -423,78 +423,142 @@ function logoutUser() {
 }
 function bindPfpUpload() {
     let profBox = document.getElementById('prof-avatar-box');
-    if (profBox) {
-        profBox.style.cursor = 'pointer'; 
+    if (!profBox) return;
+    
+    profBox.style.cursor = 'pointer'; 
+    
+    profBox.onclick = () => {
+        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+        let userStats = usersDB[currentUser];
         
-        profBox.onclick = () => {
-            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
-            let userStats = usersDB[currentUser];
-            
-            // 1. Check if they have ever bought a PFP before
-            let isFirstTime = !userStats.hasBoughtPFP;
-            let cost = isFirstTime ? 500000 : 5000;
-            
-            // 2. If they currently have a PFP active, ask if they want to remove it first
-            if (userStats.customPFP) {
-                if (confirm("Do you want to REMOVE your current Custom PFP and return to the default emoji? (This is free)")) {
-                    userStats.customPFP = null; // Clear the image
-                    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-                    applyCosmetics();
-                    showToast("🗑️ Profile Picture Removed!");
-                    return; // Stop the function here so the upload window doesn't open
-                }
-            }
-            
-            // 3. If they don't want to remove it (or don't have one), check their coins
-            if (userStats.coins < cost) {
-                showToast(`❌ Not enough coins! You need 🪙 ${cost.toLocaleString()}`);
-                return; 
-            }
-            
-            // 4. Set up dynamic text for the custom modal
-            let modalTitle = isFirstTime ? "UNLOCK CUSTOM AVATAR" : "CHANGE AVATAR";
-            let modalDesc = isFirstTime 
-                ? `Unlocking the Custom PFP feature costs 🪙 ${cost.toLocaleString()} (Future changes will cost 5000 coins). Proceed?`
-                : `Changing your Custom PFP costs 🪙 ${cost.toLocaleString()}. Proceed?`;
+        let isFirstTime = !userStats.hasBoughtPFP;
+        let cost = isFirstTime ? 500000 : 5000;
 
-            // 5. Trigger the modal and upload logic
-            showConfirmModal(
-                modalTitle, 
-                modalDesc, 
-                () => {
-                    let input = document.createElement('input'); 
-                    input.type = 'file'; 
-                    input.accept = 'image/*';
+        // 1. Create dynamic modal container if it doesn't exist
+        let modal = document.getElementById('dynamic-pfp-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'dynamic-pfp-modal';
+            modal.className = 'modal-overlay';
+            modal.style.display = 'none';
+            modal.style.zIndex = '2000'; // Ensures it floats above everything
+            
+            // Injecting the custom HTML structure for the modal
+            modal.innerHTML = `
+                <div class="modal-content" style="text-align: center; max-width: 450px;">
+                    <h2 id="pfp-dyn-title" class="neon-text" style="margin-bottom: 15px;">MANAGE AVATAR</h2>
+                    <p id="pfp-dyn-desc" style="color: var(--text-dim); margin-bottom: 25px; font-size: 1.1rem;"></p>
                     
-                    input.onchange = e => {
-                        let file = e.target.files[0]; 
-                        let reader = new FileReader();
+                    <div id="pfp-dyn-choices" style="display: flex; flex-direction: column; gap: 15px;">
+                        <button class="btn pulse-btn" id="btn-pfp-change">🖼️ CHANGE PICTURE</button>
+                        <button class="btn pulse-btn" id="btn-pfp-remove" style="border-color: var(--accent-red); color: var(--accent-red);">🗑️ REMOVE PICTURE</button>
+                        <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" onclick="document.getElementById('dynamic-pfp-modal').style.display='none'">CANCEL</button>
+                    </div>
+
+                    <div id="pfp-dyn-confirm" style="display: none; flex-direction: column; gap: 15px;">
+                        <button class="btn pulse-btn" id="btn-pfp-proceed" style="background: rgba(0,255,136,0.1);">✅ PROCEED</button>
+                        <button class="btn" style="background: rgba(255,255,255,0.1); color: white;" id="btn-pfp-cancel">❌ CANCEL</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Grab the elements we just created
+        let title = document.getElementById('pfp-dyn-title');
+        let desc = document.getElementById('pfp-dyn-desc');
+        let choicesDiv = document.getElementById('pfp-dyn-choices');
+        let confirmDiv = document.getElementById('pfp-dyn-confirm');
+        let btnChange = document.getElementById('btn-pfp-change');
+        let btnRemove = document.getElementById('btn-pfp-remove');
+        let btnProceed = document.getElementById('btn-pfp-proceed');
+        let btnCancel = document.getElementById('btn-pfp-cancel');
+
+        // Reset the modal to the first view (Choices)
+        choicesDiv.style.display = 'flex';
+        confirmDiv.style.display = 'none';
+        title.innerText = "MANAGE AVATAR";
+        desc.innerText = "What would you like to do with your profile picture?";
+        
+        // Hide the 'Remove' button entirely if they don't have a custom PFP uploaded
+        btnRemove.style.display = userStats.customPFP ? 'block' : 'none';
+
+        // Display the modal
+        modal.style.display = 'flex';
+
+        // ==========================================
+        // ACTION: USER CLICKS "CHANGE PICTURE"
+        // ==========================================
+        btnChange.onclick = () => {
+            choicesDiv.style.display = 'none';
+            confirmDiv.style.display = 'flex';
+            
+            title.innerText = isFirstTime ? "UNLOCK AVATAR" : "CHANGE AVATAR";
+            desc.innerHTML = `Changing your Profile Picture will cost <b style="color: var(--accent-neon);">🪙 ${cost.toLocaleString()} coins</b>.<br><br>Do you want to proceed?`;
+            
+            btnProceed.onclick = () => {
+                if (userStats.coins < cost) {
+                    desc.innerHTML = `<span style="color: var(--accent-red);">❌ Not enough coins! You need 🪙 ${cost.toLocaleString()}</span>`;
+                    btnProceed.style.display = 'none'; // Hide proceed if broke
+                    return;
+                }
+                
+                // Close modal and open file picker
+                modal.style.display = 'none';
+                let input = document.createElement('input'); 
+                input.type = 'file'; 
+                input.accept = 'image/*';
+                
+                input.onchange = e => {
+                    let file = e.target.files[0]; 
+                    let reader = new FileReader();
+                    
+                    reader.onload = event => {
+                        let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+                        db[currentUser].coins -= cost;
+                        db[currentUser].hasBoughtPFP = true; // Remembers they paid the big initial cost
+                        db[currentUser].customPFP = event.target.result;
+                        localStorage.setItem('hc_usersDB', JSON.stringify(db));
                         
-                        reader.onload = event => {
-                            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
-                            
-                            db[currentUser].coins -= cost;
-                            db[currentUser].hasBoughtPFP = true; // This remembers they paid the 500k!
-                            db[currentUser].customPFP = event.target.result;
-                            localStorage.setItem('hc_usersDB', JSON.stringify(db));
-                            
-                            applyCosmetics(); 
-                            const cText = document.getElementById('prof-coins');
-                            if (cText) {
-                                cText.innerText = db[currentUser].coins.toLocaleString();
-                            }
-                            
-                            showToast(`🖼️ Custom PFP Updated! (-🪙${cost.toLocaleString()})`);
-                        };
-                        
-                        if (file) reader.readAsDataURL(file);
+                        applyCosmetics(); 
+                        const cText = document.getElementById('prof-coins');
+                        if (cText) cText.innerText = db[currentUser].coins.toLocaleString();
                     };
                     
-                    input.click();
-                }
-            );
+                    if (file) reader.readAsDataURL(file);
+                };
+                input.click();
+            };
         };
-    }
+
+        // ==========================================
+        // ACTION: USER CLICKS "REMOVE PICTURE"
+        // ==========================================
+        btnRemove.onclick = () => {
+            choicesDiv.style.display = 'none';
+            confirmDiv.style.display = 'flex';
+            
+            title.innerText = "REMOVE AVATAR";
+            desc.innerHTML = `Removing your PFP to return to the default emoji is <b style="color: var(--accent-blue);">FREE</b>.<br><br>However, if you want to upload a new picture later, it will cost 🪙 5,000 coins. Proceed?`;
+            
+            btnProceed.onclick = () => {
+                modal.style.display = 'none';
+                let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+                db[currentUser].customPFP = null; 
+                localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                applyCosmetics();
+            };
+        };
+
+        // ==========================================
+        // ACTION: USER CLICKS "CANCEL"
+        // ==========================================
+        btnCancel.onclick = () => {
+            modal.style.display = 'none';
+            // Reset proceed button just in case it was hidden by the "broke" check
+            btnProceed.style.display = 'block'; 
+        };
+    };
 }
 // ==========================================
 // 3. UI, SHOP & COSMETICS
