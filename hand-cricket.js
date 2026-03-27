@@ -601,33 +601,7 @@ function bindPfpUpload() {
     };
 }
 
-        // ==========================================
-        // ACTION: USER CLICKS "REMOVE PICTURE"
-        // ==========================================
-        btnRemove.onclick = () => {
-            choicesDiv.style.display = 'none';
-            confirmDiv.style.display = 'flex';
-            
-            title.innerText = "REMOVE AVATAR";
-            desc.innerHTML = `Removing your PFP to return to the default emoji is <b style="color: var(--accent-blue);">FREE</b>.<br><br>However, if you want to upload a new picture later, it will cost 🪙 5,000 coins. Proceed?`;
-            
-            btnProceed.onclick = () => {
-                modal.style.display = 'none';
-                let db = JSON.parse(localStorage.getItem('hc_usersDB'));
-                db[currentUser].customPFP = null; 
-                localStorage.setItem('hc_usersDB', JSON.stringify(db));
-                applyCosmetics();
-            };
-        };
-
-        // ==========================================
-        // ACTION: USER CLICKS "CANCEL"
-        // ==========================================
-        btnCancel.onclick = () => {
-            modal.style.display = 'none';
-            // Reset proceed button just in case it was hidden by the "broke" check
-            btnProceed.style.display = 'block'; 
-        };
+      
     
 
 // ==========================================
