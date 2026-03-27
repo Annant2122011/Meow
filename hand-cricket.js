@@ -432,7 +432,7 @@ function bindPfpUpload() {
             
             // 1. Check if they have ever bought a PFP before
             let isFirstTime = !userStats.hasBoughtPFP;
-            let cost = isFirstTime ? 0 : 0;
+            let cost = isFirstTime ? 500000 : 5000;
             
             // 2. If they currently have a PFP active, ask if they want to remove it first
             if (userStats.customPFP) {
@@ -454,7 +454,7 @@ function bindPfpUpload() {
             // 4. Set up dynamic text for the custom modal
             let modalTitle = isFirstTime ? "UNLOCK CUSTOM AVATAR" : "CHANGE AVATAR";
             let modalDesc = isFirstTime 
-                ? `Unlocking the Custom PFP feature costs 🪙 ${cost.toLocaleString()} (Future changes will only cost 10 coins). Proceed?`
+                ? `Unlocking the Custom PFP feature costs 🪙 ${cost.toLocaleString()} (Future changes will cost 5000 coins). Proceed?`
                 : `Changing your Custom PFP costs 🪙 ${cost.toLocaleString()}. Proceed?`;
 
             // 5. Trigger the modal and upload logic
