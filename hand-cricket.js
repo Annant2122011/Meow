@@ -1212,9 +1212,12 @@ function goToToss() {
     const pControls = document.getElementById('player-call-controls');
     const cControls = document.getElementById('comp-call-controls');
 
-    // Reset visibility of step 1 (calling) and hide step 2 (result)
-    document.getElementById('toss-step-1').style.display = 'block';
-    document.getElementById('toss-result-screen').style.display = 'none';
+   // Safely reset visibility without crashing
+    const step1 = document.getElementById('toss-step-1');
+    if (step1) step1.style.display = 'block';
+    
+    const resultScreen = document.getElementById('toss-result-screen');
+    if (resultScreen) resultScreen.style.display = 'none';
 
     if (tossData.caller === 'player') {
         statusText.innerHTML = "You won the chance to call! <br><span class='dynamic-theme-text'>Heads or Tails?</span>";
