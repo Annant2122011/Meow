@@ -1184,11 +1184,16 @@ function setDifficulty(level, btnId) {
 }
 
 function goToToss() {
+  function goToToss() {
     // 1. Update the Header Buttons
     toggleHeaderButtons('toss');
 
     // 2. Switch Screens
     if (setupScreen) setupScreen.style.display = 'none';
+    
+    // THE FIX: Hide the match screen so it doesn't overlap the toss!
+    if (matchScreen) matchScreen.style.display = 'none'; 
+
     if (tossScreen) {
         tossScreen.style.display = 'block';
         // Ensure the coin container itself is visible
