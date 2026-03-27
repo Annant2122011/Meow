@@ -424,27 +424,44 @@ function logoutUser() {
 function bindPfpUpload() {
     let profBox = document.getElementById('prof-avatar-box');
     if (profBox) {
-        const PFP_COST = 500000; 
-        
         profBox.style.cursor = 'pointer'; 
-        profBox.title = `Click to Upload Custom Profile Picture (Costs 🪙 ${PFP_COST.toLocaleString()})`;
         
         profBox.onclick = () => {
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
             let userStats = usersDB[currentUser];
             
-            // Replaced ugly alert with sleek Toast
-            if (userStats.coins < PFP_COST) {
-                showToast(`❌ Not enough coins! You need 🪙 ${PFP_COST.toLocaleString()}`);
+            // 1. Check if they have ever bought a PFP before
+            let isFirstTime = !userStats.hasBoughtPFP;
+            let cost = isFirstTime ? 500000 : 0;
+            
+            // 2. If they currently have a PFP active, ask if they want to remove it first
+            if (userStats.customPFP) {
+                if (confirm("Do you want to REMOVE your current Custom PFP and return to the default emoji? (This is free)")) {
+                    userStats.customPFP = null; // Clear the image
+                    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+                    applyCosmetics();
+                    showToast("🗑️ Profile Picture Removed!");
+                    return; // Stop the function here so the upload window doesn't open
+                }
+            }
+            
+            // 3. If they don't want to remove it (or don't have one), check their coins
+            if (userStats.coins < cost) {
+                showToast(`❌ Not enough coins! You need 🪙 ${cost.toLocaleString()}`);
                 return; 
             }
             
-            // Call our new custom sleek modal
+            // 4. Set up dynamic text for the custom modal
+            let modalTitle = isFirstTime ? "UNLOCK CUSTOM AVATAR" : "CHANGE AVATAR";
+            let modalDesc = isFirstTime 
+                ? `Unlocking the Custom PFP feature costs 🪙 ${cost.toLocaleString()} (Future changes will only cost 10 coins). Proceed?`
+                : `Changing your Custom PFP costs 🪙 ${cost.toLocaleString()}. Proceed?`;
+
+            // 5. Trigger the modal and upload logic
             showConfirmModal(
-                "CUSTOM AVATAR", 
-                `Uploading a custom Profile Picture costs 🪙 ${PFP_COST.toLocaleString()}. Do you want to proceed?`, 
+                modalTitle, 
+                modalDesc, 
                 () => {
-                    // This runs ONLY if they click "YES"
                     let input = document.createElement('input'); 
                     input.type = 'file'; 
                     input.accept = 'image/*';
@@ -456,7 +473,8 @@ function bindPfpUpload() {
                         reader.onload = event => {
                             let db = JSON.parse(localStorage.getItem('hc_usersDB'));
                             
-                            db[currentUser].coins -= PFP_COST;
+                            db[currentUser].coins -= cost;
+                            db[currentUser].hasBoughtPFP = true; // This remembers they paid the 500k!
                             db[currentUser].customPFP = event.target.result;
                             localStorage.setItem('hc_usersDB', JSON.stringify(db));
                             
@@ -466,7 +484,7 @@ function bindPfpUpload() {
                                 cText.innerText = db[currentUser].coins.toLocaleString();
                             }
                             
-                            showToast(`🖼️ Custom PFP Updated! (-🪙${PFP_COST.toLocaleString()})`);
+                            showToast(`🖼️ Custom PFP Updated! (-🪙${cost.toLocaleString()})`);
                         };
                         
                         if (file) reader.readAsDataURL(file);
