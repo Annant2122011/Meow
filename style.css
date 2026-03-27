@@ -967,8 +967,8 @@ body.theme-blood {
    ========================================= */
 
 #header-avatar-box {
-    width: 70px !important;             /* MUCH bigger circle */
-    height: 70px !important;            /* Keeps it a perfect square */
+    width: 60px !important;             /* MUCH bigger circle */
+    height: 60px !important;            /* Keeps it a perfect square */
     margin: 0 auto 15px auto !important; /* Forces it to perfectly center */
     display: flex !important;
     justify-content: center !important;  /* Centers the emoji horizontally */
