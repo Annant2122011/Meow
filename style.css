@@ -3,6 +3,46 @@
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
+/* =========================================
+   DYNAMIC THEME VARIABLES (AUTO-COLOR)
+   ========================================= */
+:root {
+    /* Default Neon Green */
+    --theme-neon: #00ff88;
+    --theme-glow: rgba(0, 255, 136, 0.6);
+    --theme-dim: rgba(0, 255, 136, 0.15);
+}
+
+body.theme-synthwave {
+    /* Synthwave Purple */
+    --theme-neon: #e81cff;
+    --theme-glow: rgba(232, 28, 255, 0.6);
+    --theme-dim: rgba(232, 28, 255, 0.15);
+}
+
+body.theme-blood {
+    /* Blood Red */
+    --theme-neon: #ff2a2a;
+    --theme-glow: rgba(255, 42, 42, 0.6);
+    --theme-dim: rgba(255, 42, 42, 0.15);
+}
+
+/* Class to make ANY text glow with the active theme color */
+.dynamic-theme-text {
+    color: var(--theme-neon) !important;
+    text-shadow: 0 0 12px var(--theme-glow) !important;
+    transition: color 0.4s, text-shadow 0.4s;
+}
+
+/* Update Setup Buttons to be Hollow and match the theme */
+.active-setup-btn {
+    background: transparent !important;
+    color: var(--theme-neon) !important;
+    border: 2px solid var(--theme-neon) !important;
+    box-shadow: 0 0 15px var(--theme-glow), inset 0 0 10px var(--theme-dim) !important;
+    text-shadow: 0 0 8px var(--theme-neon);
+    transition: all 0.3s;
+}
 
 :root {
     --bg-dark: #050505;
