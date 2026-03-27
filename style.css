@@ -900,11 +900,11 @@ body.theme-blood {
     50% { box-shadow: 0 0 15px var(--theme-glow), inset 0 0 8px var(--theme-dim); }
 }
 
-/* 3. THIN COLOURED Active Buttons & Action Buttons */
+/* 3. THIN COLOURED Glow & Animation (Shared by all active buttons) */
 .btn-hollow-pulse, .active-setup-btn {
     background: transparent !important;
     color: var(--theme-neon) !important;
-    border: 1px solid var(--theme-neon) !important; /* THIN 1px Border */
+    border: 1px solid var(--theme-neon) !important; /* THIN Border */
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -919,15 +919,26 @@ body.theme-blood {
     box-shadow: 0 0 20px var(--theme-glow), inset 0 0 15px var(--theme-dim) !important;
 }
 
-/* 4. Fix for Inactive Setup Buttons (Removes the old dark green borders) */
+/* 4. SIZING FOR THE BIG ACTION BUTTONS (Proceed to Toss, Gauntlet) */
+.btn-hollow-pulse {
+    padding: 15px !important;      /* Makes them tall and chunky again! */
+    font-size: 1.2rem !important;  /* Makes the text bigger */
+    width: 100%;
+    cursor: pointer;
+}
+
+/* 5. SIZING FOR INACTIVE SETUP BUTTONS (T5, T10, Casual, Pro) */
 .setup-btn {
+    padding: 12px 15px !important; /* Proper padding for setup buttons */
+    font-size: 1rem !important;
     background: transparent !important;
-    color: #9ca3af !important; /* Soft grey text */
-    border: 1px solid #4b5563 !important; /* Neutral thin grey border */
+    color: #9ca3af !important; 
+    border: 1px solid #4b5563 !important; 
     box-shadow: none !important;
     animation: none !important;
     transition: all 0.3s ease;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .setup-btn:hover {
