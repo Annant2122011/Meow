@@ -2000,7 +2000,7 @@ function saveLifetimeStats(result) {
     } else {
         // NORMAL MATCH XP CALCULATION
         matchXP = 100; 
-        if (result === "PLAYER_WINS") matchXP += 100000;
+        if (result === "PLAYER_WINS") matchXP += 400;
         
         matchXP += gameState.playerStats.runs;
         matchXP += (gameState.compStats.wicketsLost * 10);
