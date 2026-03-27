@@ -59,11 +59,9 @@
                 <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap;">
                     <button id="btn-diff-easy" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('easy', 'btn-diff-easy')">🟢 Casual AI</button>
                     <button id="btn-diff-hard" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('hard', 'btn-diff-hard')">🔴 Pro AI (Learns)</button>
-                </div>
-                
-                <button class="btn pulse-btn" style="padding: 15px 40px; font-size: 1.5rem; background: var(--accent-neon); color: black; border: none; font-weight: 900; width: 100%; margin-bottom: 15px;" onclick="goToToss()">🪙 PROCEED TO TOSS</button>
-                
-                <button class="btn pulse-btn" style="padding: 15px 40px; font-size: 1.2rem; background: rgba(255, 42, 42, 0.15); color: var(--accent-red); border-color: var(--accent-red); font-weight: 900; width: 100%;" onclick="window.location.href='tournament.html'">🏆 ENTER THE GAUNTLET (CAMPAIGN)</button>
+              <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                <button class="btn-hollow-pulse" onclick="goToToss()">🪙 PROCEED TO TOSS</button>
+                <button class="btn-hollow-pulse" onclick="window.location.href='tournament.html'">🏆 ENTER THE GAUNTLET (CAMPAIGN)</button>
             </div>
 
             <div id="toss-screen" style="display: none; text-align: center; padding: 20px;">
