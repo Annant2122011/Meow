@@ -2612,3 +2612,4 @@ gameState.commentaryHistory = [];
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
 }
+}
