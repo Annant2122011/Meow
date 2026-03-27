@@ -17,8 +17,8 @@
     
     <button id="header-back-btn" onclick="exitGameTab()" class="btn" style="position: absolute; left: 20px; background: #dc2626; margin: 0; z-index: 999; cursor: pointer;">QUIT</button>
 
-    <h1 style="margin: 0; font-size: clamp(1.5rem, 4vw, 2.5rem); font-family: var(--font-display); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; z-index: 1;">
-        HAND<span style="color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.6);">CRICKET</span>
+  <h1 style="margin: 0; font-size: clamp(1.5rem, 4vw, 2.5rem); font-family: var(--font-display); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; z-index: 1;">
+        HAND<span class="dynamic-theme-text">CRICKET</span>
     </h1>
 
     <div style="position: absolute; right: 20px; display: flex; align-items: center; gap: 15px; z-index: 999;">
@@ -37,14 +37,18 @@
 
     <main class="container">
         <div class="game-header">
-            <h2 class="section-title neon-text">💥 CLASH ARENA 💥</h2>
+<h2 class="dynamic-theme-text" style="text-align: center; font-size: 2rem; font-family: var(--font-display); letter-spacing: 2px; margin-bottom: 5px;">
+    💥 CLASH ARENA 💥
+</h2>
             <p class="game-subtitle">Win the toss, make your choice, and dominate the match! 🔊</p>
         </div>
 
         <div class="hand-cricket-board card">
             
            <div id="setup-screen" style="display: none; text-align: center; padding: 20px;">
-                <h3 class="neon-text" style="font-size: 2.5rem; margin-bottom: 30px;">⚙️ MATCH SETUP ⚙️</h3>
+               <h3 class="dynamic-theme-text" style="text-align: center; font-size: 1.8rem; font-family: var(--font-display); letter-spacing: 2px; margin-top: 30px; margin-bottom: 20px;">
+    ⚙️ MATCH SETUP ⚙️
+</h3>
                 <p style="color: var(--accent-blue); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">SELECT FORMAT</p>
                 <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
                     <button id="btn-fmt-1" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(1, Infinity, 'btn-fmt-1')">Classic (Protect your wicket to survive)</button>
