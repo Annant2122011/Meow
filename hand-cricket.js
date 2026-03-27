@@ -629,7 +629,7 @@ function bindPfpUpload() {
             btnProceed.style.display = 'block'; 
         };
     
-}
+
 // ==========================================
 // 3. UI, SHOP & COSMETICS
 // ==========================================
