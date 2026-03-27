@@ -1312,6 +1312,8 @@ function continueToMatch() {
     }
     
     matchScreen.style.display = 'block';
+   const actionArea = document.getElementById('hand-action-area');
+    if (actionArea) actionArea.style.display = 'flex';
     updateMatchUI();
     
     let formatText = gameState.maxBalls === Infinity ? "Classic (Unlimited Overs)" : `T${gameState.maxBalls/6} (${gameState.maxWickets} Wickets)`;
