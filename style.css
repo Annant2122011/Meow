@@ -963,30 +963,26 @@ body.theme-blood {
     opacity: 1 !important;
 }
 /* =========================================
-   AVATAR / PROFILE PICTURE SIZING & CENTERING
+   INDEX PAGE AVATAR ONLY (BIGGER & CENTERED)
    ========================================= */
 
-/* 1. The Main Profile Circle (Index & Profile Pages) */
-#prof-avatar-box {
-    width:100px !important;            /* Makes the circle bigger */
-    height: 100px !important;           /* Keeps it a perfect square/circle */
-    margin: 0 auto 20px auto !important;/* PERFECTLY CENTERS the circle itself horizontally */
-    display: flex !important;
-    justify-content: center !important; /* Centers the emoji/text horizontally inside */
-    align-items: center !important;     /* Centers the emoji/text vertically inside */
-    border-radius: 50% !important;
-    font-size: 4rem !important;         /* Makes the default emoji/letter inside much bigger */
-    overflow: hidden !important;        /* Ensures uploaded custom images stay inside the circle */
-}
-
-/* 2. The Header Avatar Circle (Top Right of the Screen) */
 #header-avatar-box {
-    width: 55px !important;             /* Slightly larger header circle */
-    height: 55px !important;
+    width: 100px !important;             /* MUCH bigger circle */
+    height: 100px !important;            /* Keeps it a perfect square */
+    margin: 0 auto 15px auto !important; /* Forces it to perfectly center */
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    justify-content: center !important;  /* Centers the emoji horizontally */
+    align-items: center !important;      /* Centers the emoji vertically */
     border-radius: 50% !important;
-    font-size: 1.8rem !important;       /* Bigger emoji for header */
+    font-size: 3.5rem !important;        /* Makes the emoji itself massive */
     overflow: hidden !important;
+}
+/* =========================================
+   PROFILE PAGE AVATAR (CENTERED ONLY, ORIGINAL SIZE)
+   ========================================= */
+#prof-avatar-box {
+    margin: 0 auto 15px auto !important; /* This pushes the circle to the exact center */
+    display: flex !important;
+    justify-content: center !important;  /* Centers the emoji inside the circle horizontally */
+    align-items: center !important;      /* Centers the emoji inside the circle vertically */
 }
