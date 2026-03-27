@@ -967,8 +967,8 @@ body.theme-blood {
    ========================================= */
 
 #header-avatar-box {
-    width: 80px !important;             /* MUCH bigger circle */
-    height: 80px !important;            /* Keeps it a perfect square */
+    width: 70px !important;             /* MUCH bigger circle */
+    height: 70px !important;            /* Keeps it a perfect square */
     margin: 0 auto 15px auto !important; /* Forces it to perfectly center */
     display: flex !important;
     justify-content: center !important;  /* Centers the emoji horizontally */
@@ -982,8 +982,8 @@ body.theme-blood {
    ========================================= */
 
 #prof-avatar-box {
-    width: 70px !important;              /* Give it a fixed size so images know how big to be */
-    height: 70px !important;             
+    width: 110px !important;              /* Give it a fixed size so images know how big to be */
+    height: 110px !important;             
     margin: 0 auto 15px auto !important; /* Forces perfect horizontal centering */
     display: flex !important;
     justify-content: center !important;  
