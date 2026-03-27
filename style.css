@@ -927,48 +927,38 @@ body.theme-blood {
     cursor: pointer;
 }
 
-/* 3. THIN COLOURED Glow & Animation (Shared by all active buttons) */
-.btn-hollow-pulse, .active-setup-btn {
-    background: transparent !important;
-    color: var(--theme-neon) !important;
-    border: 1px solid var(--theme-neon) !important; /* THIN Border */
-    font-family: var(--font-display, 'Rajdhani', sans-serif);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 8px var(--theme-neon);
-    animation: dynamicNeonPulse 2s infinite;
-    transition: all 0.3s ease;
-    border-radius: 8px;
-}
 
-.btn-hollow-pulse:hover, .active-setup-btn:hover {
-    background: var(--theme-dim) !important;
-    box-shadow: 0 0 20px var(--theme-glow), inset 0 0 15px var(--theme-dim) !important;
-}
 
-/* 4. SIZING FOR THE BIG ACTION BUTTONS (Proceed to Toss, Gauntlet) */
-.btn-hollow-pulse {
-    padding: 15px !important;      /* Makes them tall and chunky again! */
-    font-size: 1.2rem !important;  /* Makes the text bigger */
-    width: 100%;
-    cursor: pointer;
-}
-
-/* 5. SIZING FOR INACTIVE SETUP BUTTONS (T5, T10, Casual, Pro) */
+/* 5. SIZING & GLOW FOR INACTIVE SETUP BUTTONS (T5, T10, Casual, Pro) */
 .setup-btn {
-    padding: 12px 15px !important; /* Proper padding for setup buttons */
+    padding: 12px 15px !important; 
     font-size: 1rem !important;
     background: transparent !important;
-    color: #9ca3af !important; 
-    border: 1px solid #4b5563 !important; 
-    box-shadow: none !important;
-    animation: none !important;
+    
+    /* Apply the dynamic theme color to unselected buttons */
+    color: var(--theme-neon) !important; 
+    border: 1px solid var(--theme-neon) !important; 
+    
+    /* Give them a static, subtle glow instead of a pulse */
+    box-shadow: 0 0 5px var(--theme-dim), inset 0 0 2px var(--theme-dim) !important;
+    text-shadow: 0 0 5px var(--theme-neon);
+    
+    /* Drop the opacity so they look "unselected" */
+    opacity: 0.5; 
+    
+    animation: none !important; /* Save the pulse for the active buttons! */
     transition: all 0.3s ease;
     border-radius: 8px;
     cursor: pointer;
 }
 
 .setup-btn:hover {
-    border-color: var(--theme-neon) !important;
+    opacity: 0.8;
+    box-shadow: 0 0 10px var(--theme-glow), inset 0 0 5px var(--theme-dim) !important;
     color: #ffffff !important;
+}
+
+/* Ensure the active button is at max brightness */
+.active-setup-btn {
+    opacity: 1 !important;
 }
