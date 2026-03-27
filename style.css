@@ -927,6 +927,33 @@ body.theme-blood {
     cursor: pointer;
 }
 
+/* 3. THIN COLOURED Glow & Animation (Shared by all active buttons) */
+.btn-hollow-pulse, .active-setup-btn {
+    background: transparent !important;
+    color: var(--theme-neon) !important;
+    border: 1px solid var(--theme-neon) !important; /* THIN Border */
+    font-family: var(--font-display, 'Rajdhani', sans-serif);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px var(--theme-neon);
+    animation: dynamicNeonPulse 2s infinite;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.btn-hollow-pulse:hover, .active-setup-btn:hover {
+    background: var(--theme-dim) !important;
+    box-shadow: 0 0 20px var(--theme-glow), inset 0 0 15px var(--theme-dim) !important;
+}
+
+/* 4. SIZING FOR THE BIG ACTION BUTTONS (Proceed to Toss, Gauntlet) */
+.btn-hollow-pulse {
+    padding: 15px !important;      /* Makes them tall and chunky again! */
+    font-size: 1.2rem !important;  /* Makes the text bigger */
+    width: 100%;
+    cursor: pointer;
+}
+
 /* 5. SIZING FOR INACTIVE SETUP BUTTONS (T5, T10, Casual, Pro) */
 .setup-btn {
     padding: 12px 15px !important; /* Proper padding for setup buttons */
