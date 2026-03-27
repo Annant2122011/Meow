@@ -967,8 +967,8 @@ body.theme-blood {
    ========================================= */
 
 #header-avatar-box {
-    width: 100px !important;             /* MUCH bigger circle */
-    height: 100px !important;            /* Keeps it a perfect square */
+    width: 80px !important;             /* MUCH bigger circle */
+    height: 80px !important;            /* Keeps it a perfect square */
     margin: 0 auto 15px auto !important; /* Forces it to perfectly center */
     display: flex !important;
     justify-content: center !important;  /* Centers the emoji horizontally */
@@ -980,9 +980,32 @@ body.theme-blood {
 /* =========================================
    PROFILE PAGE AVATAR (CENTERED ONLY, ORIGINAL SIZE)
    ========================================= */
+
 #prof-avatar-box {
-    margin: 0 auto 15px auto !important; /* This pushes the circle to the exact center */
+    width: 80px !important;              /* Give it a fixed size so images know how big to be */
+    height: 80px !important;             
+    margin: 0 auto 15px auto !important; /* Forces perfect horizontal centering */
     display: flex !important;
-    justify-content: center !important;  /* Centers the emoji inside the circle horizontally */
-    align-items: center !important;      /* Centers the emoji inside the circle vertically */
+    justify-content: center !important;  
+    align-items: center !important;      
+    border-radius: 50% !important;       /* Ensures the container is a circle */
+    overflow: hidden !important;         /* Cuts off the square corners of images */
+    font-size: 3.5rem !important;        /* Keeps emojis large */
+}
+
+/* Ensure the wrapper inside takes up the whole box */
+#prof-avatar-letter {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Forces the uploaded image to crop properly and fill the circle */
+#prof-avatar-letter img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;        /* Magic line: Prevents stretching/squishing */
+    border-radius: 50% !important;
 }
