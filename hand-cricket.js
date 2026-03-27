@@ -316,32 +316,37 @@ function syncUserData(username) {
 function toggleHeaderButtons(mode) {
     const backBtn = document.getElementById('header-back-btn');
     const forfeitBtn = document.getElementById('header-forfeit-btn');
+    const profileBtn = document.getElementById('user-profile-btn'); // Grab the profile button
     
     if (!backBtn || !forfeitBtn) return;
 
     if (mode === 'setup') {
-        // Main Menu: Show QUIT on the left, point to tab closer
+        // Main Menu: Show QUIT and PROFILE
         backBtn.style.display = 'block';
         backBtn.innerText = 'QUIT';
         backBtn.onclick = exitGameTab; 
         forfeitBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'flex';
         
     } else if (mode === 'toss') {
-        // Toss Screen: Show BACK on the left, point to safe cancel
+        // Toss Screen: Show BACK, hide PROFILE so they focus on the game
         backBtn.style.display = 'block';
         backBtn.innerText = 'BACK';
         backBtn.onclick = quitMatch;
         forfeitBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'none';
         
     } else if (mode === 'match') {
-        // Active Match: Hide left button, show FORFEIT on the right
+        // Active Match: Show FORFEIT, hide PROFILE
         backBtn.style.display = 'none';
         forfeitBtn.style.display = 'block';
+        if (profileBtn) profileBtn.style.display = 'none';
         
     } else if (mode === 'end') {
-        // Game Over: Hide both so the player focuses on the stats
+        // Game Over: Hide forfeit/back, bring PROFILE back
         backBtn.style.display = 'none';
         forfeitBtn.style.display = 'none';
+        if (profileBtn) profileBtn.style.display = 'flex';
     }
 }
 function loginUser() {
