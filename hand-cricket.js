@@ -7,6 +7,7 @@
 // ==========================================
 
 let gameState = {
+   matchActive: false,
     maxWickets: 3,
     maxBalls: 30,
     aiDifficulty: 'easy',
@@ -1304,6 +1305,7 @@ function startMatch(playerOptsToBat) {
 }
 
 function continueToMatch() {
+   gameState.matchActive = true;
    toggleHeaderButtons('match');
     if (tossScreen) {
         tossScreen.style.display = 'none';
@@ -2554,7 +2556,7 @@ function exitGameTab() {
     );
 }
 function quitMatch() {
-    const matchStarted = gameState.isPlayerBatting !== null;
+   const matchStarted = gameState.matchActive === true;
 
     if (!matchStarted) {
         // PRE-TOSS: Free exit, no stats saved, no penalty
@@ -2600,6 +2602,7 @@ function executeForfeit(applyPenalty) {
   
     // 4. WIPE THE GAME STATE CLEAN
     gameState.isPlayerBatting = null;
+   gameState.matchActive = false;
     gameState.tossChoice = null;
     gameState.innings = 1;
     gameState.gameOver = false;
