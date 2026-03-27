@@ -1183,7 +1183,7 @@ function setDifficulty(level, btnId) {
     }
 }
 
-function goToToss() {
+{
   function goToToss() {
     // 1. Update the Header Buttons
     toggleHeaderButtons('toss');
