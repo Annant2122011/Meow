@@ -1335,7 +1335,7 @@ function setDifficulty(level, btnId) {
     }
 }
 
-{
+
   function goToToss() {
     // 1. Update the Header Buttons
     toggleHeaderButtons('toss');
@@ -2763,5 +2763,4 @@ gameState.commentaryHistory = [];
         dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
-}
 }
