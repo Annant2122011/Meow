@@ -1988,8 +1988,11 @@ function saveLifetimeStats(result) {
     let matchXP = 0;
     let matchCoins = 0;
 
-    // ONLY calculate XP if they actually finished the match
-    if (result !== "FORFEIT") {
+    if (result === "FORFEIT") {
+        // THE 200 XP PENALTY
+        matchXP = -200;
+    } else {
+        // NORMAL MATCH XP CALCULATION
         matchXP = 100; 
         if (result === "PLAYER_WINS") matchXP += 400;
         
@@ -2011,13 +2014,14 @@ function saveLifetimeStats(result) {
         matchCoins = Math.floor(matchXP * 0.5);
     }
     
-    stats.xp = (stats.xp || 0) + matchXP;
+    // Apply XP (using Math.max so it never drops below 0)
+    stats.xp = Math.max(0, (stats.xp || 0) + matchXP);
     stats.coins = (stats.coins || 0) + matchCoins;
     gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
 
     stats.matches += 1;
     
-    // A forfeit counts as a loss on your Win/Loss ratio
+    // A forfeit counts as a loss
     if (result === "PLAYER_WINS") stats.wins += 1; 
     else if (result === "COM_WINS" || result === "FORFEIT") stats.losses += 1; 
     else stats.ties += 1;
@@ -2086,9 +2090,9 @@ function saveLifetimeStats(result) {
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
-    // DIFFERENT TOAST POPUP FOR FORFEITING
+    // TOAST NOTIFICATION UPDATE
     if (result === "FORFEIT") {
-        showToast(`⚠️ Match Forfeited. Stats Saved | 0 XP Gained.`);
+        showToast(`⚠️ Match Forfeited. Stats Saved | 200 XP Deducted.`);
     } else {
         showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
     }
@@ -2555,23 +2559,22 @@ function quitMatch() {
         // PRE-TOSS: Free exit, no stats saved, no penalty
         showConfirmModal(
             "CANCEL MATCH", 
-            "Are you sure you want to go back? (No stats affected)", 
+            "Are you sure you want to go back? (No stats affected, no penalty)", 
             () => {
                 executeForfeit(false);
             }
         );
     } else {
-        // POST-TOSS: Save stats, 0 XP
+        // POST-TOSS: Save stats, deduct 200 XP
         showConfirmModal(
             "FORFEIT MATCH", 
-            "Are you sure you want to forfeit? Your runs will be added to your career stats, but you will receive 0 XP.", 
+            "Are you sure you want to forfeit? Your runs will be saved, but you will LOSE 200 XP.", 
             () => {
                 executeForfeit(true);
             }
         );
     }
 }
-
 function executeForfeit(applyPenalty) {
     // 1. IF MIDWAY THROUGH MATCH, SAVE STATS WITH NO XP
     if (applyPenalty && currentUser) {
