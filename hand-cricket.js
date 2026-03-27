@@ -199,9 +199,7 @@ let runsBreakdownChartInstance = null;
 const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖', 5: '🖐️', 6: '👍' };
 
 // DOM Elements
-const tossStep1 = document.getElementById('toss-step-1');
-const tossStep2 = document.getElementById('toss-step-2');
-const tossChoiceText = document.getElementById('toss-choice-text');
+
 const tossResultScreen = document.getElementById('toss-result-screen');
 const playerDecisionBox = document.getElementById('player-decision-box');
 const computerDecisionBox = document.getElementById('computer-decision-box');
@@ -2008,14 +2006,15 @@ function saveLifetimeStats(result) {
         matchXP += (gameState.compStats.wicketsLost * 10);
         
         let bossBonusXP = 0;
-        if (gameState.isTournament && result === "PLAYER_WINS") {
+       if (gameState.isTournament && result === "PLAYER_WINS") {
             stats.bossesDefeated = (stats.bossesDefeated || 0) + 1;
-            if (gameState.currentBoss === 9 || gameState.currentBoss === 13) stats.godDefeats = (stats.godDefeats || 0) + 1;
+            // Boss 9 is the Cricket God
+            if (gameState.currentBoss === 9) stats.godDefeats = (stats.godDefeats || 0) + 1;
             
             if (gameState.currentBoss <= 2) bossBonusXP = 1000;
             else if (gameState.currentBoss <= 5) bossBonusXP = 2500;
             else if (gameState.currentBoss <= 8) bossBonusXP = 10000;
-            else if (gameState.currentBoss <= 13) bossBonusXP = 100000;
+            else if (gameState.currentBoss <= 9) bossBonusXP = 100000;
         }
         
         matchXP += bossBonusXP;
@@ -2597,12 +2596,14 @@ gameState.playerConsecZeros = 0;     // <-- ADD THIS
 gameState.compConsecZeros = 0;       // <-- ADD THIS
 gameState.commentaryHistory = [];
     
-    gameState.playerStats = { 
-        runs: 0, balls: 0, fours: 0, sixes: 0, extras: 0, wicketsLost: 0, 
+ gameState.playerStats = { 
+        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
+        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
     gameState.compStats = { 
-        runs: 0, balls: 0, fours: 0, sixes: 0, extras: 0, wicketsLost: 0, 
+        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
+        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
 }
