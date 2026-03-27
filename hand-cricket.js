@@ -628,7 +628,7 @@ function bindPfpUpload() {
             // Reset proceed button just in case it was hidden by the "broke" check
             btnProceed.style.display = 'block'; 
         };
-    };
+    
 }
 // ==========================================
 // 3. UI, SHOP & COSMETICS
