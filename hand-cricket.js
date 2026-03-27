@@ -523,8 +523,8 @@ function applyCosmetics() {
         }
         
         if (u.equippedCoin === 'bitcoin') {
-            coinHeads.innerHTML = '₿'; 
-            coinTails.innerHTML = '₿'; 
+            coinHeads.innerHTML = '₿(Heads)'; 
+            coinTails.innerHTML = '₿(Tails)'; 
         } else {
             coinHeads.innerHTML = 'HEADS'; 
             coinTails.innerHTML = 'TAILS'; 
@@ -1704,7 +1704,7 @@ function handleWide(batterNum) {
     currentBatterStats.extras += runsToAdd; 
     currentBatterStats.currentWicketRuns += runsToAdd;
     
-    currentBatterStats.wormData[currentBatterStats.wormData.length - 1].runs = currentBatterStats.runs;
+
 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
     
@@ -2143,7 +2143,7 @@ function evaluateAchievements(stats) {
             }
         }
         
-        if (level > ach.thresholds.length + 1) {
+        if (level > ach.thresholds.length) {
             level = 'MAX';
         }
         
@@ -2419,25 +2419,6 @@ function downloadPDF() {
         console.error("PDF generation failed:", err);
         btn.innerHTML = "❌ SYSTEM ERROR";
         setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 3000);
-    }
-}
-function switchTab(tabId) {
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active-tab');
-    });
-    
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active-content');
-    });
-    
-    const eventObj = window.event;
-    if (eventObj && eventObj.target) {
-        eventObj.target.classList.add('active-tab');
-    }
-    
-    const activeContent = document.getElementById(tabId);
-    if (activeContent) {
-        activeContent.classList.add('active-content');
     }
 }
 
