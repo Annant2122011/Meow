@@ -34,15 +34,7 @@ body.theme-blood {
     transition: color 0.4s, text-shadow 0.4s;
 }
 
-/* Update Setup Buttons to be Hollow and match the theme */
-.active-setup-btn {
-    background: transparent !important;
-    color: var(--theme-neon) !important;
-    border: 2px solid var(--theme-neon) !important;
-    box-shadow: 0 0 15px var(--theme-glow), inset 0 0 10px var(--theme-dim) !important;
-    text-shadow: 0 0 8px var(--theme-neon);
-    transition: all 0.3s;
-}
+
 
 :root {
     --bg-dark: #050505;
@@ -872,70 +864,73 @@ body.theme-blood {
     font-size: 3rem !important;
 }
 /* =========================================
-   HOLLOW NEON PULSE BUTTONS (THEME ADAPTIVE)
+   DYNAMIC THEME VARIABLES (AUTO-COLOR)
    ========================================= */
+:root {
+    /* Default Neon Green */
+    --theme-neon: #00ff88;
+    --theme-glow: rgba(0, 255, 136, 0.6);
+    --theme-dim: rgba(0, 255, 136, 0.15);
+}
 
-/* 1. DEFAULT THEME (Neon Green) */
-.btn-hollow-pulse {
-    background: transparent !important; 
-    color: #00ff88 !important; 
-    border: 2px solid #00ff88 !important; 
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.2) !important;
+body.theme-synthwave {
+    /* Synthwave Purple */
+    --theme-neon: #e81cff;
+    --theme-glow: rgba(232, 28, 255, 0.6);
+    --theme-dim: rgba(232, 28, 255, 0.15);
+}
+
+body.theme-blood {
+    /* Blood Red */
+    --theme-neon: #ff2a2a;
+    --theme-glow: rgba(255, 42, 42, 0.6);
+    --theme-dim: rgba(255, 42, 42, 0.15);
+}
+
+/* 1. Dynamic Text Class (For the "CRICKET" in your logo and titles) */
+.dynamic-theme-text {
+    color: var(--theme-neon) !important;
+    text-shadow: 0 0 12px var(--theme-glow) !important;
+    transition: color 0.4s, text-shadow 0.4s;
+}
+
+/* 2. Universal Pulse Animation (Automatically changes color!) */
+@keyframes dynamicNeonPulse {
+    0%, 100% { box-shadow: 0 0 5px var(--theme-dim), inset 0 0 5px var(--theme-dim); }
+    50% { box-shadow: 0 0 15px var(--theme-glow), inset 0 0 8px var(--theme-dim); }
+}
+
+/* 3. THIN COLOURED Active Buttons & Action Buttons */
+.btn-hollow-pulse, .active-setup-btn {
+    background: transparent !important;
+    color: var(--theme-neon) !important;
+    border: 1px solid var(--theme-neon) !important; /* THIN 1px Border */
     font-family: var(--font-display, 'Rajdhani', sans-serif);
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-size: 1.2rem;
-    padding: 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    animation: greenNeonPulse 2s infinite;
+    text-shadow: 0 0 8px var(--theme-neon);
+    animation: dynamicNeonPulse 2s infinite;
     transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
-.btn-hollow-pulse:hover {
-    background: rgba(0, 255, 136, 0.1) !important;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), inset 0 0 15px rgba(0, 255, 136, 0.4) !important;
-    text-shadow: 0 0 10px #00ff88;
+.btn-hollow-pulse:hover, .active-setup-btn:hover {
+    background: var(--theme-dim) !important;
+    box-shadow: 0 0 20px var(--theme-glow), inset 0 0 15px var(--theme-dim) !important;
 }
 
-@keyframes greenNeonPulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.2) !important; }
-    50% { box-shadow: 0 0 25px rgba(0, 255, 136, 0.6), inset 0 0 15px rgba(0, 255, 136, 0.4) !important; }
+/* 4. Fix for Inactive Setup Buttons (Removes the old dark green borders) */
+.setup-btn {
+    background: transparent !important;
+    color: #9ca3af !important; /* Soft grey text */
+    border: 1px solid #4b5563 !important; /* Neutral thin grey border */
+    box-shadow: none !important;
+    animation: none !important;
+    transition: all 0.3s ease;
+    border-radius: 8px;
 }
 
-/* 2. SYNTHWAVE THEME (Neon Purple) */
-body.theme-synthwave .btn-hollow-pulse {
-    color: #e81cff !important;
-    border-color: #e81cff !important;
-    animation: synthNeonPulse 2s infinite;
-}
-
-body.theme-synthwave .btn-hollow-pulse:hover {
-    background: rgba(232, 28, 255, 0.1) !important;
-    box-shadow: 0 0 20px rgba(232, 28, 255, 0.6), inset 0 0 15px rgba(232, 28, 255, 0.4) !important;
-    text-shadow: 0 0 10px #e81cff;
-}
-
-@keyframes synthNeonPulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(232, 28, 255, 0.3), inset 0 0 10px rgba(232, 28, 255, 0.2) !important; }
-    50% { box-shadow: 0 0 25px rgba(232, 28, 255, 0.6), inset 0 0 15px rgba(232, 28, 255, 0.4) !important; }
-}
-
-/* 3. BLOOD THEME (Neon Red) */
-body.theme-blood .btn-hollow-pulse {
-    color: #ff2a2a !important;
-    border-color: #ff2a2a !important;
-    animation: bloodNeonPulse 2s infinite;
-}
-
-body.theme-blood .btn-hollow-pulse:hover {
-    background: rgba(255, 42, 42, 0.1) !important;
-    box-shadow: 0 0 20px rgba(255, 42, 42, 0.6), inset 0 0 15px rgba(255, 42, 42, 0.4) !important;
-    text-shadow: 0 0 10px #ff2a2a;
-}
-
-@keyframes bloodNeonPulse {
-    0%, 100% { box-shadow: 0 0 10px rgba(255, 42, 42, 0.3), inset 0 0 10px rgba(255, 42, 42, 0.2) !important; }
-    50% { box-shadow: 0 0 25px rgba(255, 42, 42, 0.6), inset 0 0 15px rgba(255, 42, 42, 0.4) !important; }
+.setup-btn:hover {
+    border-color: var(--theme-neon) !important;
+    color: #ffffff !important;
 }
