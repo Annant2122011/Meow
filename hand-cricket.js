@@ -1185,36 +1185,38 @@ function setDifficulty(level, btnId) {
 }
 
 function goToToss() {
-   toggleHeaderButtons('toss');
-    if (setupScreen) {
-        setupScreen.style.display = 'none';
-    }
-    
+    // 1. Update the Header Buttons
+    toggleHeaderButtons('toss');
+
+    // 2. Switch Screens
+    if (setupScreen) setupScreen.style.display = 'none';
     if (tossScreen) {
         tossScreen.style.display = 'block';
+        // Ensure the coin container itself is visible
+        const coinContainer = document.querySelector('.coin-container');
+        if (coinContainer) coinContainer.style.display = 'block';
     }
     
-    let aiMode = gameState.aiDifficulty === 'hard' ? "PRO AI (Career Analysis Active)" : "CASUAL AI (Random)";
-    let formatMode = gameState.maxBalls === Infinity ? "CLASSIC FORMAT" : `T${gameState.maxBalls/6} FORMAT`;
-    
-    gameState.commentaryHistory.push(`--- WELCOME TO THE ARENA | ${formatMode} | ${aiMode} ---`);
-
-    document.getElementById('toss-result-screen').style.display = 'none';
+    // 3. Reset the Coin position
     const coin = document.getElementById('coin');
-    
     if (coin) {
         coin.style.transition = 'none';
         coin.style.transform = 'rotateY(0deg)';
     }
-    
+
+    // 4. Set up the Caller logic
     tossData.caller = Math.random() < 0.5 ? 'player' : 'comp';
     
     const statusText = document.getElementById('toss-status-text');
     const pControls = document.getElementById('player-call-controls');
     const cControls = document.getElementById('comp-call-controls');
 
+    // Reset visibility of step 1 (calling) and hide step 2 (result)
+    document.getElementById('toss-step-1').style.display = 'block';
+    document.getElementById('toss-result-screen').style.display = 'none';
+
     if (tossData.caller === 'player') {
-        statusText.innerHTML = "You won the chance to call! <br><span style='color: var(--accent-blue);'>Heads or Tails?</span>";
+        statusText.innerHTML = "You won the chance to call! <br><span class='dynamic-theme-text'>Heads or Tails?</span>";
         pControls.style.display = 'flex';
         cControls.style.display = 'none';
     } else {
@@ -1224,7 +1226,6 @@ function goToToss() {
         cControls.style.display = 'flex';
     }
 }
-
 function callCoin(choice) {
     tossData.call = choice;
     document.getElementById('player-call-controls').style.display = 'none';
