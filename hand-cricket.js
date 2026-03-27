@@ -2569,7 +2569,7 @@ function executeForfeit(applyPenalty) {
     }
 
     // 2. HIDE ALL ACTIVE SCREENS
-    const screensToHide = ['toss-screen', 'game-screen', 'post-match-screen'];
+    const screensToHide = ['toss-screen', 'match-screen', 'post-match-screen'];
     screensToHide.forEach(id => {
         let el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -2581,13 +2581,16 @@ function executeForfeit(applyPenalty) {
     const setupScreen = document.getElementById('setup-screen');
     if (setupScreen) setupScreen.style.display = 'block';
   
-    // 4. WIPE THE GAME STATE CLEAN
-    gameState.isPlayerBatting = null;
-   gameState.matchActive = false;
-    gameState.tossChoice = null;
-    gameState.innings = 1;
-    gameState.gameOver = false;
-    gameState.commentaryHistory = [];
+   // 4. WIPE THE GAME STATE CLEAN
+gameState.isPlayerBatting = null;
+gameState.matchActive = false; 
+gameState.innings = 1;
+gameState.target = null;             // <-- ADD THIS
+gameState.gameOver = false;
+gameState.isTransitioning = false;   // <-- ADD THIS
+gameState.playerConsecZeros = 0;     // <-- ADD THIS
+gameState.compConsecZeros = 0;       // <-- ADD THIS
+gameState.commentaryHistory = [];
     
     gameState.playerStats = { 
         runs: 0, balls: 0, fours: 0, sixes: 0, extras: 0, wicketsLost: 0, 
