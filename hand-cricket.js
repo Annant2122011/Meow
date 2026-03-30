@@ -866,20 +866,97 @@ function getRankDetails(xp) {
     // MAX TIER
     return { title: 'Tier 7: Mythical Master', class: 'rank-god' };
 }
+// Levels scale mathematically: Lvl 1=0, Lvl 2=50, Lvl 3=100, Lvl 4=150...
 function applyRankUI(username, avatarBoxId) {
     const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
     const xp = usersDB[username].xp || 0;
+    
+    let currentLevel = 1;
+    let xpRequiredForNext = 50; 
+    let totalXpNeededForNext = 50;
+    let baseXPForCurrentLevel = 0;
+
+    while (xp >= totalXpNeededForNext) {
+        currentLevel++;
+        baseXPForCurrentLevel = totalXpNeededForNext;
+        xpRequiredForNext = currentLevel * 50; 
+        totalXpNeededForNext += xpRequiredForNext;
+    }
+
+    let xpIntoCurrentLevel = xp - baseXPForCurrentLevel;
+    let progressPercent = (xpIntoCurrentLevel / xpRequiredForNext) * 100;
+
     const rank = getRankDetails(xp);
     const avatarBox = document.getElementById(avatarBoxId);
-    
     if (avatarBox) {
         avatarBox.className = '';
         avatarBox.classList.add(rank.class);
     }
     
+    // Animate the stunning UI progress bar
+    const lvlText = document.getElementById('prof-level-text');
+    const progBar = document.getElementById('prof-level-bar');
+    if (lvlText) lvlText.innerText = `LEVEL ${currentLevel}`;
+    if (progBar) progBar.style.width = `${progressPercent}%`;
+
     return { rank, xp };
 }
 
+// --- CROPPER.JS LOGIC ---
+let currentCropper = null;
+
+function initCropper(imageSrc) {
+    const modal = document.getElementById('cropper-modal');
+    const image = document.getElementById('cropper-image');
+    
+    image.src = imageSrc;
+    modal.style.display = 'flex';
+    
+    if (currentCropper) currentCropper.destroy();
+    
+    // Initialize professional cropping engine
+    currentCropper = new Cropper(image, {
+        aspectRatio: 1, 
+        viewMode: 1,
+        dragMode: 'move', // Panning mode
+        autoCropArea: 1,
+        cropBoxResizable: false, // Locked circular size
+        cropBoxMovable: false,
+        guides: false, center: false, highlight: false, background: false
+    });
+}
+
+function cancelCrop() {
+    document.getElementById('cropper-modal').style.display = 'none';
+    if (currentCropper) currentCropper.destroy();
+}
+
+function saveCrop() {
+    if (!currentCropper) return;
+    
+    // Generate beautiful 400x400 circular crop
+    const canvas = currentCropper.getCroppedCanvas({
+        width: 400, height: 400,
+        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
+    });
+    
+    const finalImage = canvas.toDataURL('image/png');
+    
+    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+    db[currentUser].coins -= 500000;
+    db[currentUser].customPFP = finalImage;
+    localStorage.setItem('hc_usersDB', JSON.stringify(db));
+    
+    applyCosmetics(); 
+    document.getElementById('prof-coins').innerText = db[currentUser].coins.toLocaleString();
+    
+    SoundManager.play('coinSpend'); // Trigger transaction sound
+    showToast(`🖼️ Avatar Masterfully Updated! (-🪙500,000)`);
+    cancelCrop();
+}
+
+// Update your bindPfpUpload file reader logic to trigger initCropper:
+// Inside bindPfpUpload -> reader.onload = event => { initCropper(event.target.result); };
 function getLevelColor(level) {
     if (level === 1) return '#9e9e9e'; // Grey
     if (level === 2) return '#4ade80'; // Green
