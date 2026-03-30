@@ -1023,3 +1023,28 @@ body.theme-blood {
     outline: 2px solid var(--theme-neon, #00ff88);
     outline-color: rgba(0, 255, 136, 0.7);
 }
+/* ==========================================
+   FEATURE 1: RESPONSIVE AVATAR CENTERING
+   ========================================== */
+/* This wrapper forces anything inside it to stay dead-center on ALL screen sizes */
+.avatar-center-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    padding: 15px 0;
+}
+
+/* Specifically lock the profile box so it never drifts or squishes */
+#prof-avatar-box, #header-avatar-box {
+    position: relative;
+    margin: 0 auto;
+    flex-shrink: 0; /* Prevents the circle from squishing into an oval on tiny phones */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
