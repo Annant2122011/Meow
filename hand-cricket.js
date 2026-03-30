@@ -746,33 +746,30 @@ function bindPfpUpload() {
 
 
 function applyCosmetics() {
-   // Apply Match Screen Background
+    // 1. Check for user and initialize 'u' FIRST
+    if (!currentUser) return;
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+
+    // 2. Apply Match Screen Background
     const matchScreen = document.getElementById('match-screen');
     if (matchScreen) {
         matchScreen.className = ''; // wipe old backgrounds
         matchScreen.classList.add(u.equippedBackground);
     }
 
-    // Apply New CSS Themes
+    // 3. Apply New CSS Themes
     document.body.classList.remove('theme-synthwave', 'theme-blood', 'theme-matrix', 'theme-ocean', 'theme-gold');
     if (u.equippedTheme !== 'default') {
         document.body.classList.add('theme-' + u.equippedTheme);
     }
 
-    // Map the dynamic sounds based on equipped SFX
+    // 4. Map the dynamic sounds based on equipped SFX
     SoundManager.tracks.batCrack = `assets/bat_${u.equippedSfxBat}.mp3`;
     SoundManager.tracks.crowdRoar = `assets/roar_${u.equippedSfxRoar}.mp3`;
     SoundManager.tracks.howzat = `assets/wkt_${u.equippedSfxWicket}.mp3`;
-    if (!currentUser) return;
     
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
-    
-    document.body.classList.remove('theme-synthwave', 'theme-blood');
-    if (u.equippedTheme !== 'default') {
-        document.body.classList.add('theme-' + u.equippedTheme);
-    }
-    
-   let headerAv = document.getElementById('avatar-text'); 
+    // 5. Update UI Elements
+    let headerAv = document.getElementById('avatar-text'); 
     let profAv = document.getElementById('prof-avatar-letter'); 
     
     const displayAvatar = (el) => {
@@ -808,7 +805,6 @@ function applyCosmetics() {
         }
     }
 }
-
 function renderShop() {
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
     
