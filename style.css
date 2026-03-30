@@ -1041,3 +1041,71 @@ body.theme-blood {
     object-fit: cover !important;
     border-radius: 50% !important;
 }
+/* ==========================================
+   EXPANDED SHOP THEMES
+   ========================================== */
+.theme-matrix {
+    --bg-dark: #000b00;
+    --panel-bg: rgba(0, 20, 0, 0.85);
+    --accent-neon: #00ff41;
+    --accent-blue: #008f11;
+    --accent-red: #ff003c;
+    --theme-neon: #00ff41;
+    --theme-glow: rgba(0, 255, 65, 0.5);
+    font-family: 'Courier New', monospace; /* Hacky hacker vibe */
+}
+
+.theme-ocean {
+    --bg-dark: #001220;
+    --panel-bg: rgba(0, 25, 45, 0.85);
+    --accent-neon: #00e5ff;
+    --accent-blue: #0077ff;
+    --accent-red: #ff3366;
+    --theme-neon: #00e5ff;
+    --theme-glow: rgba(0, 229, 255, 0.5);
+}
+
+.theme-gold {
+    --bg-dark: #1a1600;
+    --panel-bg: rgba(30, 25, 0, 0.85);
+    --accent-neon: #ffcc00;
+    --accent-blue: #ffaa00;
+    --accent-red: #ff4400;
+    --theme-neon: #ffcc00;
+    --theme-glow: rgba(255, 204, 0, 0.5);
+}
+
+/* ==========================================
+   SHOP BACKGROUNDS (Match Screen)
+   ========================================== */
+.bg-default { background: transparent; }
+
+.bg-gully {
+    background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('assets/bg_gully.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-stadium {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.9)), url('assets/bg_stadium.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-cyber {
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('assets/bg_cyber.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-colosseum {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.9)), url('assets/bg_colosseum.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.bg-galaxy {
+    background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.9)), url('assets/bg_galaxy.jpg');
+    background-size: cover;
+    background-position: center;
+}
