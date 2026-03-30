@@ -2926,3 +2926,47 @@ gameState.commentaryHistory = [];
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
 }
+// ==========================================
+// 🚀 THE ELITE ULTIMATE ENGINE (PART 1)
+// ==========================================
+
+const EliteEngine = {
+    // 1. SILKY SMOOTH LEVELING MATH
+    updateLeveling: function(xp) {
+        let level = Math.floor(xp / 50) + 1;
+        let xpInLevel = xp % 50;
+        let pct = (xpInLevel / 50) * 100;
+        
+        const bar = document.getElementById('prof-level-bar');
+        const txt = document.getElementById('prof-level-text');
+        
+        if (bar) bar.style.width = pct + "%";
+        if (txt) txt.innerText = `LEVEL ${level} • ${xpInLevel}/50 XP`;
+    },
+
+    // 2. INTELLIGENT AFK PROTECTOR
+    afkTimer: null,
+    startAFKCheck: function() {
+        clearTimeout(this.afkTimer);
+        if (gameState.isPlayerBatting !== null && !gameState.gameOver) {
+            this.afkTimer = setTimeout(() => {
+                showConfirmModal(
+                    "🚨 STADIUM SECURITY", 
+                    "Are you still at the crease? Match auto-forfeits in 15s!", 
+                    () => { executeForfeit(true); }
+                );
+            }, 45000); // 45 Seconds
+        }
+    },
+
+    // 3. CINEMATIC COMMENTARY & SFX
+    announceMilestone: function(score, runs) {
+        const milestone = Math.floor((score + runs) / 50) * 50;
+        if (milestone > Math.floor(score / 50) * 50) {
+            SoundManager.play('crowdRoar');
+            return `<span style="color:#e81cff; font-weight:900; text-shadow: 0 0 15px #e81cff;">
+                    🌟 UNBELIEVABLE! ${milestone} RUNS REACHED! 🌟</span>`;
+        }
+        return null;
+    }
+};
