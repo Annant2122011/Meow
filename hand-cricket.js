@@ -902,58 +902,9 @@ function applyRankUI(username, avatarBoxId) {
     return { rank, xp };
 }
 
-// --- CROPPER.JS LOGIC ---
-let currentCropper = null;
 
-function initCropper(imageSrc) {
-    const modal = document.getElementById('cropper-modal');
-    const image = document.getElementById('cropper-image');
-    
-    image.src = imageSrc;
-    modal.style.display = 'flex';
-    
-    if (currentCropper) currentCropper.destroy();
-    
-    // Initialize professional cropping engine
-    currentCropper = new Cropper(image, {
-        aspectRatio: 1, 
-        viewMode: 1,
-        dragMode: 'move', // Panning mode
-        autoCropArea: 1,
-        cropBoxResizable: false, // Locked circular size
-        cropBoxMovable: false,
-        guides: false, center: false, highlight: false, background: false
-    });
-}
 
-function cancelCrop() {
-    document.getElementById('cropper-modal').style.display = 'none';
-    if (currentCropper) currentCropper.destroy();
-}
 
-function saveCrop() {
-    if (!currentCropper) return;
-    
-    // Generate beautiful 400x400 circular crop
-    const canvas = currentCropper.getCroppedCanvas({
-        width: 400, height: 400,
-        imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
-    });
-    
-    const finalImage = canvas.toDataURL('image/png');
-    
-    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
-    db[currentUser].coins -= 500000;
-    db[currentUser].customPFP = finalImage;
-    localStorage.setItem('hc_usersDB', JSON.stringify(db));
-    
-    applyCosmetics(); 
-    document.getElementById('prof-coins').innerText = db[currentUser].coins.toLocaleString();
-    
-    SoundManager.play('coinSpend'); // Trigger transaction sound
-    showToast(`🖼️ Avatar Masterfully Updated! (-🪙500,000)`);
-    cancelCrop();
-}
 
 // Update your bindPfpUpload file reader logic to trigger initCropper:
 // Inside bindPfpUpload -> reader.onload = event => { initCropper(event.target.result); };
