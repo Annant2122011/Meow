@@ -1009,3 +1009,17 @@ body.theme-blood {
     object-fit: cover !important;        /* Magic line: Prevents stretching/squishing */
     border-radius: 50% !important;
 }
+/* =========================================
+   CIRCULAR CROPPER.JS OVERRIDE
+   ========================================= */
+/* Makes the visible crop area a perfect circle */
+.cropper-view-box,
+.cropper-face {
+    border-radius: 50%;
+}
+
+/* Hides the square grid lines and center crosshair for a cleaner look */
+.cropper-view-box {
+    outline: 2px solid var(--theme-neon, #00ff88);
+    outline-color: rgba(0, 255, 136, 0.7);
+}
