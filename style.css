@@ -1024,27 +1024,20 @@ body.theme-blood {
     outline-color: rgba(0, 255, 136, 0.7);
 }
 /* ==========================================
-   FEATURE 1: RESPONSIVE AVATAR CENTERING
+   FEATURE 1: INDEX HEADER AVATAR CENTERING
    ========================================== */
-/* This wrapper forces anything inside it to stay dead-center on ALL screen sizes */
-.avatar-center-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    text-align: center;
-    margin: 0 auto;
-    padding: 15px 0;
+#header-avatar-box {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important; /* Prevents it from squishing on small phones */
 }
 
-/* Specifically lock the profile box so it never drifts or squishes */
-#prof-avatar-box, #header-avatar-box {
-    position: relative;
-    margin: 0 auto;
-    flex-shrink: 0; /* Prevents the circle from squishing into an oval on tiny phones */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+/* Ensures the custom uploaded image is perfectly centered and covers the circle */
+#header-avatar-box img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
 }
