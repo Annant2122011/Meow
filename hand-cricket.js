@@ -1923,6 +1923,7 @@ function handleWicket(num, type) {
     
     if (!gameState.isPlayerBatting) {
         gameState.compStats.dots++; 
+       currentBatterStats.dots++;
     }
     
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
@@ -1981,6 +1982,7 @@ function handleDefense() {
     
     if (!gameState.isPlayerBatting) {
         gameState.compStats.dots++;
+       currentBatterStats.dots++;
     }
     
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
@@ -2003,18 +2005,17 @@ function handleRuns(runs) {
     let currentScore = currentBatterStats.runs;
     let newScore = currentScore + runs;
     
-    // 1. MILESTONE ENGINE (Executes exactly when a milestone is crossed)
-    let currentMilestone = Math.floor(currentScore / 50);
-    let newMilestone = Math.floor(newScore / 50);
+    // INTEGRATED ELITE MILESTONE LOGIC
+    let currentMilestone = Math.floor(currentScore / 50) * 50;
+    let newMilestone = Math.floor(newScore / 50) * 50;
     
-    if (newMilestone > currentMilestone && newMilestone >= 1) {
-        let milestoneRuns = newMilestone * 50;
-        let mColor = milestoneRuns >= 100 ? "#e81cff" : "#00d2ff"; // Purple for 100+, Blue for 50
-        let cText = `🌟 MAGNIFICENT ${milestoneRuns}! ${batterName} achieves a spectacular milestone! 🌟`;
-        
-        gameState.commentaryHistory.push(`↳ ${cText}`);
-        commentaryBox.innerHTML = `> <span style="color: ${mColor}; font-weight: 900; text-shadow: 0 0 10px ${mColor}; display: block; animation: pulse 1s infinite;">${cText}</span>`;
+    if (newMilestone > currentMilestone && newMilestone >= 50) {
         SoundManager.play('crowdRoar');
+        let mColor = newMilestone >= 100 ? "#e81cff" : "#00d2ff"; 
+        let milestoneText = `🌟 UNBELIEVABLE! ${newMilestone} RUNS REACHED! ${batterName} IS DOMINATING! 🌟`;
+        
+        commentaryBox.innerHTML = `> <span style="color: ${mColor}; font-weight: 900; text-shadow: 0 0 15px ${mColor}; display: block; animation: pulse 1s infinite;">${milestoneText}</span>`;
+        gameState.commentaryHistory.push(`↳ ${milestoneText}`);
     }
 
     // 2. APPLY CORE STATS
@@ -2328,7 +2329,7 @@ function saveLifetimeStats(result) {
     if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) stats.successfulChases += 1;
 
     if (gameState.playerStats.runs >= 50 && gameState.playerStats.runs < 100) stats.careerFifties = (stats.careerFifties || 0) + 1;
-    if (gameState.playerStats.runs >= 100 && gameState.playerStats.runs < 200) stats.careerCenturies = (stats.careerCenturies || 0) + 1;
+   if (gameState.playerStats.runs >= 100) stats.careerCenturies = (stats.careerCenturies || 0) + 1;
     if (gameState.playerStats.runs >= 200) stats.careerDoubleCenturies = (stats.careerDoubleCenturies || 0) + 1;
     if (gameState.compStats.wicketsLost >= 5) stats.fiveWicketHauls = (stats.fiveWicketHauls || 0) + 1;
     stats.totalExtrasReceived = (stats.totalExtrasReceived || 0) + gameState.playerStats.extras;
@@ -2551,7 +2552,7 @@ function generateAIInsight(result) {
     const insightBox = document.getElementById('ai-insight-text'); if (!insightBox) return;
     
     let pSR = gameState.playerStats.balls > 0 ? (gameState.playerStats.runs / gameState.playerStats.balls) * 100 : 0;
-    let dots = gameState.playerStats.balls - (gameState.playerStats.fours + gameState.playerStats.sixes + gameState.playerStats.runs);
+    let dots = gameState.playerStats.dots;
     
     let insight = "";
     if (gameState.isTournament) {
@@ -2886,11 +2887,15 @@ function executeForfeit(applyPenalty) {
     }
 
     // 2. HIDE ALL ACTIVE SCREENS
-    const screensToHide = ['toss-screen', 'match-screen', 'post-match-screen'];
-    screensToHide.forEach(id => {
-        let el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+   const screensToHide = ['toss-screen', 'match-screen', 'post-match-screen', 'toss-result-screen'];
+screensToHide.forEach(id => {
+    let el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+});
+
+// Also add this right below the screensToHide loop to reset the target box:
+const targetBox = document.getElementById('target-box');
+if (targetBox) targetBox.style.display = 'none';
     
     // 3. SHOW THE SETUP SCREEN
     toggleHeaderButtons('setup');
@@ -2920,50 +2925,7 @@ gameState.commentaryHistory = [];
         dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
     };
 }
-// ==========================================
-// 🚀 THE ELITE ULTIMATE ENGINE (PART 1)
-// ==========================================
 
-const EliteEngine = {
-    // 1. SILKY SMOOTH LEVELING MATH
-    updateLeveling: function(xp) {
-        let level = Math.floor(xp / 50) + 1;
-        let xpInLevel = xp % 50;
-        let pct = (xpInLevel / 50) * 100;
-        
-        const bar = document.getElementById('prof-level-bar');
-        const txt = document.getElementById('prof-level-text');
-        
-        if (bar) bar.style.width = pct + "%";
-        if (txt) txt.innerText = `LEVEL ${level} • ${xpInLevel}/50 XP`;
-    },
-
-    // 2. INTELLIGENT AFK PROTECTOR
-    afkTimer: null,
-    startAFKCheck: function() {
-        clearTimeout(this.afkTimer);
-        if (gameState.isPlayerBatting !== null && !gameState.gameOver) {
-            this.afkTimer = setTimeout(() => {
-                showConfirmModal(
-                    "🚨 STADIUM SECURITY", 
-                    "Are you still at the crease? Match auto-forfeits in 15s!", 
-                    () => { executeForfeit(true); }
-                );
-            }, 45000); // 45 Seconds
-        }
-    },
-
-    // 3. CINEMATIC COMMENTARY & SFX
-    announceMilestone: function(score, runs) {
-        const milestone = Math.floor((score + runs) / 50) * 50;
-        if (milestone > Math.floor(score / 50) * 50) {
-            SoundManager.play('crowdRoar');
-            return `<span style="color:#e81cff; font-weight:900; text-shadow: 0 0 15px #e81cff;">
-                    🌟 UNBELIEVABLE! ${milestone} RUNS REACHED! 🌟</span>`;
-        }
-        return null;
-    }
-};
 // ==========================================
 // 🏦 GRAND ECONOMY & LEDGER SYSTEM
 // ==========================================
