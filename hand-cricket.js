@@ -1,7 +1,84 @@
 /* =========================================================
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
+// ==========================================
+// 🏏 SOUND MANAGER (AAA Audio Engine)
+// ==========================================
+const SoundManager = {
+    enabled: true,
+    bgm: new Audio('assets/stadium_bgm.mp3'),
+    tracks: {
+        batCrack: 'assets/bat_crack.mp3',
+        crowdRoar: 'assets/crowd_roar.mp3',
+        howzat: 'assets/howzat.mp3',
+        coinSpend: 'assets/coin_spend.mp3'
+    },
+    
+    init: function() {
+        this.bgm.loop = true;
+        this.bgm.volume = 0.25; // Subtle background hum
+    },
+    
+    play: function(trackName) {
+        if (!this.enabled || !this.tracks[trackName]) return;
+        let sfx = new Audio(this.tracks[trackName]);
+        sfx.volume = 0.8;
+        sfx.play().catch(() => console.log("SFX blocked until user interacts"));
+    },
+    
+    startBGM: function() {
+        if (this.enabled) this.bgm.play().catch(() => {});
+    }
+};
+SoundManager.init();
 
+// ==========================================
+// ⏳ AFK MANAGER (Anti-Idle System)
+// ==========================================
+const AFKManager = {
+    warningTimer: null,
+    forfeitTimer: null,
+    limit: 45000, // 45 seconds
+    
+    reset: function() {
+        clearTimeout(this.warningTimer);
+        clearTimeout(this.forfeitTimer);
+        
+        // Only trigger if deeply in a match
+        const isMidMatch = gameState.isPlayerBatting !== null && !gameState.gameOver && !gameState.isTransitioning;
+        if (isMidMatch) {
+            this.warningTimer = setTimeout(() => this.triggerWarning(), this.limit);
+        }
+    },
+    
+    triggerWarning: function() {
+        showConfirmModal(
+            "⚠️ PLAYER INACTIVE ⚠️", 
+            "You have been AFK for 45 seconds. The match will auto-forfeit in 15 seconds!", 
+            () => { 
+                clearTimeout(this.forfeitTimer); 
+                executeForfeit(true); 
+            }
+        );
+        
+        // Dynamically change the Cancel button to "I'M HERE"
+        setTimeout(() => {
+            const cancelBtn = document.querySelector('#custom-confirm-modal .btn:nth-child(2)');
+            if (cancelBtn) {
+                cancelBtn.style.background = "#00ff88";
+                cancelBtn.style.color = "black";
+                cancelBtn.innerText = "I'M STILL HERE";
+                cancelBtn.onclick = () => { closeConfirmModal(); this.reset(); };
+            }
+        }, 50);
+
+        this.forfeitTimer = setTimeout(() => {
+            closeConfirmModal();
+            executeForfeit(true);
+            showToast("⏳ Match Auto-Forfeited due to 60s of inactivity.");
+        }, 15000);
+    }
+};
 // ==========================================
 // 1. GAME STATE & DATABASES
 // ==========================================
@@ -1311,6 +1388,7 @@ function setDifficulty(level, btnId) {
 
 
   function goToToss() {
+     SoundManager.startBGM();
     // 1. Update the Header Buttons
     toggleHeaderButtons('toss');
 
@@ -1707,6 +1785,8 @@ function getComputerThrow() {
 }
 
 function playHand(playerNum) {
+   AFKManager.reset();
+   
     if (gameState.gameOver || gameState.isTransitioning) {
         return;
     }
@@ -1821,10 +1901,13 @@ function handleWicket(num, type) {
     let comment = "";
     
     if (type === 'STUMPED') {
+       SoundManager.play('howzat');
         comment = getRandomCommentary(commentaryDB.wkt_stumped).replace("[BATTER]", batterName);
     } else if (type === 'HIT_WICKET') {
+       SoundManager.play('howzat');
         comment = getRandomCommentary(commentaryDB.wkt_hit).replace("[BATTER]", batterName);
     } else {
+       SoundManager.play('howzat');
         comment = getRandomCommentary(commentaryDB.wkt_bowled).replace("[BATTER]", batterName).replace("[NUM]", num);
     }
     
