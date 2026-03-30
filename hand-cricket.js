@@ -245,12 +245,18 @@ const shopItems = {
         { id: '👽', name: 'Alien', price: 999 },
         { id: '🤖', name: 'Robot', price: 1499 },
         { id: '🤫', name: 'Silencer', price: 1999 },
-        { id: '👑', name: 'King', price: 2999 }
+        { id: '👑', name: 'King', price: 2999 },
+       { id: '🥷', name: 'Ninja', price: 3499 },
+       { id: '🐉', name: 'Dragon', price: 4499 },
+        { id: '🦁', name: 'Alpha Lion', price: 4999 }
     ],
     themes: [
         { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
         { id: 'synthwave', name: 'Synthwave', price: 1499, icon: '🟪' },
-        { id: 'blood', name: 'Blood Red', price: 1999, icon: '🟥' }
+        { id: 'blood', name: 'Blood Red', price: 1999, icon: '🟥' },
+       { id: 'matrix', name: 'Matrix Code', price: 3999, icon: '💻' },
+        { id: 'ocean', name: 'Deep Ocean', price: 6999, icon: '🌊' },
+        { id: 'gold', name: 'Royal Gold', price: 14999, icon: '🟨' }
     ],
    coins: [
         { id: 'default', name: 'Lead Coin', price: 0, icon: '🪙' }, 
@@ -259,7 +265,39 @@ const shopItems = {
         { id: 'gold', name: 'Gold Coin', price: 7499, icon: '🟡' },
       { id: 'dollar', name: 'Dollar Coin', price: 9999, icon: '💲' },
         { id: 'bitcoin', name: 'Crypto Coin', price: 12499, icon: '₿' }, 
-        { id: 'diamond', name: 'Diamond Coin', price: 15999, icon: '💎' }
+        { id: 'diamond', name: 'Diamond Coin', price: 15999, icon: '💎' },
+      { id: 'emerald', name: 'Emerald Coin', price: 19999, icon: '❇️' },
+        { id: 'obsidian', name: 'Dark Obsidian', price: 24999, icon: '🌑' }
+    ],
+   backgrounds: [
+        { id: 'bg-default', name: 'Plain Dark', price: 0, icon: '⬛' },
+        { id: 'bg-gully', name: 'Gully Streets', price: 2500, icon: '🏘️' },
+        { id: 'bg-stadium', name: 'Night Stadium', price: 7500, icon: '🏟️' },
+        { id: 'bg-cyber', name: 'Neon Cyber City', price: 15000, icon: '🌃' },
+        { id: 'bg-colosseum', name: 'The Colosseum', price: 30000, icon: '🏛️' },
+        { id: 'bg-galaxy', name: 'Galactic Arena', price: 100000, icon: '🌌' }
+    ],
+    commentary: [
+        { id: 'default', name: 'Standard EN', price: 0, icon: '🎙️' },
+        { id: 'pro', name: 'Pro Broadcast', price: 4999, icon: '📺' },
+        { id: 'poetic', name: 'Elite Poetic', price: 9999, icon: '📜' },
+        { id: 'hindi', name: 'Premium Hindi', price: 39999, icon: '🇮🇳' },
+        { id: 'bhojpuri', name: 'Bhojpuri Bawal', price: 29999, icon: '🔥' }
+    ],
+    sfxBat: [
+        { id: 'wood', name: 'Classic Wood', price: 0, icon: '🏏' },
+        { id: 'metal', name: 'Metal Ping', price: 999, icon: '🔔' },
+        { id: 'plasma', name: 'Plasma Whip', price: 3999, icon: '⚡' }
+    ],
+    sfxRoar: [
+        { id: 'standard', name: 'Standard Crowd', price: 0, icon: '🗣️' },
+        { id: 'massive', name: 'Stadium Eruption', price: 2999, icon: '🏟️' },
+        { id: 'alien', name: 'Alien Cheers', price: 4999, icon: '👽' }
+    ],
+    sfxWicket: [
+        { id: 'howzat', name: 'Classic Howzat', price: 0, icon: '☝️' },
+        { id: 'buzzer', name: 'Arcade Buzzer', price: 1499, icon: '❌' },
+        { id: 'explosion', name: 'Thunder Strike', price: 1999, icon: '🌩️' }
     ]
 };
 
@@ -376,6 +414,17 @@ function syncUserData(username) {
     u.equippedTheme = u.equippedTheme || 'default'; 
     u.equippedCoin = u.equippedCoin || 'default';
     if (!u.achLevels) u.achLevels = {};
+   u.unlockedBackgrounds = u.unlockedBackgrounds || ['bg-default'];
+    u.unlockedCommentary = u.unlockedCommentary || ['default'];
+    u.unlockedSfxBat = u.unlockedSfxBat || ['wood'];
+    u.unlockedSfxRoar = u.unlockedSfxRoar || ['standard'];
+    u.unlockedSfxWicket = u.unlockedSfxWicket || ['howzat'];
+
+    u.equippedBackground = u.equippedBackground || 'bg-default';
+    u.equippedCommentary = u.equippedCommentary || 'default';
+    u.equippedSfxBat = u.equippedSfxBat || 'wood';
+    u.equippedSfxRoar = u.equippedSfxRoar || 'standard';
+    u.equippedSfxWicket = u.equippedSfxWicket || 'howzat';
 
     // --- ZERO MIGRATION: Wipe old data, start fresh ---
     delete u.last10SR;
@@ -697,6 +746,23 @@ function bindPfpUpload() {
 
 
 function applyCosmetics() {
+   // Apply Match Screen Background
+    const matchScreen = document.getElementById('match-screen');
+    if (matchScreen) {
+        matchScreen.className = ''; // wipe old backgrounds
+        matchScreen.classList.add(u.equippedBackground);
+    }
+
+    // Apply New CSS Themes
+    document.body.classList.remove('theme-synthwave', 'theme-blood', 'theme-matrix', 'theme-ocean', 'theme-gold');
+    if (u.equippedTheme !== 'default') {
+        document.body.classList.add('theme-' + u.equippedTheme);
+    }
+
+    // Map the dynamic sounds based on equipped SFX
+    SoundManager.tracks.batCrack = `assets/bat_${u.equippedSfxBat}.mp3`;
+    SoundManager.tracks.crowdRoar = `assets/roar_${u.equippedSfxRoar}.mp3`;
+    SoundManager.tracks.howzat = `assets/wkt_${u.equippedSfxWicket}.mp3`;
     if (!currentUser) return;
     
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
