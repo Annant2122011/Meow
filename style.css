@@ -1109,3 +1109,85 @@ body.theme-blood {
     background-size: cover;
     background-position: center;
 }
+/* ==========================================
+   THE GRAND SHOP GRID LAYOUT
+   ========================================== */
+.shop-grid {
+    display: grid;
+    /* Automatically creates columns that are at least 120px wide, and stretches to fill space */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    justify-content: center;
+    padding: 10px 0;
+}
+
+.shop-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between; /* Pushes the button to the absolute bottom */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shop-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px var(--theme-glow, rgba(0,255,136,0.2));
+    border-color: var(--theme-neon, #00ff88);
+}
+
+.shop-item-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.shop-item-name {
+    font-size: 0.95rem;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 15px;
+    /* Forces all titles to be the same height so buttons align perfectly in a row */
+    min-height: 2.8em; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Base button styling */
+.shop-btn {
+    width: 100%;
+    padding: 10px 5px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.2s;
+}
+
+/* Button States */
+.shop-btn.buy {
+    background: var(--theme-neon, #00ff88);
+    color: #000;
+}
+.shop-btn.buy:disabled {
+    background: #333;
+    color: #888;
+    cursor: not-allowed;
+}
+.shop-btn.equip {
+    background: var(--accent-blue, #00d2ff);
+    color: #000;
+}
+.shop-btn.equipped {
+    background: transparent;
+    border: 2px solid #555;
+    color: #a1a1aa;
+    cursor: default;
+}
