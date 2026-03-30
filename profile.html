@@ -29,6 +29,31 @@
                 <h3 class="neon-text" style="font-size: 2.5rem; color: var(--accent-blue); text-shadow: 0 0 10px rgba(0,210,255,0.5); margin-bottom: 5px;"><span id="prof-username">USER</span></h3>
                 
                 <p id="prof-rank" style="font-family: var(--font-display); font-weight: 900; font-size: 1.3rem; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 2px;"></p>
+                <div style="width: 100%; max-width: 300px; margin: 15px auto; text-align: center;">
+    <div id="prof-level-text" style="color: var(--theme-neon, #00ff88); font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; text-shadow: 0 0 8px var(--theme-glow, rgba(0,255,136,0.5));">
+        LEVEL 1
+    </div>
+    <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; box-shadow: inset 0 0 5px rgba(0,0,0,0.5);">
+        <div id="prof-level-bar" style="height: 100%; width: 0%; background: var(--theme-neon, #00ff88); box-shadow: 0 0 10px var(--theme-neon, #00ff88); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+    </div>
+</div>
+
+<div id="cropper-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+    <div style="width: 90%; max-width: 450px; background: #0b0f19; padding: 25px; border-radius: 16px; border: 2px solid var(--theme-neon, #00ff88); box-shadow: 0 0 30px var(--theme-glow, rgba(0,255,136,0.2));">
+        <h3 style="color: white; text-align: center; margin-top: 0; font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; letter-spacing: 1px;">ALIGN AVATAR</h3>
+        
+        <div style="width: 100%; height: 350px; background: #000; overflow: hidden; border-radius: 50%; border: 3px dashed #333; margin: 0 auto;">
+            <img id="cropper-image" src="" style="max-width: 100%; display: block;">
+        </div>
+        
+        <p style="color: #a1a1aa; text-align: center; font-size: 0.9rem; margin: 15px 0;">Pinch to zoom, drag to pan perfectly into the circle.</p>
+        
+        <div style="display: flex; gap: 15px; margin-top: 20px;">
+            <button class="btn" onclick="cancelCrop()" style="background: #374151; flex: 1; border: none; padding: 12px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">CANCEL</button>
+            <button class="btn pulse-btn" onclick="saveCrop()" style="background: var(--theme-neon, #00ff88); flex: 1; border: none; padding: 12px; border-radius: 8px; color: black; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px var(--theme-glow, rgba(0,255,136,0.4));">SAVE AVATAR</button>
+        </div>
+    </div>
+</div>
                 
                 <div style="display: flex; justify-content: center; gap: 20px; font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;">
                     <span style="color: var(--text-dim);">XP: <span id="prof-xp" style="color: white;">0</span></span>
