@@ -1960,37 +1960,65 @@ function handleDefense() {
 }
 function handleRuns(runs) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
+    const batterName = gameState.isPlayerBatting ? "YOU" : "THE COMPUTER";
     
+    let currentScore = currentBatterStats.runs;
+    let newScore = currentScore + runs;
+    
+    // 1. MILESTONE ENGINE (Executes exactly when a milestone is crossed)
+    let currentMilestone = Math.floor(currentScore / 50);
+    let newMilestone = Math.floor(newScore / 50);
+    
+    if (newMilestone > currentMilestone && newMilestone >= 1) {
+        let milestoneRuns = newMilestone * 50;
+        let mColor = milestoneRuns >= 100 ? "#e81cff" : "#00d2ff"; // Purple for 100+, Blue for 50
+        let cText = `🌟 MAGNIFICENT ${milestoneRuns}! ${batterName} achieves a spectacular milestone! 🌟`;
+        
+        gameState.commentaryHistory.push(`↳ ${cText}`);
+        commentaryBox.innerHTML = `> <span style="color: ${mColor}; font-weight: 900; text-shadow: 0 0 10px ${mColor}; display: block; animation: pulse 1s infinite;">${cText}</span>`;
+        SoundManager.play('crowdRoar');
+    }
+
+    // 2. APPLY CORE STATS
     currentBatterStats.runs += runs; 
     currentBatterStats.balls++; 
     currentBatterStats.currentWicketRuns += runs;
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
 
+    // 3. CONTEXTUAL COMMENTARY & SOUNDS
     let tType = null;
-    if (!gameState.isPlayerBatting && runs === 6) {
-        tType = "six";
-    }
-    
     let comment = "";
-  if (runs === 4) { 
-        currentBatterStats.fours++; 
-        comment = getRandomCommentary(commentaryDB.run_4);
-    } else if (runs === 6) { 
-        currentBatterStats.sixes++; 
-        comment = getRandomCommentary(commentaryDB.run_6);
-    } else if (runs === 5) {
-        currentBatterStats.fives = (currentBatterStats.fives || 0) + 1; // <--- ADDED TRACKER
-        comment = getRandomCommentary(commentaryDB.run_5);
-    } else { 
-        comment = getRandomCommentary(commentaryDB.run_1_3).replace(/\[RUNS\]/g, runs);
+    let isBoundary = (runs === 4 || runs === 6);
+    let isFirstBall = (currentBatterStats.balls === 1);
+    let consecutiveDots = gameState.isPlayerBatting ? gameState.playerConsecZeros : gameState.compConsecZeros;
+
+    if (isBoundary) SoundManager.play('batCrack');
+
+    if (isFirstBall && runs === 6) {
+        comment = `<span style="color: #ff2a2a; font-weight: bold;">🚀 SMACKED HARD out of the park on the very first ball! What an explosive start! (+6)</span>`;
+        currentBatterStats.sixes++; tType = "six";
+    } 
+    else if (consecutiveDots >= 3 && isBoundary) {
+        comment = `<span style="color: #00ff88; font-weight: bold;">⚡ Finally breaks the shackles! A boundary after a silent showdown of defense! (+${runs})</span>`;
+        if (runs === 4) currentBatterStats.fours++;
+        if (runs === 6) { currentBatterStats.sixes++; tType = "six"; }
+    } 
+    else {
+        if (runs === 4) { 
+            currentBatterStats.fours++; 
+            comment = `<span style="color: #00ff88;">${getRandomCommentary(commentaryDB.run_4)}</span>`;
+        } else if (runs === 6) { 
+            currentBatterStats.sixes++; 
+            comment = `<span style="color: #9333ea; font-weight: bold;">${getRandomCommentary(commentaryDB.run_6)}</span>`;
+        } else if (runs === 5) {
+            currentBatterStats.fives = (currentBatterStats.fives || 0) + 1; 
+            comment = `<span style="color: #facc15;">${getRandomCommentary(commentaryDB.run_5)}</span>`;
+        } else { 
+            comment = `<span style="color: #3b82f6;">${getRandomCommentary(commentaryDB.run_1_3).replace(/\[RUNS\]/g, runs)}</span>`;
+        }
     }
     
     writeCommentary(comment, tType);
-
-    if (gameState.isPlayerBatting && currentBatterStats.runs >= 100 && !currentBatterStats.hitCentury) { 
-        currentBatterStats.hitCentury = true; 
-        fireConfetti(); 
-    }
 }
 
 function checkMatchState() {
