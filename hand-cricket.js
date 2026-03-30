@@ -386,6 +386,14 @@ function syncUserData(username) {
     
     u.highestScoreNotOut = u.highestScoreNotOut || false; 
     u.customPFP = u.customPFP || null;
+   // --- NEW ECONOMY & INVENTORY ---
+    u.diamonds = u.diamonds || 0.00;
+    u.cards = u.cards || { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 };
+    u.transactions = u.transactions || { coins: [], diamonds: [] };
+    
+    // Ensure all transactions have history arrays
+    if (!u.transactions.coins) u.transactions.coins = [];
+    if (!u.transactions.diamonds) u.transactions.diamonds = [];
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
 }
@@ -2368,6 +2376,39 @@ function saveLifetimeStats(result) {
     evaluateAchievements(stats);
     usersDB[currentUser] = stats; 
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+   // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
+    if (result !== "FORFEIT") {
+        // Calculate Diamonds
+        let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
+        if (result === "PLAYER_WINS") matchDiamonds += 0.10;
+        
+        logTransaction('diamond', matchDiamonds, `Match Reward (${result})`);
+        
+        // Calculate Card Drops
+        let numCards = result === "PLAYER_WINS" ? 10 : (result === "TIE" ? 7 : 4);
+        let dropResults = { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 };
+        
+        for (let i = 0; i < numCards; i++) {
+            let roll = Math.random();
+            if (roll < 0.01) dropResults.legendary++;       // 1% chance
+            else if (roll < 0.05) dropResults.epic++;       // 4% chance
+            else if (roll < 0.20) dropResults.rare++;       // 15% chance
+            else if (roll < 0.50) dropResults.uncommon++;   // 30% chance
+            else dropResults.common++;                      // 50% chance
+        }
+        
+        // Save Cards to DB
+        stats.cards.common += dropResults.common;
+        stats.cards.uncommon += dropResults.uncommon;
+        stats.cards.rare += dropResults.rare;
+        stats.cards.epic += dropResults.epic;
+        stats.cards.legendary += dropResults.legendary;
+        
+        // Show detailed Loot Toast
+        setTimeout(() => {
+            showToast(`🃏 CARDS DROPPED: ${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`);
+        }, 5500); // Trigger after the initial XP/Coin toast
+    }
     
     // TOAST NOTIFICATION UPDATE
     if (result === "FORFEIT") {
@@ -2923,3 +2964,38 @@ const EliteEngine = {
         return null;
     }
 };
+// ==========================================
+// 🏦 GRAND ECONOMY & LEDGER SYSTEM
+// ==========================================
+
+function formatCurrency(num) {
+    if (num >= 1e11) return (num / 1e11).toFixed(2) + 'Kb'; // Kharab
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'Ab';  // Arab
+    if (num >= 1e7) return (num / 1e7).toFixed(2) + 'C';   // Crore
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';   // Million
+    if (num >= 1e5) return (num / 1e5).toFixed(2) + 'L';   // Lakh
+    if (num >= 1000) return (num / 1000).toFixed(2) + 'K'; // Thousand
+    return num.toString();
+}
+
+function logTransaction(type, amount, reason) {
+    if (!currentUser) return;
+    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+    let u = db[currentUser];
+    
+    let date = new Date();
+    let timestamp = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    
+    let logEntry = { amount: amount, reason: reason, time: timestamp };
+    
+    if (type === 'coin') {
+        u.coins += amount;
+        u.transactions.coins.unshift(logEntry); // Add to top of history
+    } else if (type === 'diamond') {
+        u.diamonds += amount;
+        u.diamonds = parseFloat(u.diamonds.toFixed(2)); // Prevent floating point bugs
+        u.transactions.diamonds.unshift(logEntry);
+    }
+    
+    localStorage.setItem('hc_usersDB', JSON.stringify(db));
+}
