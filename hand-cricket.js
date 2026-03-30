@@ -620,6 +620,8 @@ function bindPfpUpload() {
                             aspectRatio: 1, // Forces a perfect square!
                             viewMode: 1,    // Restricts the crop box to not exceed the canvas
                             dragMode: 'move',
+                           guides: false,  // <-- REMOVES THE DOTTED GRID
+                        center: false,
                             background: false
                         });
                     };
