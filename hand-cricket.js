@@ -284,20 +284,11 @@ const shopItems = {
         { id: 'hindi', name: 'Premium Hindi', price: 39999, icon: '🇮🇳' },
         { id: 'bhojpuri', name: 'Bhojpuri Bawal', price: 29999, icon: '🔥' }
     ],
-    sfxBat: [
-        { id: 'wood', name: 'Classic Wood', price: 0, icon: '🏏' },
-        { id: 'metal', name: 'Metal Ping', price: 999, icon: '🔔' },
-        { id: 'plasma', name: 'Plasma Whip', price: 3999, icon: '⚡' }
-    ],
+   
     sfxRoar: [
         { id: 'standard', name: 'Standard Crowd', price: 0, icon: '🗣️' },
         { id: 'massive', name: 'Stadium Eruption', price: 2999, icon: '🏟️' },
         { id: 'alien', name: 'Alien Cheers', price: 4999, icon: '👽' }
-    ],
-    sfxWicket: [
-        { id: 'howzat', name: 'Classic Howzat', price: 0, icon: '☝️' },
-        { id: 'buzzer', name: 'Arcade Buzzer', price: 1499, icon: '❌' },
-        { id: 'explosion', name: 'Thunder Strike', price: 1999, icon: '🌩️' }
     ]
 };
 
