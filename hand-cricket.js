@@ -9,7 +9,7 @@ const SoundManager = {
     bgm: new Audio('assets/stadium_bgm.mp3'),
     tracks: {
         batCrack: 'assets/bat_crack.mp3',
-        crowdRoar: 'assets/crowd_roar.mp3',
+        crowdRoar: 'assets/crowd_roar.ogg',
         howzat: 'assets/howzat.mp3',
         coinSpend: 'assets/coin_spend.wav'
     },
