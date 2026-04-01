@@ -846,6 +846,14 @@ function renderShop() {
     if (coinsContainer) {
         coinsContainer.innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
     }
+const commentaryContainer = document.getElementById('shop-commentary');
+    if (commentaryContainer) commentaryContainer.innerHTML = buildSection(shopItems.commentary, 'commentary', u.unlockedCommentary, u.equippedCommentary);
+
+    const backgroundsContainer = document.getElementById('shop-backgrounds');
+    if (backgroundsContainer) backgroundsContainer.innerHTML = buildSection(shopItems.backgrounds, 'background', u.unlockedBackgrounds, u.equippedBackground);
+
+    const sfxRoarContainer = document.getElementById('shop-sfxRoar');
+    if (sfxRoarContainer) sfxRoarContainer.innerHTML = buildSection(shopItems.sfxRoar, 'sfxRoar', u.unlockedSfxRoar, u.equippedSfxRoar);
 }
 
 function buyItem(type, itemId, price) {
@@ -863,7 +871,10 @@ function buyItem(type, itemId, price) {
                 
                 if (type === 'avatar') u.unlockedAvatars.push(itemId);
                 if (type === 'theme') u.unlockedThemes.push(itemId);
-                if (type === 'coin') u.unlockedCoins.push(itemId);
+                if (type === 'coin') u.unlockedCoins.push(itemId)
+                   if (type === 'commentary') u.unlockedCommentary.push(itemId);
+                if (type === 'background') u.unlockedBackgrounds.push(itemId);
+                if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);;
                 
                 localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
                 showToast(`🛍️ Successfully Purchased!`);
@@ -886,6 +897,9 @@ function equipItem(type, itemId) {
     if (type === 'avatar') u.equippedAvatar = itemId;
     if (type === 'theme') u.equippedTheme = itemId;
     if (type === 'coin') u.equippedCoin = itemId;
+   if (type === 'commentary') u.equippedCommentary = itemId;
+    if (type === 'background') u.equippedBackground = itemId;
+    if (type === 'sfxRoar') u.equippedSfxRoar = itemId;
     
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
