@@ -3590,6 +3590,7 @@ function closeLedgerModal() {
 // DEDICATED BANK LEDGER PAGE LOGIC
 // ==========================================
 let activeLedgerTab = 'coins';
+let currentCropper = null;
 
 function initLedger() {
     const urlParams = new URLSearchParams(window.location.search);
