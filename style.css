@@ -1277,53 +1277,59 @@ body.theme-blood {
         width: 100% !important;
     }
 }
-/* =========================================================
-   DESKTOP & LAPTOP WIDESCREEN EXPANSION & POLISH
-   ========================================================= */
-@media (min-width: 1024px) {
-    /* 1. Expand the main wrapper */
-    .container {
-        max-width: 1400px !important; 
-        width: 95% !important;        
-        padding: 40px;
-    }
-
-    /* ---------------------------------------------------
-       PROFILE PAGE POLISH
+/* ---------------------------------------------------
+       COMPACT TAB CONTENTS (Graphs, Stats, Ranks)
        --------------------------------------------------- */
-    #profile-page-container > .card { max-width: 100% !important; }
     
-    .neon-text { font-size: 3.5rem !important; }
-    #prof-rank { font-size: 1.8rem !important; }
-    #prof-level-text { font-size: 1.5rem !important; margin-bottom: 10px !important; }
-    
-    #tab-stats ul { font-size: 1.5rem !important; line-height: 2.5 !important; }
-    #tab-stats ul li span { font-size: 1.8rem !important; }
-    
-    header .btn { font-size: 1.2rem !important; padding: 15px 30px !important; }
-    header button[onclick*="info-modal"] { font-size: 2rem !important; }
+    /* 1. STATS: Two columns, tighter spacing, centered */
+    #tab-stats > div { 
+        max-width: 900px; 
+        margin: 0 auto; 
+    }
+    #tab-stats ul { 
+        font-size: 1.2rem !important; 
+        line-height: 1.8 !important; 
+        column-count: 2; /* Splits the 10 stats into 2 neat columns! */
+        column-gap: 40px; 
+    }
+    #tab-stats ul li {
+        break-inside: avoid; /* Prevents stats from being cut in half */
+        margin-bottom: 10px;
+    }
+    #tab-stats ul li span { font-size: 1.4rem !important; }
 
-    .tab-container {
+    /* 2. CHARTS: Side-by-side grid instead of massive full-width blocks */
+    #tab-charts { 
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        gap: 20px; 
+    }
+    .chart-wrapper { 
+        max-width: 45% !important; /* Forces them to share the screen */
+        flex: 1 1 400px; 
+        margin: 0 !important; /* Overrides inline margins */
+    }
+
+    /* 3. RANKS: Two-column grid instead of a tall vertical list */
+    #tab-levels > div { 
+        max-width: 1000px; 
+        margin: 0 auto; 
+    }
+    #tab-levels > div > div { 
+        display: grid !important; 
+        grid-template-columns: 1fr 1fr; 
         gap: 15px; 
-        justify-content: center;
-        border-bottom: 3px solid rgba(255,255,255,0.1) !important;
     }
-    
-   flex: 1;
-        max-width: 250px; 
-        font-size: 1.3rem !important;
-        padding: 20px !important;
-        background: rgba(255, 255, 255, 0.03) !important; 
-        border-radius: 12px 12px 0 0 !important; 
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-bottom: none !important;
+
+    /* 4. GRIDS: Shrink item sizes slightly and center the shop */
+    .shop-grid, .achievements-grid { 
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; 
+        gap: 20px; 
+        max-width: 1200px; 
+        margin: 0 auto; 
     }
-    
-    .tab-btn.active-tab { background: rgba(0, 210, 255, 0.1) !important; border-color: var(--accent-blue) !important; }
-    button[onclick="logoutUser()"] { max-width: 400px; margin: 40px auto !important; display: block; font-size: 1.4rem !important; border-radius: 12px !important; }
-    
-    .shop-grid, .achievements-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; gap: 25px; }
-    .chart-wrapper { max-width: 100% !important; width: 100% !important; }
+}
 
     /* ---------------------------------------------------
        INDEX / ARENA PAGE POLISH (NEW!)
