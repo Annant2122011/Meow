@@ -766,8 +766,8 @@ function bindPfpUpload() {
             localStorage.setItem('hc_usersDB', JSON.stringify(db));
             
             applyCosmetics(); 
-            const cText = document.getElementById('prof-coins');
-            if (cText) cText.innerText = db[currentUser].coins.toLocaleString();
+           const cText = document.getElementById('prof-coins');
+            if (cText) cText.innerText = formatCurrency(db[currentUser].coins);
             
             showToast(`🖼️ Custom PFP Cropped & Saved! (-🪙${cost.toLocaleString()})`);
             closePfpModal();
@@ -948,9 +948,9 @@ function buyItem(type, itemId, price) {
                 localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
                 showToast(`🛍️ Successfully Purchased!`);
                 
-                const cText = document.getElementById('prof-coins');
+               const cText = document.getElementById('prof-coins');
                 if (cText) {
-                    cText.innerText = u.coins.toLocaleString();
+                    cText.innerText = formatCurrency(u.coins);
                 }
                 
                 renderShop();
