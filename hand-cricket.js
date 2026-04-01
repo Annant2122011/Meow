@@ -1166,6 +1166,13 @@ function renderShop() {
 
     const sfxRoarContainer = document.getElementById('shop-sfxRoar');
     if (sfxRoarContainer) sfxRoarContainer.innerHTML = buildSection(shopItems.sfxRoar, 'sfxRoar', u.unlockedSfxRoar, u.equippedSfxRoar);
+   const rarityData = {
+    common:    { cardsReq: 5,  discount: 0.20 }, // 80% off if you have 5 Common Cards
+    uncommon:  { cardsReq: 10, discount: 0.25 }, // 75% off if you have 10 Uncommon Cards
+    rare:      { cardsReq: 5,  discount: 0.30 }, // 70% off if you have 5 Rare Cards
+    epic:      { cardsReq: 3,  discount: 0.40 }, // 60% off if you have 3 Epic Cards
+    legendary: { cardsReq: 1,  discount: 0.50 }  // 50% off if you have 1 Legendary Card
+};
 
    // Render Diamond Exchange Tab
     const exchangeContainer = document.getElementById('shop-exchange');
@@ -1184,6 +1191,7 @@ function renderShop() {
     }
 }
 function openShopModal(type, itemId) {
+   
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
     let itemMap = { 'avatar': shopItems.avatars, 'theme': shopItems.themes, 'coin': shopItems.coins, 'commentary': shopItems.commentary, 'background': shopItems.backgrounds, 'sfxRoar': shopItems.sfxRoar };
     let item = itemMap[type].find(i => i.id === itemId);
