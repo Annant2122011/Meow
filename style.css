@@ -1192,10 +1192,10 @@ body.theme-blood {
     cursor: default;
 }
 /* =========================================================
-   DESKTOP & LAPTOP WIDESCREEN EXPANSION
+   DESKTOP & LAPTOP WIDESCREEN EXPANSION & POLISH
    ========================================================= */
 @media (min-width: 1024px) {
-    /* 1. Expand the main wrapper on ALL pages (Index, Tournament, Profile) */
+    /* 1. Expand the main wrapper */
     .container {
         max-width: 1400px !important; 
         width: 95% !important;        
@@ -1207,19 +1207,71 @@ body.theme-blood {
         max-width: 100% !important; 
     }
 
-    /* 3. Make Shop grids wider and more spacious on PCs */
-    .shop-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    /* ---------------------------------------------------
+       BIG SCREEN FONTS (Scale up the text!)
+       --------------------------------------------------- */
+    /* Make the Username and Level bigger */
+    .neon-text { font-size: 3.5rem !important; }
+    #prof-rank { font-size: 1.8rem !important; }
+    #prof-level-text { font-size: 1.5rem !important; margin-bottom: 10px !important; }
+
+    /* Make the Stats list much larger and easier to read */
+    #tab-stats ul { 
+        font-size: 1.5rem !important; 
+        line-height: 2.5 !important; 
+    }
+    /* Make the actual stat numbers huge */
+    #tab-stats ul li span { 
+        font-size: 1.8rem !important; 
+    }
+
+    /* ---------------------------------------------------
+       BUTTON ARRANGEMENT (Fix the ugly stretching)
+       --------------------------------------------------- */
+    /* Top Header Buttons */
+    header .btn { font-size: 1.2rem !important; padding: 15px 30px !important; }
+    header button[onclick*="info-modal"] { font-size: 2rem !important; }
+
+    /* Redesign the Navigation Tabs */
+    .tab-container {
+        gap: 15px; /* Add space between the buttons */
+        justify-content: center;
+        border-bottom: 3px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        max-width: 250px; /* Stops them from stretching infinitely */
+        font-size: 1.3rem !important;
+        padding: 20px !important;
+        background: rgba(255, 255, 255, 0.03) !important; /* Subtle background */
+        border-radius: 12px 12px 0 0 !important; /* Rounded top corners like real tabs */
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-bottom: none !important;
+    }
+    
+    .tab-btn.active-tab {
+        background: rgba(0, 210, 255, 0.1) !important;
+        border-color: var(--accent-blue) !important;
+    }
+
+    /* Center the Logout Button and stop it from stretching full width */
+    button[onclick="logoutUser()"] {
+        max-width: 400px;
+        margin: 40px auto !important;
+        display: block;
+        font-size: 1.4rem !important;
+        border-radius: 12px !important;
+    }
+
+    /* ---------------------------------------------------
+       GRID & CHART ENHANCEMENTS
+       --------------------------------------------------- */
+    .shop-grid, .achievements-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; 
         gap: 25px;
     }
     
-    /* 4. Make Achievement badges fit better on wide screens */
-    .achievements-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 20px;
-    }
-    
-    /* 5. Make the Charts larger and wider */
     .chart-wrapper {
         max-width: 100% !important;
         width: 100% !important;
