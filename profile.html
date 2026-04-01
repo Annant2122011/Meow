@@ -115,10 +115,24 @@
     </div>
 </div>
                 
-                <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 30px; font-weight: bold; font-size: 1.6rem; margin-bottom: 25px;">
-    <span style="color: var(--text-dim);">XP: <span id="prof-xp" style="color: white;">0</span></span>
-    <span style="color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🪙 <span id="prof-coins">0</span></span>
-    <span style="color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.5);">💎 <span id="prof-diamonds">0.00</span></span>
+              <div class="currency-container" onclick="openLedgerModal('coin')">
+  <img src="coin-icon.png" alt="Coins" />
+  <span id="coin-balance">1.2M</span>
+</div>
+
+<div class="currency-container" onclick="openLedgerModal('diamond')">
+  <img src="diamond-icon.png" alt="Diamonds" />
+  <span id="diamond-balance">450</span>
+</div>
+                <div id="ledger-modal" class="hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Transaction History</h2>
+      <button onclick="closeLedgerModal()">X</button>
+    </div>
+    
+    <div id="ledger-list" class="scrollable-list"></div>
+  </div>
 </div>
             </div>
             
