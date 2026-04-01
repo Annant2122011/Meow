@@ -57,25 +57,62 @@
         </div>
     </div>
 </div>
-              <div id="info-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
-    <div style="width: 90%; max-width: 450px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 2px solid var(--accent-blue); box-shadow: 0 0 30px rgba(0, 210, 255, 0.2); position: relative; overflow: hidden;">
+             <div id="info-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+    <div style="width: 90%; max-width: 500px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 2px solid var(--accent-blue); box-shadow: 0 0 40px rgba(0, 210, 255, 0.2); position: relative; overflow: hidden;">
         
         <div id="info-view-list" style="display: flex; flex-direction: column;">
-            <h2 style="color: var(--accent-neon); text-align: center; margin-top: 0; font-family: var(--font-display); letter-spacing: 2px; text-transform: uppercase;">ARENA INTEL</h2>
-            <p style="color: #a1a1aa; text-align: center; margin-bottom: 25px; font-size: 0.95rem;">Select a topic to decrypt data</p>
+            <h2 style="color: var(--accent-neon); text-align: center; margin-top: 0; font-family: var(--font-display); letter-spacing: 2px; text-transform: uppercase;">ARENA INTEL (DECRYPTED)</h2>
+            <p style="color: #a1a1aa; text-align: center; margin-bottom: 25px; font-size: 0.95rem;">Full system transparency between Dev and Player.</p>
 
-            <div class="intel-scroll-box" style="display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 5px;">
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('XP & Coin Calculus', 'XP is calculated by Base + Runs + Wickets.\n\nCoins = 50% of your total earned XP.')">1. XP & Coin Calculus</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('Currency Abbreviations', 'K = Thousand (1,000)\nL = Lakh (100,000)\nM = Million (1,000,000)\nC = Crore (10,000,000)\nAb = Arab\nKb = Kharab')">2. Currency Abbreviations</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('Diamond Generation', 'Diamonds are the elite currency.\n\n• Base Play Reward: +0.04 💎\n• Match Win Bonus: +0.10 💎')">3. Diamond Generation</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('Loot Card Probabilities', 'Cards are dropped at the end of matches based on these rates:\n\n• Common: 50%\n• Uncommon: 30%\n• Rare: 15%\n• Epic: 4%\n• Legendary: 1%')">4. Loot Card Probabilities</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('Task Rewards', 'Tasks (Coming Soon in Part 3) will yield fixed, high-tier cards based on the specific difficulty of the challenge completed.')">5. Task Rewards</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px;" onclick="showIntelDetail('Level Mechanics', 'Every 50 XP grants you a Level Up.\n\nLeveling up unlocks higher tiers of bosses in the Gauntlet and exclusive shop items.')">6. Level Mechanics</button>
+            <div class="intel-scroll-box" style="display: flex; flex-direction: column; gap: 10px; max-height: 55vh; overflow-y: auto; padding-right: 5px;">
+                
+                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('1. Core Economy Calculus', 'XP Generation:\n• XP is dynamically calculated based on Runs Scored and Wickets Taken.\n\nCoin Minting (Standard Currency):\n• Coins = 50% of your total earned XP.\n\nDiamond Mining (Elite Currency):\n• Base Play Reward: +0.04 💎 just for finishing a match.\n• Match Win Bonus: +0.10 💎 extra for securing a victory.\n• Diamonds can also be traded directly for massive Coin packages in the Shop.')">
+                1. Core Economy Calculus
+                </button>
+
+                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('2. Hybrid Shop & Refunds', 'We reward the grind. You never have to pay full price if you collect cards.\n\nCollector\'s Path Discounts:\n• Common Item: Need 5 Cards ➔ 80% Off\n• Uncommon Item: Need 10 Cards ➔ 75% Off\n• Rare Item: Need 5 Cards ➔ 70% Off\n• Epic Item: Need 3 Cards ➔ 60% Off\n• Legendary Item: Need 1 Card ➔ 50% Off\n\nRefund Policy:\nRegret a purchase? Sell any premium item back to the store for a flat 25% coin refund. It will automatically unequip.')">
+                2. Hybrid Shop & Refunds
+                </button>
+
+                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('3. Loot Card Engine', 'Cards drop at the end of every match based on outcome.\n\nDrop Quantities:\n• Match Win = 10 Cards\n• Match Tie = 7 Cards\n• Match Loss = 4 Cards\n\nRarity Probabilities (Per Card):\n• ⬜ Common: 50%\n• 🟩 Uncommon: 30%\n• 🟦 Rare: 15%\n• 🟪 Epic: 4%\n• 🟨 Legendary: 1%\n\nNote: The engine automatically checks for duplicates.')">
+                3. Loot Card Drop Engine
+                </button>
+
+                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('4. Leveling & Rank Tiers', 'Every 50 XP grants you a Level Up.\n\nRank Thresholds:\n• Tier 1 (Gully): 0 XP\n• Tier 2 (Club): 1,000 XP\n• Tier 3 (State): 3,000 XP\n• Tier 4 (National): 7,000 XP\n• Tier 5 (World): 15,000 XP\n• Tier 6 (God): 35,000 XP\n• Tier 7 (Mythical): 100,000+ XP')">
+                4. Leveling & Rank Tiers
+                </button>
+
+                <button class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('5. Data Storage & Privacy', 'Currency Abbreviations:\nK = Thousand, L = Lakh, M = Million, C = Crore, Ab = Arab, Kb = Kharab.\n\nData Privacy (Full Transparency):\nYour save file is stored 100% locally in your browser cache (LocalStorage). We do not track your data on external servers. Warning: If you clear your browser data, you will lose your progress!')">
+                5. Data Storage & Privacy
+                </button>
+
+                <button class="btn" style="background: rgba(255,42,42,0.1); border: 1px solid var(--accent-red); color: white; text-align: left; padding: 15px; font-size: 1rem;" 
+                onclick="showIntelDetail('6. Developer Roadmap', 'Transparency from the Dev:\n\nCurrently in development for the next major patches:\n1. The Task System: Daily & Lifetime challenges with guaranteed Epic/Legendary card drops.\n2. Bank Ledger: A transaction history UI showing exactly where every coin and diamond was spent or earned.\n3. Match History: A perf-log to download PDFs of your past matches.\n\nThank you for playing and supporting indie development!')">
+                6. Developer Roadmap (V3.0)
+                </button>
+
             </div>
             
-            <button class="btn" style="background: #374151; color: white; margin-top: 20px; width: 100%; border: none; font-weight: bold;" onclick="document.getElementById('info-modal').style.display='none'">CLOSE</button>
+            <button class="btn" style="background: #374151; color: white; margin-top: 20px; width: 100%; border: none; font-weight: bold; padding: 15px;" onclick="document.getElementById('info-modal').style.display='none'">CLOSE INTEL</button>
         </div>
 
+        <div id="info-view-detail" style="display: none; flex-direction: column; text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <h3 id="intel-detail-title" style="color: var(--accent-neon); font-family: var(--font-display); letter-spacing: 1px; margin-top: 0; margin-bottom: 20px; font-size: 1.4rem;">TITLE</h3>
+            
+            <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); padding: 25px 20px; border-radius: 8px; margin-bottom: 25px; text-align: left;">
+                <p id="intel-detail-desc" style="color: white; font-size: 1.05rem; line-height: 1.8; margin: 0; white-space: pre-line;"></p>
+            </div>
+            
+            <button class="btn pulse-btn" style="background: var(--accent-blue); color: black; font-weight: bold; width: 100%; padding: 15px;" onclick="hideIntelDetail()">⬅️ BACK TO TOPICS</button>
+        </div>
+
+    </div>
+</div>
         <div id="info-view-detail" style="display: none; flex-direction: column; text-align: center;">
             <h3 id="intel-detail-title" style="color: var(--accent-neon); font-family: var(--font-display); letter-spacing: 1px; margin-top: 0; margin-bottom: 20px; font-size: 1.3rem;">TITLE</h3>
             
