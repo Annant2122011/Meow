@@ -1395,3 +1395,65 @@ body.theme-blood {
         padding: 20px 50px !important;
     }
 }
+/* =========================================================
+   LEDGER / TRANSACTION HISTORY UI
+   ========================================================= */
+.ledger-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.ledger-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tx-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.tx-reason {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+}
+
+.tx-date {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.tx-right {
+    text-align: right;
+}
+
+.tx-amount {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 900;
+}
+
+/* Cyberpunk Scrollbar for the Ledger */
+#ledger-list::-webkit-scrollbar {
+    width: 6px;
+}
+#ledger-list::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.5);
+}
+#ledger-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
