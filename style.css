@@ -1457,3 +1457,71 @@ body.theme-blood {
     background: #555;
     border-radius: 4px;
 }
+/* =========================================================
+   BANK LEDGER PAGE STYLES
+   ========================================================= */
+.ledger-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+.ledger-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+    border-left-width: 5px;
+}
+.row-income:hover { border-left-color: var(--accent-neon); }
+.row-expense:hover { border-left-color: var(--accent-red); }
+
+.tx-reason { 
+    color: #fff; 
+    font-weight: 900; 
+    font-size: 1.1rem; 
+    font-family: var(--font-display); 
+    letter-spacing: 1px; 
+    text-transform: uppercase; 
+}
+.tx-date { 
+    color: var(--text-dim); 
+    font-size: 0.85rem; 
+    letter-spacing: 1px; 
+    margin-top: 5px; 
+    font-family: monospace; 
+}
+.tx-amount { 
+    font-family: var(--font-display); 
+    font-size: 1.5rem; 
+    font-weight: 900; 
+    text-align: right; 
+}
+
+.ledger-tab { 
+    padding: 15px; 
+    font-size: 1.2rem; 
+    font-family: var(--font-display); 
+    flex: 1; 
+    text-align: center; 
+    cursor: pointer; 
+    border-bottom: 2px solid rgba(255,255,255,0.1); 
+    color: gray; 
+    transition: 0.3s; 
+    font-weight: bold; 
+}
+.ledger-tab.active-coin { 
+    color: #ffd700; 
+    border-bottom: 3px solid #ffd700; 
+    text-shadow: 0 0 10px rgba(255,215,0,0.5); 
+    background: rgba(255,215,0,0.05); 
+}
+.ledger-tab.active-diamond { 
+    color: #00d2ff; 
+    border-bottom: 3px solid #00d2ff; 
+    text-shadow: 0 0 10px rgba(0,210,255,0.5); 
+    background: rgba(0,210,255,0.05); 
+}
