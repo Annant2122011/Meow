@@ -531,61 +531,59 @@ const bossInfo = [
     }
 ];
 
-// SHOP DATABASE
+// SHOP DATABASE (HYBRID COLLECTION SYSTEM)
 const shopItems = {
     avatars: [
-        { id: '👤', name: 'Default', price: 0 },
-        { id: '🐯', name: 'Tiger', price: 499 },
-        { id: '👽', name: 'Alien', price: 999 },
-        { id: '🤖', name: 'Robot', price: 1499 },
-        { id: '🤫', name: 'Silencer', price: 1999 },
-        { id: '👑', name: 'King', price: 2999 },
-       { id: '🥷', name: 'Ninja', price: 3499 },
-       { id: '🐉', name: 'Dragon', price: 4499 },
-        { id: '🦁', name: 'Alpha Lion', price: 4999 }
+        { id: '👤', name: 'Default', price: 0, rarity: 'common' },
+        { id: '🐯', name: 'Tiger', price: 499, rarity: 'common' },
+        { id: '👽', name: 'Alien', price: 1499, rarity: 'uncommon' },
+        { id: '🤖', name: 'Robot', price: 2999, rarity: 'uncommon' },
+        { id: '🤫', name: 'Silencer', price: 5999, rarity: 'rare' },
+        { id: '🥷', name: 'Ninja', price: 12999, rarity: 'epic' },
+        { id: '🐉', name: 'Dragon', price: 24999, rarity: 'epic' },
+        { id: '👑', name: 'King', price: 49999, rarity: 'legendary' },
+        { id: '🦁', name: 'Alpha Lion', price: 99999, rarity: 'legendary' }
     ],
     themes: [
-        { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩' },
-        { id: 'synthwave', name: 'Synthwave', price: 1499, icon: '🟪' },
-        { id: 'blood', name: 'Blood Red', price: 1999, icon: '🟥' },
-       { id: 'matrix', name: 'Matrix Code', price: 3999, icon: '💻' },
-        { id: 'ocean', name: 'Deep Ocean', price: 6999, icon: '🌊' },
-        { id: 'gold', name: 'Royal Gold', price: 14999, icon: '🟨' }
+        { id: 'default', name: 'Cyber Green', price: 0, icon: '🟩', rarity: 'common' },
+        { id: 'synthwave', name: 'Synthwave', price: 2999, icon: '🟪', rarity: 'uncommon' },
+        { id: 'blood', name: 'Blood Red', price: 6999, icon: '🟥', rarity: 'rare' },
+        { id: 'matrix', name: 'Matrix Code', price: 14999, icon: '💻', rarity: 'epic' },
+        { id: 'ocean', name: 'Deep Ocean', price: 29999, icon: '🌊', rarity: 'epic' },
+        { id: 'gold', name: 'Royal Gold', price: 79999, icon: '🟨', rarity: 'legendary' }
     ],
-   coins: [
-        { id: 'default', name: 'Lead Coin', price: 0, icon: '🪙' }, 
-        { id: 'copper', name: 'Copper Coin', price: 2499, icon: '🟤' },
-        { id: 'silver', name: 'Silver Coin', price: 4999, icon: '⚪' }, 
-        { id: 'gold', name: 'Gold Coin', price: 7499, icon: '🟡' },
-      { id: 'dollar', name: 'Dollar Coin', price: 9999, icon: '💲' },
-        { id: 'bitcoin', name: 'Crypto Coin', price: 12499, icon: '₿' }, 
-        { id: 'diamond', name: 'Diamond Coin', price: 15999, icon: '💎' },
-      { id: 'emerald', name: 'Emerald Coin', price: 19999, icon: '❇️' },
-        { id: 'obsidian', name: 'Dark Obsidian', price: 24999, icon: '🌑' }
+    coins: [
+        { id: 'default', name: 'Lead Coin', price: 0, icon: '🪙', rarity: 'common' }, 
+        { id: 'copper', name: 'Copper Coin', price: 2499, icon: '🟤', rarity: 'common' },
+        { id: 'silver', name: 'Silver Coin', price: 4999, icon: '⚪', rarity: 'uncommon' }, 
+        { id: 'gold', name: 'Gold Coin', price: 9999, icon: '🟡', rarity: 'rare' },
+        { id: 'dollar', name: 'Dollar Coin', price: 19999, icon: '💲', rarity: 'rare' },
+        { id: 'bitcoin', name: 'Crypto Coin', price: 39999, icon: '₿', rarity: 'epic' }, 
+        { id: 'diamond', name: 'Diamond Coin', price: 59999, icon: '💎', rarity: 'epic' },
+        { id: 'emerald', name: 'Emerald Coin', price: 89999, icon: '❇️', rarity: 'legendary' },
+        { id: 'obsidian', name: 'Dark Obsidian', price: 150000, icon: '🌑', rarity: 'legendary' }
     ],
-   backgrounds: [
-        { id: 'bg-default', name: 'Plain Dark', price: 0, icon: '⬛' },
-        { id: 'bg-gully', name: 'Gully Streets', price: 2500, icon: '🏘️' },
-        { id: 'bg-stadium', name: 'Night Stadium', price: 7500, icon: '🏟️' },
-        { id: 'bg-cyber', name: 'Neon Cyber City', price: 15000, icon: '🌃' },
-        { id: 'bg-colosseum', name: 'The Colosseum', price: 30000, icon: '🏛️' },
-        { id: 'bg-galaxy', name: 'Galactic Arena', price: 100000, icon: '🌌' }
+    backgrounds: [
+        { id: 'bg-default', name: 'Plain Dark', price: 0, icon: '⬛', rarity: 'common' },
+        { id: 'bg-gully', name: 'Gully Streets', price: 3500, icon: '🏘️', rarity: 'uncommon' },
+        { id: 'bg-stadium', name: 'Night Stadium', price: 8500, icon: '🏟️', rarity: 'rare' },
+        { id: 'bg-cyber', name: 'Neon Cyber City', price: 25000, icon: '🌃', rarity: 'epic' },
+        { id: 'bg-colosseum', name: 'The Colosseum', price: 60000, icon: '🏛️', rarity: 'legendary' },
+        { id: 'bg-galaxy', name: 'Galactic Arena', price: 120000, icon: '🌌', rarity: 'legendary' }
     ],
     commentary: [
-        { id: 'default', name: 'Standard EN', price: 0, icon: '🎙️' },
-        { id: 'pro', name: 'Pro Broadcast', price: 4999, icon: '📺' },
-        { id: 'poetic', name: 'Elite Poetic', price: 9999, icon: '📜' },
-        { id: 'hindi', name: 'Premium Hindi', price: 39999, icon: '🇮🇳' },
-        { id: 'bhojpuri', name: 'Bhojpuri Bawal', price: 29999, icon: '🔥' }
+        { id: 'default', name: 'Standard EN', price: 0, icon: '🎙️', rarity: 'common' },
+        { id: 'pro', name: 'Pro Broadcast', price: 5999, icon: '📺', rarity: 'uncommon' },
+        { id: 'poetic', name: 'Elite Poetic', price: 14999, icon: '📜', rarity: 'rare' },
+        { id: 'hindi', name: 'Premium Hindi', price: 49999, icon: '🇮🇳', rarity: 'epic' },
+        { id: 'bhojpuri', name: 'Bhojpuri Bawal', price: 99999, icon: '🔥', rarity: 'legendary' }
     ],
-   
     sfxRoar: [
-        { id: 'standard', name: 'Standard Crowd', price: 0, icon: '🗣️' },
-        { id: 'massive', name: 'Stadium Eruption', price: 2999, icon: '🏟️' },
-        { id: 'alien', name: 'Alien Cheers', price: 4999, icon: '👽' }
+        { id: 'standard', name: 'Standard Crowd', price: 0, icon: '🗣️', rarity: 'common' },
+        { id: 'massive', name: 'Stadium Eruption', price: 4999, icon: '🏟️', rarity: 'rare' },
+        { id: 'alien', name: 'Alien Cheers', price: 19999, icon: '👽', rarity: 'epic' }
     ]
 };
-
 let tossData = { caller: null, call: null, result: null };
 let currentUser = null;
 let srChartInstance = null;
@@ -1101,14 +1099,18 @@ function renderShop() {
             let isEquipped = equippedId === item.id;
             let btnHtml = '';
             
+            // Format rarity for CSS classes and visual flair
+            let rarityColor = item.rarity === 'legendary' ? '#fbbf24' : 
+                              item.rarity === 'epic' ? '#a855f7' : 
+                              item.rarity === 'rare' ? '#06b6d4' : 
+                              item.rarity === 'uncommon' ? '#4ade80' : '#a1a1aa';
+            
             if (isEquipped) {
                 btnHtml = `<button class="shop-btn equipped" disabled>EQUIPPED</button>`;
             } else if (isUnlocked) {
                 btnHtml = `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`;
             } else {
-                let canAfford = u.coins >= item.price;
-                let disabledStr = !canAfford ? 'disabled' : '';
-                btnHtml = `<button class="shop-btn buy" ${disabledStr} onclick="buyItem('${typeStr}', '${item.id}', ${item.price})">🪙 ${item.price}</button>`;
+                btnHtml = `<button class="shop-btn buy" style="border-bottom: 2px solid ${rarityColor};" onclick="openShopModal('${typeStr}', '${item.id}')">🪙 ${formatCurrency(item.price)}</button>`;
             }
             
             let equipClass = isEquipped ? 'equipped' : '';
@@ -1127,20 +1129,15 @@ function renderShop() {
     };
     
     const avatarsContainer = document.getElementById('shop-avatars');
-    if (avatarsContainer) {
-        avatarsContainer.innerHTML = buildSection(shopItems.avatars, 'avatar', u.unlockedAvatars, u.equippedAvatar);
-    }
+    if (avatarsContainer) avatarsContainer.innerHTML = buildSection(shopItems.avatars, 'avatar', u.unlockedAvatars, u.equippedAvatar);
     
     const themesContainer = document.getElementById('shop-themes');
-    if (themesContainer) {
-        themesContainer.innerHTML = buildSection(shopItems.themes, 'theme', u.unlockedThemes, u.equippedTheme);
-    }
+    if (themesContainer) themesContainer.innerHTML = buildSection(shopItems.themes, 'theme', u.unlockedThemes, u.equippedTheme);
     
     const coinsContainer = document.getElementById('shop-coins');
-    if (coinsContainer) {
-        coinsContainer.innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
-    }
-const commentaryContainer = document.getElementById('shop-commentary');
+    if (coinsContainer) coinsContainer.innerHTML = buildSection(shopItems.coins, 'coin', u.unlockedCoins, u.equippedCoin);
+
+    const commentaryContainer = document.getElementById('shop-commentary');
     if (commentaryContainer) commentaryContainer.innerHTML = buildSection(shopItems.commentary, 'commentary', u.unlockedCommentary, u.equippedCommentary);
 
     const backgroundsContainer = document.getElementById('shop-backgrounds');
@@ -1149,39 +1146,100 @@ const commentaryContainer = document.getElementById('shop-commentary');
     const sfxRoarContainer = document.getElementById('shop-sfxRoar');
     if (sfxRoarContainer) sfxRoarContainer.innerHTML = buildSection(shopItems.sfxRoar, 'sfxRoar', u.unlockedSfxRoar, u.equippedSfxRoar);
 }
+// Centralized Rarity Requirements
+const rarityData = {
+    common:    { cardsReq: 5,  discount: 0.20 }, // 80% off if you have 5 Common Cards
+    uncommon:  { cardsReq: 10, discount: 0.25 }, // 75% off if you have 10 Uncommon Cards
+    rare:      { cardsReq: 5,  discount: 0.30 }, // 70% off if you have 5 Rare Cards
+    epic:      { cardsReq: 3,  discount: 0.40 }, // 60% off if you have 3 Epic Cards
+    legendary: { cardsReq: 1,  discount: 0.50 }  // 50% off if you have 1 Legendary Card
+};
 
-function buyItem(type, itemId, price) {
-    // Call our new custom sleek modal
-    showConfirmModal(
-        "CONFIRM PURCHASE", 
-        `Are you sure you want to spend 🪙 ${price.toLocaleString()} on this item?`, 
-        () => {
-            // This runs ONLY if they click "YES"
-            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-            let u = usersDB[currentUser];
-            
-            if (u.coins >= price) {
-                u.coins -= price;
-                
-                if (type === 'avatar') u.unlockedAvatars.push(itemId);
-                if (type === 'theme') u.unlockedThemes.push(itemId);
-                if (type === 'coin') u.unlockedCoins.push(itemId)
-                   if (type === 'commentary') u.unlockedCommentary.push(itemId);
-                if (type === 'background') u.unlockedBackgrounds.push(itemId);
-                if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);;
-                
-                localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-                showToast(`🛍️ Successfully Purchased!`);
-                
-               const cText = document.getElementById('prof-coins');
-                if (cText) {
-                    cText.innerText = formatCurrency(u.coins);
-                }
-                
-                renderShop();
-            }
-        }
-    );
+function openShopModal(type, itemId) {
+    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    
+    // 1. Find the Item
+    let itemMap = {
+        'avatar': shopItems.avatars, 'theme': shopItems.themes, 'coin': shopItems.coins,
+        'commentary': shopItems.commentary, 'background': shopItems.backgrounds, 'sfxRoar': shopItems.sfxRoar
+    };
+    let item = itemMap[type].find(i => i.id === itemId);
+    if (!item) return;
+
+    // 2. Calculate Costs
+    let rData = rarityData[item.rarity];
+    let userCards = u.cards[item.rarity] || 0;
+    
+    let instantPrice = item.price;
+    let grindPrice = Math.floor(item.price * rData.discount);
+    let hasEnoughCards = userCards >= rData.cardsReq;
+
+    // 3. Update Modal DOM
+    document.getElementById('shop-item-title').innerHTML = `${item.icon || item.id} ${item.name} <span style="font-size: 0.6em; color: #a1a1aa;">(${item.rarity.toUpperCase()})</span>`;
+    
+    // Option A: Grind
+    let reqsDiv = document.getElementById('shop-card-reqs');
+    reqsDiv.innerHTML = `Cards Needed: <span style="color: ${hasEnoughCards ? '#00ff88' : '#ff2a2a'}">${userCards} / ${rData.cardsReq} ${item.rarity.toUpperCase()} Cards</span>`;
+    
+    let btnGrind = document.getElementById('btn-buy-grind');
+    if (hasEnoughCards) {
+        btnGrind.disabled = false;
+        btnGrind.style.background = 'var(--accent-blue)';
+        btnGrind.style.color = 'black';
+        btnGrind.innerHTML = `UNLOCK FOR 🪙 ${formatCurrency(grindPrice)}`;
+        btnGrind.onclick = () => processPurchase(type, itemId, 'grind', grindPrice, item.rarity, rData.cardsReq);
+    } else {
+        btnGrind.disabled = true;
+        btnGrind.style.background = '#374151';
+        btnGrind.style.color = 'white';
+        btnGrind.innerHTML = `LOCKED (NEED CARDS)`;
+    }
+
+    // Option B: Instant
+    let btnInstant = document.getElementById('btn-buy-instant');
+    btnInstant.innerHTML = `UNLOCK INSTANTLY FOR 🪙 ${formatCurrency(instantPrice)}`;
+    btnInstant.onclick = () => processPurchase(type, itemId, 'instant', instantPrice, null, 0);
+
+    // Show Modal
+    document.getElementById('shop-purchase-modal').style.display = 'flex';
+}
+
+function processPurchase(type, itemId, method, finalPrice, rarityType, cardsToDeduct) {
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+    let u = usersDB[currentUser];
+    
+    if (u.coins < finalPrice) {
+        alert("Not enough coins!");
+        return;
+    }
+
+    // Deduct Assets
+    u.coins -= finalPrice;
+    logTransaction('coin', -finalPrice, `Shop Purchase (${method})`);
+
+    if (method === 'grind') {
+        u.cards[rarityType] -= cardsToDeduct;
+    }
+
+    // Unlock Item
+    if (type === 'avatar') u.unlockedAvatars.push(itemId);
+    if (type === 'theme') u.unlockedThemes.push(itemId);
+    if (type === 'coin') u.unlockedCoins.push(itemId);
+    if (type === 'commentary') u.unlockedCommentary.push(itemId);
+    if (type === 'background') u.unlockedBackgrounds.push(itemId);
+    if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);
+    
+    // Save and Update UI
+    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    
+    document.getElementById('shop-purchase-modal').style.display = 'none';
+    showToast(`🛍️ Item Unlocked Successfully!`);
+    SoundManager.play('coinSpend');
+    
+    const cText = document.getElementById('prof-coins');
+    if (cText) cText.innerText = formatCurrency(u.coins);
+    
+    renderShop();
 }
 
 function equipItem(type, itemId) {
