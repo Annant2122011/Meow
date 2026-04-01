@@ -779,8 +779,9 @@ function toggleHeaderButtons(mode) {
 function loginUser() {
     const username = document.getElementById('username-input').value.trim().toUpperCase();
     
-    if (!username) {
-        alert("Arena requires a Player Name!");
+  if (!username) {
+        // Swap alert() for showToast()
+        showToast("⚠️ Arena requires a Player Name!");
         return;
     }
     
@@ -1245,10 +1246,12 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
     let u = usersDB[currentUser];
     
-    // Check balances
-    if (currencyType === 'coin' && u.coins < finalPrice) return alert("Not enough coins!");
-    if (currencyType === 'diamond' && u.diamonds < finalPrice) return alert("Not enough diamonds!");
-
+   if (currencyType === 'coin' && u.coins < finalPrice) {
+        return showToast("❌ Not enough coins!");
+    }
+    if (currencyType === 'diamond' && u.diamonds < finalPrice) {
+        return showToast("❌ Not enough diamonds!");
+    }
     // Deduct Assets
     if (currencyType === 'coin') {
         u.coins -= finalPrice;
