@@ -3487,10 +3487,13 @@ function logTransaction(type, amount, reason) {
     let db = JSON.parse(localStorage.getItem('hc_usersDB'));
     let u = db[currentUser];
     
+    // Get exact Date, Time, and Seconds!
     let date = new Date();
-    let timestamp = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    let exactTime = date.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    let exactDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    let preciseTimestamp = `${exactDate} | ${exactTime}`;
     
-    let logEntry = { amount: amount, reason: reason, time: timestamp };
+    let logEntry = { amount: amount, reason: reason, time: preciseTimestamp };
     
     if (type === 'coin') {
         u.coins += amount;
