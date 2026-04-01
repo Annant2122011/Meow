@@ -1253,7 +1253,7 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     if (currencyType === 'coin' && u.coins < finalPrice) return showToast("❌ Not enough coins!");
     if (currencyType === 'diamond' && u.diamonds < finalPrice) return showToast("❌ Not enough diamonds!");
 
-    // ✨ NEW: Generate a highly detailed Ledger description
+    // ✨ Generate a highly detailed Ledger description for BUYING
     const typeNames = {
         'avatar': 'Avatar',
         'theme': 'UI Theme',
@@ -1297,6 +1297,7 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     
     renderShop();
 }
+
 function refundItem(type, itemId, refundAmt) {
     showConfirmModal(
         "RESTORE PURCHASE", 
@@ -1305,7 +1306,7 @@ function refundItem(type, itemId, refundAmt) {
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
             let u = usersDB[currentUser];
             
-            // ✨ NEW: Generate a highly detailed Ledger description
+            // ✨ Generate a highly detailed Ledger description for SELLING
             const typeNames = {
                 'avatar': 'Avatar',
                 'theme': 'UI Theme',
@@ -1352,7 +1353,6 @@ function refundItem(type, itemId, refundAmt) {
         }
     );
 }
-
 function buyCoinsWithDiamonds(pkgId) {
     let pkg = shopItems.exchange.find(p => p.id === pkgId);
     if (!pkg) return;
@@ -1382,49 +1382,6 @@ function buyCoinsWithDiamonds(pkgId) {
             } else {
                 showToast(`❌ Not enough Diamonds! Need ${pkg.diaPrice.toFixed(1)}`);
             }
-        }
-    );
-}
-
-function refundItem(type, itemId, refundAmt) {
-    showConfirmModal(
-        "RESTORE PURCHASE", 
-        `Are you sure you want to sell this item? You will receive 🪙 ${formatCurrency(refundAmt)} (25% of base price).`, 
-        () => {
-            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
-            let u = usersDB[currentUser];
-            
-            // 1. Give Coins Back & Log it
-            u.coins += refundAmt;
-            logTransaction('coin', refundAmt, `Item Refund (${itemId})`);
-            
-            // 2. Remove from Unlocked Inventory Arrays
-            if (type === 'avatar') u.unlockedAvatars = u.unlockedAvatars.filter(id => id !== itemId);
-            if (type === 'theme') u.unlockedThemes = u.unlockedThemes.filter(id => id !== itemId);
-            if (type === 'coin') u.unlockedCoins = u.unlockedCoins.filter(id => id !== itemId);
-            if (type === 'commentary') u.unlockedCommentary = u.unlockedCommentary.filter(id => id !== itemId);
-            if (type === 'background') u.unlockedBackgrounds = u.unlockedBackgrounds.filter(id => id !== itemId);
-            if (type === 'sfxRoar') u.unlockedSfxRoar = u.unlockedSfxRoar.filter(id => id !== itemId);
-            
-            // 3. Auto-Unequip Fallback Logic (Switch to Default)
-            if (type === 'avatar' && u.equippedAvatar === itemId) u.equippedAvatar = '👤';
-            if (type === 'theme' && u.equippedTheme === itemId) u.equippedTheme = 'default';
-            if (type === 'coin' && u.equippedCoin === itemId) u.equippedCoin = 'default';
-            if (type === 'commentary' && u.equippedCommentary === itemId) u.equippedCommentary = 'default';
-            if (type === 'background' && u.equippedBackground === itemId) u.equippedBackground = 'bg-default';
-            if (type === 'sfxRoar' && u.equippedSfxRoar === itemId) u.equippedSfxRoar = 'standard';
-            
-            // 4. Save and Update UI
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
-            
-            showToast(`♻️ Item Sold! (+🪙${formatCurrency(refundAmt)})`);
-            SoundManager.play('coinSpend'); // Plays a sound
-            
-            const cText = document.getElementById('prof-coins');
-            if (cText) cText.innerText = formatCurrency(u.coins);
-            
-            applyCosmetics(); 
-            renderShop();
         }
     );
 }
