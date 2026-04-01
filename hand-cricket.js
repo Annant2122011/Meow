@@ -630,8 +630,10 @@ window.onload = function() {
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
+    const isLedgerPage = document.getElementById('ledger-total') !== null; // 🚨 NEW: Ledger Page Check
 
-    if (isProfilePage || isTournamentPage) {
+    // If we are on Profile, Tournament, OR Ledger
+    if (isProfilePage || isTournamentPage || isLedgerPage) {
         if (!storedUser) {
             window.location.href = 'index.html';
             return;
@@ -644,13 +646,15 @@ window.onload = function() {
         if (isProfilePage) {
             renderProfilePage();
             renderShop();
-           bindPfpUpload();
+            bindPfpUpload();
         }
         
         if (isTournamentPage) {
             renderTournamentPage();
         }
+        
     } else {
+        // We are on index.html
         if (storedUser) {
             loadUser(storedUser);
         } else {
@@ -1246,19 +1250,16 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
     let u = usersDB[currentUser];
     
-   if (currencyType === 'coin' && u.coins < finalPrice) {
-        return showToast("❌ Not enough coins!");
-    }
-    if (currencyType === 'diamond' && u.diamonds < finalPrice) {
-        return showToast("❌ Not enough diamonds!");
-    }
-    // Deduct Assets
+    if (currencyType === 'coin' && u.coins < finalPrice) return showToast("❌ Not enough coins!");
+    if (currencyType === 'diamond' && u.diamonds < finalPrice) return showToast("❌ Not enough diamonds!");
+
+    // Deduct Assets & LOG IT (Using the new 'u' parameter)
     if (currencyType === 'coin') {
         u.coins -= finalPrice;
-        logTransaction('coin', -finalPrice, `Shop Purchase (${method})`);
+        logTransaction(u, 'coin', -finalPrice, `Shop Purchase (${method})`);
     } else {
         u.diamonds -= finalPrice;
-        logTransaction('diamond', -finalPrice, `Shop Purchase (${method})`);
+        logTransaction(u, 'diamond', -finalPrice, `Shop Purchase (${method})`);
     }
 
     if (method === 'grind') u.cards[rarityType] -= cardsToDeduct;
@@ -1281,6 +1282,82 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
     
     renderShop();
+}
+
+function refundItem(type, itemId, refundAmt) {
+    showConfirmModal(
+        "RESTORE PURCHASE", 
+        `Are you sure you want to sell this item? You will receive 🪙 ${formatCurrency(refundAmt)} (25% of base price).`, 
+        () => {
+            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+            let u = usersDB[currentUser];
+            
+            // 1. Give Coins Back & Log it
+            u.coins += refundAmt;
+            logTransaction(u, 'coin', refundAmt, `Item Refund (${itemId})`);
+            
+            // 2. Remove from Unlocked Inventory
+            if (type === 'avatar') u.unlockedAvatars = u.unlockedAvatars.filter(id => id !== itemId);
+            if (type === 'theme') u.unlockedThemes = u.unlockedThemes.filter(id => id !== itemId);
+            if (type === 'coin') u.unlockedCoins = u.unlockedCoins.filter(id => id !== itemId);
+            if (type === 'commentary') u.unlockedCommentary = u.unlockedCommentary.filter(id => id !== itemId);
+            if (type === 'background') u.unlockedBackgrounds = u.unlockedBackgrounds.filter(id => id !== itemId);
+            if (type === 'sfxRoar') u.unlockedSfxRoar = u.unlockedSfxRoar.filter(id => id !== itemId);
+            
+            // 3. Auto-Unequip Fallback
+            if (type === 'avatar' && u.equippedAvatar === itemId) u.equippedAvatar = '👤';
+            if (type === 'theme' && u.equippedTheme === itemId) u.equippedTheme = 'default';
+            if (type === 'coin' && u.equippedCoin === itemId) u.equippedCoin = 'default';
+            if (type === 'commentary' && u.equippedCommentary === itemId) u.equippedCommentary = 'default';
+            if (type === 'background' && u.equippedBackground === itemId) u.equippedBackground = 'bg-default';
+            if (type === 'sfxRoar' && u.equippedSfxRoar === itemId) u.equippedSfxRoar = 'standard';
+            
+            // 4. Save and Update UI
+            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            
+            showToast(`♻️ Item Sold! (+🪙${formatCurrency(refundAmt)})`);
+            SoundManager.play('coinSpend'); 
+            
+            const cText = document.getElementById('prof-coins');
+            if (cText) cText.innerText = formatCurrency(u.coins);
+            
+            applyCosmetics(); 
+            renderShop();
+        }
+    );
+}
+
+function buyCoinsWithDiamonds(pkgId) {
+    let pkg = shopItems.exchange.find(p => p.id === pkgId);
+    if (!pkg) return;
+
+    showConfirmModal(
+        "DIAMOND EXCHANGE", 
+        `Trade 💎 ${pkg.diaPrice.toFixed(1)} Diamonds for 🪙 ${pkg.coins.toLocaleString()} Coins?`, 
+        () => {
+            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+            let u = db[currentUser];
+
+            if (u.diamonds >= pkg.diaPrice) {
+                u.diamonds -= pkg.diaPrice;
+                u.coins += pkg.coins;
+                
+                logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
+                logTransaction(u, 'coin', pkg.coins, `Diamond Exchange`);
+                
+                localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                
+                document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
+                document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+                
+                showToast(`💸 Exchange Successful! (+🪙${formatCurrency(pkg.coins)})`);
+                SoundManager.play('coinSpend');
+                renderShop();
+            } else {
+                showToast(`❌ Not enough Diamonds! Need ${pkg.diaPrice.toFixed(1)}`);
+            }
+        }
+    );
 }
 
 function refundItem(type, itemId, refundAmt) {
@@ -2926,7 +3003,7 @@ function saveLifetimeStats(result) {
         let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
         if (result === "PLAYER_WINS") matchDiamonds += 0.10;
         
-        logTransaction('diamond', matchDiamonds, `Match Reward (${result})`);
+     logTransaction(stats, 'diamond', matchDiamonds, 'Match Reward (' + result + ')');
         
         // Calculate Card Drops
         let numCards = result === "PLAYER_WINS" ? 10 : (result === "TIE" ? 7 : 4);
@@ -3490,12 +3567,8 @@ function formatCurrency(num) {
     return num.toString();
 }
 
-function logTransaction(type, amount, reason) {
-    if (!currentUser) return;
-    let db = JSON.parse(localStorage.getItem('hc_usersDB'));
-    let u = db[currentUser];
-    
-    // Get exact Date, Time, and Seconds!
+// UPDATE: Now takes 'u' (the user object) as the first parameter
+function logTransaction(u, type, amount, reason) {
     let date = new Date();
     let exactTime = date.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     let exactDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -3503,16 +3576,15 @@ function logTransaction(type, amount, reason) {
     
     let logEntry = { amount: amount, reason: reason, time: preciseTimestamp };
     
+    if (!u.transactions) u.transactions = { coins: [], diamonds: [] };
+    if (!u.transactions.coins) u.transactions.coins = [];
+    if (!u.transactions.diamonds) u.transactions.diamonds = [];
+
     if (type === 'coin') {
-        u.coins += amount;
-        u.transactions.coins.unshift(logEntry); // Add to top of history
+        u.transactions.coins.unshift(logEntry);
     } else if (type === 'diamond') {
-        u.diamonds += amount;
-        u.diamonds = parseFloat(u.diamonds.toFixed(2)); // Prevent floating point bugs
         u.transactions.diamonds.unshift(logEntry);
     }
-    
-    localStorage.setItem('hc_usersDB', JSON.stringify(db));
 }
 // ==========================================
 // THE LEDGER / TRANSACTION HISTORY ENGINE
