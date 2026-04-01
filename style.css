@@ -1311,7 +1311,7 @@ body.theme-blood {
         margin: 0 !important; /* Overrides inline margins */
     }
 
-    /* 3. RANKS: Two-column grid instead of a tall vertical list */
+   /* 3. RANKS: Two-column grid instead of a tall vertical list */
     #tab-levels > div { 
         max-width: 1000px; 
         margin: 0 auto; 
@@ -1320,6 +1320,13 @@ body.theme-blood {
         display: grid !important; 
         grid-template-columns: 1fr 1fr; 
         gap: 15px; 
+    }
+    
+    /* Center the 7th Rank (Mythical Master) */
+    #tab-levels > div > div > div:last-child {
+        grid-column: 1 / -1; /* Tells it to span across both columns */
+        margin: 0 auto;      /* Centers it horizontally */
+        width: calc(50% - 7.5px); /* Keeps it the exact same width as the cards above it */
     }
 
     /* 4. GRIDS: Shrink item sizes slightly and center the shop */
