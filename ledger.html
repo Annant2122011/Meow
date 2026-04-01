@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Ledger | Hand Cricket Clash</title>
+    <link rel="icon" type="image/png" href="https://i.ibb.co/cc6DJrZt/Cric-Pulse-Logo-meow.png" sizes="32x32">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
+        <button class="btn pulse-btn" style="font-size: 1rem; padding: 10px 20px;" onclick="window.location.href='profile.html'">⬅️ BACK TO PROFILE</button>
+        <div class="logo">
+            <span class="logo-text" style="font-size: 1.8rem; letter-spacing: 2px;">BANK <span style="color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">LEDGER</span></span>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="card" style="max-width: 800px; margin: 0 auto; border-color: #ffd700; padding: 0; overflow: hidden;">
+            
+            <div style="display: flex; width: 100%;">
+                <div id="tab-btn-coins" class="ledger-tab" onclick="switchLedger('coins')">🪙 COIN HISTORY</div>
+                <div id="tab-btn-diamonds" class="ledger-tab" onclick="switchLedger('diamonds')">💎 DIAMOND HISTORY</div>
+            </div>
+
+            <div style="text-align: center; padding: 25px; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <p style="color: var(--text-dim); margin: 0; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;">Current Balance</p>
+                <h2 id="ledger-total" style="font-family: var(--font-display); font-size: 3rem; margin: 0; text-shadow: 0 0 15px rgba(255,255,255,0.2);">0</h2>
+            </div>
+
+            <div id="ledger-list" style="padding: 20px; max-height: 60vh; overflow-y: auto;">
+                </div>
+
+        </div>
+    </main>
+
+    <script src="hand-cricket.js"></script>
+</body>
+</html>
