@@ -254,14 +254,14 @@
             <button id="btn-buy-grind" class="btn" style="width: 100%; background: #374151; color: white;" disabled>LOCKED (NEED CARDS)</button>
         </div>
 
-        <div style="background: rgba(255,42,42,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-red);">
+       <div style="background: rgba(255,42,42,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-red);">
             <h4 style="color: var(--accent-red); margin-top: 0;">OPTION B: Instant Access</h4>
             <p style="color: #a1a1aa; font-size: 0.9rem;">Skip the grind. Unlock immediately at a premium.</p>
-            <button id="btn-buy-instant" class="btn pulse-btn" style="width: 100%; background: var(--accent-red); color: white;">UNLOCK INSTANTLY</button>
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <button id="btn-buy-instant-coin" class="btn pulse-btn" style="flex: 1; background: var(--accent-red); color: white;">🪙 COINS</button>
+                <button id="btn-buy-instant-dia" class="btn pulse-btn" style="flex: 1; background: #00d2ff; color: black; box-shadow: 0 0 10px rgba(0,210,255,0.4);">💎 DIAMONDS</button>
+            </div>
         </div>
-
-        <button class="btn" style="width: 100%; background: transparent; border: 1px solid #555; color: white;" onclick="document.getElementById('shop-purchase-modal').style.display='none'">CANCEL</button>
-    </div>
 </div>
 
             <button class="btn" style="margin-top: 25px; width: 100%; padding: 15px; background: rgba(255, 42, 42, 0.1); border: 2px solid var(--accent-red); color: var(--accent-red); font-size: 1.2rem; font-weight: 900; letter-spacing: 2px;" onclick="logoutUser()">LOGOUT / SWITCH ACCOUNT</button>
