@@ -1239,13 +1239,13 @@ body.theme-blood {
         border-bottom: 3px solid rgba(255,255,255,0.1) !important;
     }
     
-    .tab-btn {
+  .tab-btn {
         flex: 1;
-        max-width: 250px; /* Stops them from stretching infinitely */
-        font-size: 1.3rem !important;
-        padding: 20px !important;
-        background: rgba(255, 255, 255, 0.03) !important; /* Subtle background */
-        border-radius: 12px 12px 0 0 !important; /* Rounded top corners like real tabs */
+        max-width: 250px; 
+        padding: 12px 15px !important; /* Reduced padding to make tabs less tall */
+        /* font-size removed to restore the original 1.1rem size */
+        background: rgba(255, 255, 255, 0.03) !important; 
+        border-radius: 12px 12px 0 0 !important; 
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
         border-bottom: none !important;
     }
