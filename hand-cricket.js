@@ -11,7 +11,7 @@ const SoundManager = {
         batCrack: 'assets/bat_crack.mp3',
         crowdRoar: 'assets/crowd_roar.mp3',
         howzat: 'assets/howzat.mp3',
-        coinSpend: 'assets/coin_spend.mp3'
+        coinSpend: 'assets/coin_spend.wav'
     },
     
     init: function() {
