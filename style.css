@@ -1299,8 +1299,8 @@ body.theme-blood {
     #tab-stats ul li span { font-size: 1.4rem !important; }
 
     /* 2. CHARTS: Side-by-side grid instead of massive full-width blocks */
-    #tab-charts { 
-        display: flex; 
+   #tab-charts.active-content { 
+        display: flex !important; 
         flex-wrap: wrap; 
         justify-content: center; 
         gap: 20px; 
