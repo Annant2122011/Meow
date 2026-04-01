@@ -1298,19 +1298,23 @@ body.theme-blood {
     }
     #tab-stats ul li span { font-size: 1.4rem !important; }
 
-    /* 2. CHARTS: Side-by-side grid instead of massive full-width blocks */
-   #tab-charts.active-content { 
-        display: flex !important; 
-        flex-wrap: wrap; 
-        justify-content: center; 
-        gap: 20px; 
+  /* 2. CHARTS: Strict 2-Column Grid (2x3 layout) */
+    #tab-charts.active-content { 
+        display: grid !important; 
+        grid-template-columns: 1fr 1fr; /* Exactly 2 equal columns */
+        gap: 30px; /* Nice breathing room between charts */
+        max-width: 1200px; /* Keeps them from stretching to infinity */
+        margin: 0 auto; 
     }
+    
     .chart-wrapper { 
-        max-width: 45% !important; /* Forces them to share the screen */
-        flex: 1 1 400px; 
-        margin: 0 !important; /* Overrides inline margins */
+        max-width: 100% !important; 
+        width: 100% !important; 
+        margin: 0 !important; /* Removes default vertical margins */
+        display: flex; 
+        flex-direction: column;
+        justify-content: center;
     }
-
    /* 3. RANKS: Two-column grid instead of a tall vertical list */
     #tab-levels > div { 
         max-width: 1000px; 
