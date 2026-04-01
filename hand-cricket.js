@@ -3586,3 +3586,97 @@ function openLedgerModal(currencyType) {
 function closeLedgerModal() {
     document.getElementById('ledger-modal').style.display = 'none';
 }
+// ==========================================
+// DEDICATED BANK LEDGER PAGE LOGIC
+// ==========================================
+let activeLedgerTab = 'coins';
+
+function initLedger() {
+    const urlParams = new URLSearchParams(window.location.search);
+    activeLedgerTab = urlParams.get('tab') || 'coins';
+    renderLedger();
+}
+
+function switchLedger(tabType) {
+    activeLedgerTab = tabType;
+    // Update URL silently so if they refresh, it stays on the right tab
+    window.history.replaceState(null, '', `?tab=${tabType}`);
+    renderLedger();
+}
+
+function renderLedger() {
+    // If somehow they got here logged out, send them to the main menu
+    if (!currentUser) currentUser = localStorage.getItem('hc_currentUser');
+    if (!currentUser) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const db = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const u = db[currentUser];
+    if (!u) return;
+
+    const listContainer = document.getElementById('ledger-list');
+    const totalEl = document.getElementById('ledger-total');
+    const tabCoins = document.getElementById('tab-btn-coins');
+    const tabDiamonds = document.getElementById('tab-btn-diamonds');
+    
+    // Failsafe: Don't run this code if we aren't on the Ledger page
+    if (!listContainer || !totalEl) return; 
+    
+    listContainer.innerHTML = '';
+
+    // Handle UI Switching based on the active tab
+    let historyArray = [];
+    if (activeLedgerTab === 'coins') {
+        historyArray = u.transactions.coins || [];
+        totalEl.innerHTML = `🪙 ${formatCurrency(u.coins)}`; 
+        totalEl.style.color = '#ffd700';
+        tabCoins.className = 'ledger-tab active-coin';
+        tabDiamonds.className = 'ledger-tab';
+    } else {
+        historyArray = u.transactions.diamonds || [];
+        totalEl.innerHTML = `💎 ${u.diamonds.toFixed(2)}`;
+        totalEl.style.color = '#00d2ff';
+        tabDiamonds.className = 'ledger-tab active-diamond';
+        tabCoins.className = 'ledger-tab';
+    }
+
+    // Render the items
+    if (historyArray.length === 0) {
+        listContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: gray; font-family: var(--font-display); font-size: 1.2rem;">NO TRANSACTIONS FOUND</div>';
+        return;
+    }
+
+    historyArray.forEach(tx => {
+        const row = document.createElement('div');
+        const isIncome = tx.amount > 0;
+        
+        row.className = `ledger-row ${isIncome ? 'row-income' : 'row-expense'}`;
+        
+        const amountColor = isIncome ? 'var(--accent-neon)' : 'var(--accent-red)';
+        const amountPrefix = isIncome ? '+' : '';
+        const currencySymbol = activeLedgerTab === 'coins' ? '🪙' : '💎';
+        
+        let displayAmount = Math.abs(tx.amount);
+        displayAmount = activeLedgerTab === 'coins' ? formatCurrency(displayAmount) : displayAmount.toFixed(2);
+
+        row.innerHTML = `
+            <div>
+                <div class="tx-reason">${tx.reason}</div>
+                <div class="tx-date">🕒 ${tx.time}</div>
+            </div>
+            <div class="tx-amount" style="color: ${amountColor}; text-shadow: 0 0 10px ${amountColor}80;">
+                ${amountPrefix}${displayAmount} ${currencySymbol}
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+// Automatically boot up the ledger system if the page has loaded
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('ledger-total')) {
+        initLedger();
+    }
+});
