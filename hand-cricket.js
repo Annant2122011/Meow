@@ -2464,7 +2464,7 @@ function handleWicket(num, type) {
     
     if (!gameState.isPlayerBatting) {
         gameState.compStats.dots++; 
-       currentBatterStats.dots++;
+       
     }
     
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
@@ -2523,7 +2523,7 @@ function handleDefense() {
     
     if (!gameState.isPlayerBatting) {
         gameState.compStats.dots++;
-       currentBatterStats.dots++;
+       
     }
     
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
@@ -2857,6 +2857,7 @@ function saveLifetimeStats(result) {
     else stats.ties += 1;
     
     stats.totalRuns += gameState.playerStats.runs; 
+   stats.totalWicketsTaken = (stats.totalWicketsTaken || 0) + gameState.compStats.wicketsLost;
     stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
     stats.careerFours += gameState.playerStats.fours;
@@ -3436,14 +3437,18 @@ screensToHide.forEach(id => {
 });
 
 // Also add this right below the screensToHide loop to reset the target box:
-const targetBox = document.getElementById('target-box');
-if (targetBox) targetBox.style.display = 'none';
+const tBox = document.getElementById('target-box');
+if (tBox) tBox.style.display = 'none';
     
-    // 3. SHOW THE SETUP SCREEN
+   // 3. SHOW THE SETUP SCREEN (OR REDIRECT TO GAUNTLET)
     toggleHeaderButtons('setup');
 
-    const setupScreen = document.getElementById('setup-screen');
-    if (setupScreen) setupScreen.style.display = 'block';
+    if (gameState.isTournament) {
+        window.location.href = 'tournament.html';
+    } else {
+        const setupScreen = document.getElementById('setup-screen');
+        if (setupScreen) setupScreen.style.display = 'block';
+    }
   
    // 4. WIPE THE GAME STATE CLEAN
 gameState.isPlayerBatting = null;
@@ -3455,6 +3460,9 @@ gameState.isTransitioning = false;   // <-- ADD THIS
 gameState.playerConsecZeros = 0;     // <-- ADD THIS
 gameState.compConsecZeros = 0;       // <-- ADD THIS
 gameState.commentaryHistory = [];
+   gameState.playerMatchBatting = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 };
+gameState.playerMatchBowling = { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 };
+gameState.playerHistory = [];
     
  gameState.playerStats = { 
         runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
