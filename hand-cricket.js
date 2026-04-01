@@ -260,7 +260,82 @@ const commentaryMaster = {
             "🤯 Out of the stadium! Absolute brute force for 6!",
             "⚡ What a strike! Clean connection brings up a 6!"
         ]
-    }
+    },
+// 📜 Elite Poetic
+    'poetic': {
+        wkt_stumped: [
+            "🚨 Out of the crease, a careless stride, the keeper's gloves have crushed their pride. [BATTER] is stumped!",
+            "⚡ A wandering foot, a fatal slip, the bails are off with a lightning whip! Farewell, [BATTER].",
+            "🧤 Too far from home, a tragic fate, the keeper strikes and seals the gate. [BATTER] departs.",
+            "🕺 A dance down the pitch, a swing of the bat, the keeper reacts and leaves them flat!",
+            "🤯 Outside the line, a foolish quest, the quick-handed keeper does the rest. [BATTER] is gone.",
+            "🎯 A heavy foot, a wand'ring mind, the keeper leaves the bails behind! [BATTER] is out."
+        ],
+        wkt_hit: [
+            "🏏💥 Stepping back to block the ball, [BATTER] makes the timber fall! Hit wicket.",
+            "🪵 A clumsy heel, a shattered bail, [BATTER]'s defense is to no avail.",
+            "😱 Retreating deep into the night, [BATTER] strikes their stumps in fright!",
+            "🤦‍♂️ A fateful step against the wood, [BATTER] has ruined their livelihood!",
+            "😬 Defending deep with clumsy feet, [BATTER] ensures their own defeat!",
+            "🛑 A massive swing, a backward pace, the bails are scattered round the place!"
+        ],
+        wkt_bowled: [
+            "💥 Through the gate the ball has sped, the wooden stumps are lying dead. [BATTER] is bowled!",
+            "🔥 A fiery dart, a beaten bat, the timber falls and that is that! [BATTER] is out.",
+            "🎯 You threw the same, a perfect [NUM], the stumps are struck like a beaten drum.",
+            "⚡ A deadly ball, an angled seam, the shattered stumps destroy the dream. [BATTER] departs.",
+            "🪵 The woodwork flies, the bails are tossed, [BATTER] looks back at all they've lost.",
+            "🤯 A spinning ball, a missing blade, the stumps are hit, the price is paid!"
+        ],
+        wide: [
+            "↔️ Way off the mark, a straying line, +[RUNS] to [TEAM], a gift divine.",
+            "🙅‍♂️ The umpire's arms are open wide, +[RUNS] free runs for the batting side.",
+            "💸 A reckless throw, completely lost, +[RUNS] to [TEAM] without a cost.",
+            "🧭 Far from the pitch, a wayward aim, +[RUNS] to [TEAM] to boost the game.",
+            "👀 The bowler slips, the ball goes wide, a stroke of fortune for [TEAM]'s side.",
+            "🎁 Way outside, beyond the reach, +[RUNS] extra runs upon the beach."
+        ],
+        defend: [
+            "🛡️ A gentle tap, a solid block, the batter stands firm as a rock. 0 runs.",
+            "🧱 No run is taken, no risk is made, the bowler's threat is smoothly played.",
+            "🧘‍♂️ With perfect poise and grounded feet, the ball and bat safely meet.",
+            "🥱 A quiet block, a watchful eye, the batter lets the danger fly.",
+            "🛑 The bat comes down, the ball is dead, zero runs, just like I said.",
+            "📉 Defended well, without a fright, the batter keeps the wicket tight."
+        ],
+        run_1_3: [
+            "🏃 A nimble strike, a rapid pace, they add +[RUNS] to win the race.",
+            "🏃‍♂️ With eager feet they cross the track, +[RUNS] more runs into the sack.",
+            "🤌 A quiet push, a stolen run, they grab +[RUNS] beneath the sun.",
+            "💨 A subtle touch, a quick sprint through, +[RUNS] runs are added to the crew.",
+            "⚡ Through the gap with careful grace, they steal +[RUNS] runs to keep the pace.",
+            "🏏 A gentle tap, they dash away, +[RUNS] more runs to build the play."
+        ],
+        run_4: [
+            "🔥 A cracking shot, a glorious sound, 4 runs go racing to the ground!",
+            "🚀 The fielders chase but look in vain, 4 beautiful runs to ease the pain.",
+            "⚡ It splits the gap with pure delight, 4 runs shine brightly in the night.",
+            "🤌 A sweet caress, a regal drive, 4 runs to keep the dream alive!",
+            "💥 It skims the grass, it beats the chase, 4 stunning runs to win the race.",
+            "🏏 A mighty sweep, a perfect hit, 4 runs are added to the kit!"
+        ],
+        run_5: [
+            "🤪 A frantic throw, a fielding mess, 5 lucky runs to ease the stress!",
+            "🤯 The ball flies wide, the fielders weep, 5 chaotic runs for them to keep.",
+            "🏃 Overthrows and sheer dismay, 5 bizarre runs are given away.",
+            "🏃🏃🏃 Chaos reigns upon the green, 5 runs like nothing ever seen!",
+            "🤦‍♂️ A wild mistake, a total blunder, 5 runs to make the bowler wonder.",
+            "🎁 A gift of runs, a sloppy throw, 5 extra runs to steal the show!"
+        ],
+        run_6: [
+            "🚀 High in the air, a mighty blow, 6 massive runs to steal the show!",
+            "🛸 Over the ropes, a perfect flight, 6 glorious runs to end the fight.",
+            "👍 A giant swing, a roaring crowd, 6 runs are hit, majestic and proud!",
+            "🔥 It scales the sky, it leaves the park, 6 massive runs to leave a mark!",
+            "💥 A thunderous crack, an orbit bound, 6 runs that land beyond the ground!",
+            "⚡ A brutal hit, it sails away, 6 runs to dominate the day!"
+        ]
+    },
 };
 // 10-BOSS GAUNTLET DATABASE
 const bossInfo = [
