@@ -117,82 +117,151 @@ let gameState = {
     }
 };
 
-// MULTI-VARIATION COMMENTARY DATABASE
-const commentaryDB = {
-    wkt_stumped: [
-        "🚨 WIDE AND STUMPED! Lightning-fast glovework removes [BATTER]!",
-        "🧤 Brilliant stumping! [BATTER] dragged their foot out of the crease!",
-        "⚡ Blink and you miss it! [BATTER] is stumped by a mile!",
-        "🤯 Caught wandering! A careless mistake costs [BATTER] their wicket!",
-        "🎯 Beautiful deception from the bowler, and the keeper finishes the job on [BATTER]!",
-        "🕺 Dancing down the track? Bad idea. [BATTER] is stumped!"
-    ],
-    wkt_hit: [
-        "🏏💥 HIT WICKET! [BATTER] defended too deep (3x 0s) and stepped on the stumps! OUT!",
-        "🤦‍♂️ Oh dear! [BATTER] went so far back they kicked their own stumps!",
-        "🪵 Clumsy footwork! [BATTER] knocks the bails off!",
-        "😬 Disaster for [BATTER]! Stepped right onto the stumps while defending!",
-        "🛑 Too defensive! [BATTER] retreated straight into the woodwork!",
-        "😱 Unbelievable! [BATTER] is out hit wicket after retreating too far!"
-    ],
-    wkt_bowled: [
-        "💥 WICKET! Clean bowled! Both threw [NUM]. [BATTER] departs!",
-        "🎯 Knocked him over! A perfect delivery shatters the stumps of [BATTER]!",
-        "🔥 Absolute seed! [BATTER] had no clue about that one. Bowled!",
-        "🪵 TIMBER! The stumps go flying! [BATTER] is out!",
-        "🤯 You miss, I hit! [BATTER] plays all over a straight one!",
-        "⚡ What a delivery! Ripped through the defense of [BATTER]!"
-    ],
-    wide: [
-        "↔️ WIDE BALL! Bowler threw 0. Batter threw [NUM]. +[RUNS] Runs to [TEAM].",
-        "🎁 Free runs! Way outside the line. +[RUNS] to [TEAM]!",
-        "🙅‍♂️ The umpire stretches his arms! Wide called. +[RUNS] for [TEAM].",
-        "👀 Slipping down the leg side! Wide ball. +[RUNS] added to [TEAM]'s total.",
-        "🧭 Lost the radar completely there! Wide ball, +[RUNS] for [TEAM].",
-        "💸 Easy pickings. A loose delivery gifts +[RUNS] to [TEAM]."
-    ],
-    defend: [
-        "🛡️ SOLID DEFENSE! Batter blocked the ball safely. 0 runs.",
-        "🧱 Dead batted. No run there.",
-        "🛑 Safely negotiated. Just blocking it out.",
-        "🥱 A quiet dot ball. Respecting the bowler.",
-        "🧘‍♂️ Well defended. Playing it safe with a solid block.",
-        "📉 No risks taken. A solid forward defense for 0."
-    ],
-    run_1_3: [
-        "🏃 +[RUNS] Runs! Quick running.",
-        "⚡ Good hustle! They steal +[RUNS] runs.",
-        "🏏 Pushed into the gap for +[RUNS].",
-        "🏃‍♂️ Excellent running between the wickets gets them +[RUNS]!",
-        "🤌 Soft hands, quick feet. That's +[RUNS] runs.",
-        "💨 Scampering through for +[RUNS] quick ones."
-    ],
-    run_4: [
-        "🔥 +4 Runs! Glorious cover drive!",
-        "⚡ Pulled away beautifully to the boundary! +4!",
-        "🚀 Shot of the day! Pierces the gap for 4 runs!",
-        "💥 Crunched through the off-side! One bounce into the fence for 4!",
-        "🏏 Sweet timing! The outfield is fast, and it races away for 4!",
-        "🤌 Pure elegance! Leans into the drive and gets 4!"
-    ],
-    run_5: [
-        "🏃🏃🏃 +5 Runs! Overthrows! What a mess in the field!",
-        "🤪 Madness! 5 runs taken through sheer panic in the field!",
-        "🏃‍♂️ Rare 5 runs! Great running combined with sloppy fielding!",
-        "🎁 A gift of 5 runs! The fielding side falls apart!",
-        "🤯 5 runs! Have you ever seen anything like it? Chaos!",
-        "💨 Scampering for 5! The throw misses the stumps completely!"
-    ],
-    run_6: [
-        "🚀 👍 +6 Runs! MASSIVE HIT!",
-        "🛸 INTO THE ORBIT! That's a colossal 6!",
-        "💥 BOOM! Dispatched into the crowd for 6 runs!",
-        "🔥 Stand and deliver! A majestic 6 over long-on!",
-        "🤯 Out of the stadium! Absolute brute force for 6!",
-        "⚡ What a strike! Clean connection brings up a 6!"
-    ]
+// MULTI-VARIATION COMMENTARY MASTER DATABASE
+const commentaryMaster = {
+    // 🎙️ Standard EN (Basic)
+    // 🎙️ Standard EN (Basic)
+    'default': {
+        wkt_stumped: [
+            "Stumped! [BATTER] is caught out of the crease.",
+            "Wicket. The keeper whips the bails off to dismiss [BATTER].",
+            "Out! [BATTER] is stumped.",
+            "Keeper removes the bails in a flash. [BATTER] departs.",
+            "[BATTER] is out of their ground. Stumped."
+        ],
+        wkt_hit: [
+            "Hit wicket. [BATTER] steps on their own stumps.",
+            "Out. [BATTER] retreats too far and dislodges the bails.",
+            "Wicket. [BATTER] defends into the stumps.",
+            "Disaster for [BATTER] as they step on the stumps.",
+            "Hit wicket. [BATTER] dislodges the bails with their own bat."
+        ],
+        wkt_bowled: [
+            "Bowled! Both threw [NUM]. [BATTER] is out.",
+            "Wicket! [BATTER] misses and the stumps are hit.",
+            "Out! Clean bowled.",
+            "Through the gate! [BATTER] is bowled.",
+            "The stumps are shattered. [BATTER] has to go."
+        ],
+        wide: [
+            "Wide ball. Bowler threw 0, Batter threw [NUM]. +[RUNS] to [TEAM].",
+            "Umpire signals wide. +[RUNS] runs for [TEAM].",
+            "Wide delivery. +[RUNS] added to the total.",
+            "That's too far outside the line. Wide signaled. +[RUNS] for [TEAM].",
+            "Straying down the leg side. Umpire calls wide, adding +[RUNS] to [TEAM]."
+        ],
+        defend: [
+            "Defended safely. 0 runs.",
+            "Solid block. No run.",
+            "Batter defends. 0 runs.",
+            "Pushed back to the bowler. 0 runs.",
+            "Played with a straight bat. No run."
+        ],
+        run_1_3: [
+            "+[RUNS] runs scored.",
+            "They take +[RUNS] runs.",
+            "Pushed for +[RUNS].",
+            "They cross over for +[RUNS].",
+            "Worked away nicely for +[RUNS] runs."
+        ],
+        run_4: [
+            "+4 Runs! Boundary.",
+            "Hit away for 4 runs.",
+            "4 runs to the total.",
+            "Driven elegantly for 4 runs.",
+            "Finds the gap and it rolls to the boundary for 4."
+        ],
+        run_5: [
+            "+5 Runs from overthrows.",
+            "5 runs taken.",
+            "Rare 5 runs scored.",
+            "Poor fielding results in 5 runs.",
+            "An overthrow costs the fielding side. 5 runs."
+        ],
+        run_6: [
+            "+6 Runs! A six is hit.",
+            "Six runs! Clears the boundary.",
+            "Massive hit for 6.",
+            "Struck beautifully over the ropes for a six.",
+            "High and handsome. 6 runs to the total."
+        ]
+    },
+    // 📺 Pro Broadcast
+    'pro': {
+        wkt_stumped: [
+            "🚨 WIDE AND STUMPED! Lightning-fast glovework removes [BATTER]!",
+            "🧤 Brilliant stumping! [BATTER] dragged their foot out of the crease!",
+            "⚡ Blink and you miss it! [BATTER] is stumped by a mile!",
+            "🤯 Caught wandering! A careless mistake costs [BATTER] their wicket!",
+            "🎯 Beautiful deception from the bowler, and the keeper finishes the job on [BATTER]!",
+            "🕺 Dancing down the track? Bad idea. [BATTER] is stumped!"
+        ],
+        wkt_hit: [
+            "🏏💥 HIT WICKET! [BATTER] defended too deep (3x 0s) and stepped on the stumps! OUT!",
+            "🤦‍♂️ Oh dear! [BATTER] went so far back they kicked their own stumps!",
+            "🪵 Clumsy footwork! [BATTER] knocks the bails off!",
+            "😬 Disaster for [BATTER]! Stepped right onto the stumps while defending!",
+            "🛑 Too defensive! [BATTER] retreated straight into the woodwork!",
+            "😱 Unbelievable! [BATTER] is out hit wicket after retreating too far!"
+        ],
+        wkt_bowled: [
+            "💥 WICKET! Clean bowled! Both threw [NUM]. [BATTER] departs!",
+            "🎯 Knocked him over! A perfect delivery shatters the stumps of [BATTER]!",
+            "🔥 Absolute seed! [BATTER] had no clue about that one. Bowled!",
+            "🪵 TIMBER! The stumps go flying! [BATTER] is out!",
+            "🤯 You miss, I hit! [BATTER] plays all over a straight one!",
+            "⚡ What a delivery! Ripped through the defense of [BATTER]!"
+        ],
+        wide: [
+            "↔️ WIDE BALL! Bowler threw 0. Batter threw [NUM]. +[RUNS] Runs to [TEAM].",
+            "🎁 Free runs! Way outside the line. +[RUNS] to [TEAM]!",
+            "🙅‍♂️ The umpire stretches his arms! Wide called. +[RUNS] for [TEAM].",
+            "👀 Slipping down the leg side! Wide ball. +[RUNS] added to [TEAM]'s total.",
+            "🧭 Lost the radar completely there! Wide ball, +[RUNS] for [TEAM].",
+            "💸 Easy pickings. A loose delivery gifts +[RUNS] to [TEAM]."
+        ],
+        defend: [
+            "🛡️ SOLID DEFENSE! Batter blocked the ball safely. 0 runs.",
+            "🧱 Dead batted. No run there.",
+            "🛑 Safely negotiated. Just blocking it out.",
+            "🥱 A quiet dot ball. Respecting the bowler.",
+            "🧘‍♂️ Well defended. Playing it safe with a solid block.",
+            "📉 No risks taken. A solid forward defense for 0."
+        ],
+        run_1_3: [
+            "🏃 +[RUNS] Runs! Quick running.",
+            "⚡ Good hustle! They steal +[RUNS] runs.",
+            "🏏 Pushed into the gap for +[RUNS].",
+            "🏃‍♂️ Excellent running between the wickets gets them +[RUNS]!",
+            "🤌 Soft hands, quick feet. That's +[RUNS] runs.",
+            "💨 Scampering through for +[RUNS] quick ones."
+        ],
+        run_4: [
+            "🔥 +4 Runs! Glorious cover drive!",
+            "⚡ Pulled away beautifully to the boundary! +4!",
+            "🚀 Shot of the day! Pierces the gap for 4 runs!",
+            "💥 Crunched through the off-side! One bounce into the fence for 4!",
+            "🏏 Sweet timing! The outfield is fast, and it races away for 4!",
+            "🤌 Pure elegance! Leans into the drive and gets 4!"
+        ],
+        run_5: [
+            "🏃🏃🏃 +5 Runs! Overthrows! What a mess in the field!",
+            "🤪 Madness! 5 runs taken through sheer panic in the field!",
+            "🏃‍♂️ Rare 5 runs! Great running combined with sloppy fielding!",
+            "🎁 A gift of 5 runs! The fielding side falls apart!",
+            "🤯 5 runs! Have you ever seen anything like it? Chaos!",
+            "💨 Scampering for 5! The throw misses the stumps completely!"
+        ],
+        run_6: [
+            "🚀 👍 +6 Runs! MASSIVE HIT!",
+            "🛸 INTO THE ORBIT! That's a colossal 6!",
+            "💥 BOOM! Dispatched into the crowd for 6 runs!",
+            "🔥 Stand and deliver! A majestic 6 over long-on!",
+            "🤯 Out of the stadium! Absolute brute force for 6!",
+            "⚡ What a strike! Clean connection brings up a 6!"
+        ]
+    }
 };
-
 // 10-BOSS GAUNTLET DATABASE
 const bossInfo = [
     { 
@@ -2008,13 +2077,13 @@ function handleWicket(num, type) {
     
     if (type === 'STUMPED') {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(commentaryDB.wkt_stumped).replace("[BATTER]", batterName);
+        comment = getRandomCommentary(getActiveCommentary().wkt_stumped).replace("[BATTER]", batterName);
     } else if (type === 'HIT_WICKET') {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(commentaryDB.wkt_hit).replace("[BATTER]", batterName);
+        comment = getRandomCommentary(getActiveCommentary().wkt_hit).replace("[BATTER]", batterName);
     } else {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(commentaryDB.wkt_bowled).replace("[BATTER]", batterName).replace("[NUM]", num);
+        comment = getRandomCommentary(getActiveCommentary().wkt_bowled).replace("[BATTER]", batterName).replace("[NUM]", num);
     }
     
     writeCommentary(comment, tType);
@@ -2031,7 +2100,7 @@ function handleWide(batterNum) {
 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
     
-    let comment = getRandomCommentary(commentaryDB.wide)
+    let comment = getRandomCommentary(getActiveCommentary().wide)
         .replace("[NUM]", batterNum)
         .replace(/\[RUNS\]/g, runsToAdd)
         .replace(/\[TEAM\]/g, team);
@@ -2054,7 +2123,7 @@ function handleDefense() {
     
     currentBatterStats.wormData.push({ ball: currentBatterStats.balls, runs: currentBatterStats.runs, wkt: false });
     
-    let comment = getRandomCommentary(commentaryDB.defend);
+    let comment = getRandomCommentary(getActiveCommentary().defend);
     writeCommentary(comment, null);
 
     if (gameState.isPlayerBatting && currentUser) { 
@@ -2112,15 +2181,15 @@ function handleRuns(runs) {
     else {
         if (runs === 4) { 
             currentBatterStats.fours++; 
-            comment = `<span style="color: #00ff88;">${getRandomCommentary(commentaryDB.run_4)}</span>`;
+            comment = `<span style="color: #00ff88;">${getRandomCommentary(getActiveCommentary().run_4)}</span>`;
         } else if (runs === 6) { 
             currentBatterStats.sixes++; 
-            comment = `<span style="color: #9333ea; font-weight: bold;">${getRandomCommentary(commentaryDB.run_6)}</span>`;
+            comment = `<span style="color: #9333ea; font-weight: bold;">${getRandomCommentary(getActiveCommentary().run_6)}</span>`;
         } else if (runs === 5) {
             currentBatterStats.fives = (currentBatterStats.fives || 0) + 1; 
-            comment = `<span style="color: #facc15;">${getRandomCommentary(commentaryDB.run_5)}</span>`;
+            comment = `<span style="color: #facc15;">${getRandomCommentary(getActiveCommentary().run_5)}</span>`;
         } else { 
-            comment = `<span style="color: #3b82f6;">${getRandomCommentary(commentaryDB.run_1_3).replace(/\[RUNS\]/g, runs)}</span>`;
+            comment = `<span style="color: #3b82f6;">${getRandomCommentary(getActiveCommentary().run_1_3).replace(/\[RUNS\]/g, runs)}</span>`;
         }
     }
     
