@@ -1129,9 +1129,9 @@ function renderProfilePage() {
         return logoutUser();
     }
     
-    const cText = document.getElementById('prof-coins'); 
+   const cText = document.getElementById('prof-coins'); 
     if (cText) {
-        cText.innerText = stats.coins;
+        cText.innerText = formatCurrency(stats.coins);
     }
     
     document.getElementById('prof-username').innerText = currentUser;
