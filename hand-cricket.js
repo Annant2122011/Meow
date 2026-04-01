@@ -2680,6 +2680,7 @@ function endGame(result) {
         inningsStatus.innerText = "🏆 YOU WON THE MATCH!"; 
         inningsStatus.style.background = "var(--accent-blue)"; 
         fireConfetti(); 
+       SoundManager.play('crowdRoar');
     } else if (result === "COM_WINS") { 
         inningsStatus.innerText = "💀 COMPUTER WON!"; 
         inningsStatus.style.background = "var(--accent-red)"; 
