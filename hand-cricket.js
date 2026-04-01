@@ -843,7 +843,7 @@ function loadUser(username) {
     }
 }
 
-functionfunction logoutUser() {
+function logoutUser() {
     showConfirmModal(
         "SYSTEM DISCONNECT", 
         "Are you sure you want to log out? You will need your username to log back in.", 
