@@ -1097,7 +1097,6 @@ function renderShop() {
         items.forEach(item => {
             let isUnlocked = unlockedArr.includes(item.id);
             let isEquipped = equippedId === item.id;
-            let btnHtml = '';
             
             // Format rarity for CSS classes and visual flair
             let rarityColor = item.rarity === 'legendary' ? '#fbbf24' : 
@@ -1105,14 +1104,25 @@ function renderShop() {
                               item.rarity === 'rare' ? '#06b6d4' : 
                               item.rarity === 'uncommon' ? '#4ade80' : '#a1a1aa';
             
+            // Wrap buttons in a flex column so they stack nicely
+            let btnHtml = '<div style="display: flex; flex-direction: column; gap: 5px; width: 100%;">';
+            
             if (isEquipped) {
-                btnHtml = `<button class="shop-btn equipped" disabled>EQUIPPED</button>`;
+                btnHtml += `<button class="shop-btn equipped" disabled>EQUIPPED</button>`;
             } else if (isUnlocked) {
-                btnHtml = `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`;
+                btnHtml += `<button class="shop-btn equip" onclick="equipItem('${typeStr}', '${item.id}')">EQUIP</button>`;
             } else {
-                btnHtml = `<button class="shop-btn buy" style="border-bottom: 2px solid ${rarityColor};" onclick="openShopModal('${typeStr}', '${item.id}')">🪙 ${formatCurrency(item.price)}</button>`;
+                btnHtml += `<button class="shop-btn buy" style="border-bottom: 2px solid ${rarityColor};" onclick="openShopModal('${typeStr}', '${item.id}')">🪙 ${formatCurrency(item.price)}</button>`;
+            }
+
+            // ADD THE RESTORE/SELL BUTTON (If unlocked and it's not a free default item)
+            if (isUnlocked && item.price > 0) {
+                let refundAmt = Math.floor(item.price * 0.25); // 25% of original price
+                btnHtml += `<button class="shop-btn" style="background: rgba(255,42,42,0.1); border: 1px solid var(--accent-red); color: var(--accent-red); padding: 6px; font-size: 0.8rem; letter-spacing: 1px;" onclick="refundItem('${typeStr}', '${item.id}', ${refundAmt})">♻️ SELL (🪙 ${formatCurrency(refundAmt)})</button>`;
             }
             
+            btnHtml += '</div>';
+
             let equipClass = isEquipped ? 'equipped' : '';
             let iconDisplay = item.icon || item.id;
             
@@ -1146,15 +1156,6 @@ function renderShop() {
     const sfxRoarContainer = document.getElementById('shop-sfxRoar');
     if (sfxRoarContainer) sfxRoarContainer.innerHTML = buildSection(shopItems.sfxRoar, 'sfxRoar', u.unlockedSfxRoar, u.equippedSfxRoar);
 }
-// Centralized Rarity Requirements
-const rarityData = {
-    common:    { cardsReq: 5,  discount: 0.20 }, // 80% off if you have 5 Common Cards
-    uncommon:  { cardsReq: 10, discount: 0.25 }, // 75% off if you have 10 Uncommon Cards
-    rare:      { cardsReq: 5,  discount: 0.30 }, // 70% off if you have 5 Rare Cards
-    epic:      { cardsReq: 3,  discount: 0.40 }, // 60% off if you have 3 Epic Cards
-    legendary: { cardsReq: 1,  discount: 0.50 }  // 50% off if you have 1 Legendary Card
-};
-
 function openShopModal(type, itemId) {
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
     
