@@ -843,14 +843,17 @@ function loadUser(username) {
     }
 }
 
-function logoutUser() {
-    if (confirm("Are you sure you want to log out and switch accounts?")) {
-        localStorage.removeItem('hc_currentUser');
-        window.location.href = 'index.html';
-    }
+functionfunction logoutUser() {
+    showConfirmModal(
+        "SYSTEM DISCONNECT", 
+        "Are you sure you want to log out? You will need your username to log back in.", 
+        () => {
+            // This runs if the user clicks "YES"
+            localStorage.removeItem('hc_currentUser');
+            window.location.href = 'index.html'; // Or 'auth.html' (Whatever your login page is named)
+        }
+    );
 }
-let currentCropper = null; // Holds the cropper tool instance
-
 function bindPfpUpload() {
     let profBox = document.getElementById('prof-avatar-box');
     if (!profBox) return;
