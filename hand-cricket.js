@@ -3500,3 +3500,83 @@ function logTransaction(type, amount, reason) {
     
     localStorage.setItem('hc_usersDB', JSON.stringify(db));
 }
+// ==========================================
+// THE LEDGER / TRANSACTION HISTORY ENGINE
+// ==========================================
+
+function openLedgerModal(currencyType) {
+    if (!currentUser) return;
+    
+    // Grab fresh data directly from the save file
+    const db = JSON.parse(localStorage.getItem('hc_usersDB'));
+    const u = db[currentUser];
+    
+    const modal = document.getElementById('ledger-modal');
+    const listContainer = document.getElementById('ledger-list');
+    const titleEl = document.getElementById('ledger-title');
+    
+    // Clear old data
+    listContainer.innerHTML = '';
+    
+    // Determine which array to map over and style the header
+    let historyArray = [];
+    if (currencyType === 'coin') {
+        historyArray = u.transactions.coins || [];
+        titleEl.innerHTML = '🪙 COIN LEDGER';
+        titleEl.style.color = '#ffd700';
+        titleEl.style.textShadow = '0 0 10px rgba(255,215,0,0.5)';
+        modal.querySelector('.modal-content').style.borderColor = '#ffd700';
+        modal.querySelector('.modal-content > div:first-child').style.borderBottomColor = '#ffd700';
+    } else {
+        historyArray = u.transactions.diamonds || [];
+        titleEl.innerHTML = '💎 DIAMOND LEDGER';
+        titleEl.style.color = '#00d2ff';
+        titleEl.style.textShadow = '0 0 10px rgba(0,210,255,0.5)';
+        modal.querySelector('.modal-content').style.borderColor = '#00d2ff';
+        modal.querySelector('.modal-content > div:first-child').style.borderBottomColor = '#00d2ff';
+    }
+
+    // Populate the list
+    if (historyArray.length === 0) {
+        listContainer.innerHTML = '<p style="text-align:center; color: var(--text-dim); margin-top: 20px; font-family: var(--font-display);">No transactions found.</p>';
+    } else {
+        historyArray.forEach(tx => {
+            const row = document.createElement('div');
+            row.className = 'ledger-row';
+            
+            // Logic for Income vs Expense
+            const isIncome = tx.amount > 0;
+            const amountColor = isIncome ? 'var(--accent-neon)' : 'var(--accent-red)';
+            const amountPrefix = isIncome ? '+' : '';
+            const currencySymbol = currencyType === 'coin' ? '🪙' : '💎';
+            
+            // Format the number (Coins use your K/M/L formatting, Diamonds stay as decimals)
+            let displayAmount = Math.abs(tx.amount);
+            if (currencyType === 'coin') {
+                displayAmount = formatCurrency(displayAmount);
+            } else {
+                displayAmount = displayAmount.toFixed(2);
+            }
+
+            row.innerHTML = `
+                <div class="tx-left">
+                    <div class="tx-reason">${tx.reason}</div>
+                    <div class="tx-date">${tx.time}</div>
+                </div>
+                <div class="tx-right">
+                    <div class="tx-amount" style="color: ${amountColor}; text-shadow: 0 0 10px ${amountColor}80;">
+                        ${amountPrefix}${displayAmount} ${currencySymbol}
+                    </div>
+                </div>
+            `;
+            listContainer.appendChild(row);
+        });
+    }
+
+    // Show the modal
+    modal.style.display = 'flex';
+}
+
+function closeLedgerModal() {
+    document.getElementById('ledger-modal').style.display = 'none';
+}
