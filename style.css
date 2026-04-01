@@ -1276,7 +1276,7 @@ body.theme-blood {
         max-width: 100% !important;
         width: 100% !important;
     }
-}
+
 /* ---------------------------------------------------
        COMPACT TAB CONTENTS (Graphs, Stats, Ranks)
        --------------------------------------------------- */
@@ -1340,7 +1340,6 @@ body.theme-blood {
         max-width: 1200px; 
         margin: 0 auto; 
     }
-}
 
     /* ---------------------------------------------------
        INDEX / ARENA PAGE POLISH (NEW!)
