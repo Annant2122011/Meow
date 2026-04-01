@@ -1277,3 +1277,105 @@ body.theme-blood {
         width: 100% !important;
     }
 }
+/* =========================================================
+   DESKTOP & LAPTOP WIDESCREEN EXPANSION & POLISH
+   ========================================================= */
+@media (min-width: 1024px) {
+    /* 1. Expand the main wrapper */
+    .container {
+        max-width: 1400px !important; 
+        width: 95% !important;        
+        padding: 40px;
+    }
+
+    /* ---------------------------------------------------
+       PROFILE PAGE POLISH
+       --------------------------------------------------- */
+    #profile-page-container > .card { max-width: 100% !important; }
+    
+    .neon-text { font-size: 3.5rem !important; }
+    #prof-rank { font-size: 1.8rem !important; }
+    #prof-level-text { font-size: 1.5rem !important; margin-bottom: 10px !important; }
+    
+    #tab-stats ul { font-size: 1.5rem !important; line-height: 2.5 !important; }
+    #tab-stats ul li span { font-size: 1.8rem !important; }
+    
+    header .btn { font-size: 1.2rem !important; padding: 15px 30px !important; }
+    header button[onclick*="info-modal"] { font-size: 2rem !important; }
+
+    .tab-container {
+        gap: 15px; 
+        justify-content: center;
+        border-bottom: 3px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        max-width: 250px; 
+        font-size: 1.3rem !important;
+        padding: 20px !important;
+        background: rgba(255, 255, 255, 0.03) !important; 
+        border-radius: 12px 12px 0 0 !important; 
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-bottom: none !important;
+    }
+    
+    .tab-btn.active-tab { background: rgba(0, 210, 255, 0.1) !important; border-color: var(--accent-blue) !important; }
+    button[onclick="logoutUser()"] { max-width: 400px; margin: 40px auto !important; display: block; font-size: 1.4rem !important; border-radius: 12px !important; }
+    
+    .shop-grid, .achievements-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; gap: 25px; }
+    .chart-wrapper { max-width: 100% !important; width: 100% !important; }
+
+    /* ---------------------------------------------------
+       INDEX / ARENA PAGE POLISH (NEW!)
+       --------------------------------------------------- */
+    /* Give the Game Board and Menu more room */
+    #setup-screen { max-width: 900px !important; }
+    #game-screen { max-width: 1200px !important; padding: 40px !important; }
+
+    /* Enlarge the Menu Settings */
+    .setup-btn { font-size: 1.3rem !important; padding: 18px 30px !important; }
+    .game-subtitle { font-size: 1.5rem !important; margin-bottom: 20px !important; }
+    
+    /* Make the action buttons MASSIVE */
+    #start-toss-btn, button[onclick="startGauntlet()"] {
+        font-size: 1.6rem !important;
+        padding: 20px 40px !important;
+        letter-spacing: 4px;
+        margin-top: 25px;
+    }
+
+    /* GIANT IN-GAME SCOREBOARD */
+    .score-number { font-size: 5.5rem !important; }
+    .score-label { font-size: 1.2rem !important; letter-spacing: 3px !important; }
+    .score-card { padding: 20px !important; }
+
+    /* MASSIVE ANIMATED FISTS */
+    .hand-icon { font-size: 8rem !important; }
+    .vs-text { font-size: 3rem !important; }
+    .hand-display { padding: 40px !important; margin: 40px 0 !important; }
+
+    /* DASHBOARD PLAY BUTTONS (All in one row!) */
+    .button-grid {
+        grid-template-columns: repeat(7, 1fr) !important; /* 7 columns instead of 3 */
+        gap: 20px !important;
+        margin: 40px auto !important;
+    }
+    .hand-btn {
+        font-size: 3rem !important; /* Huge emojis */
+        padding: 20px 10px !important;
+        border-radius: 16px !important;
+    }
+
+    /* Commentary and Next Ball */
+    .commentary-box {
+        font-size: 1.5rem !important;
+        padding: 30px !important;
+        min-height: 100px !important;
+        line-height: 1.5 !important;
+    }
+    #next-ball-btn {
+        font-size: 1.6rem !important;
+        padding: 20px 50px !important;
+    }
+}
