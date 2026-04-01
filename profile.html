@@ -13,13 +13,15 @@
 <body>
 
     <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;">
-        <button class="btn pulse-btn" style="font-size: 1rem; padding: 10px 20px;" onclick="window.location.href='index.html'">⬅️ BACK TO ARENA</button>
-        <button onclick="document.getElementById('info-modal').style.display='flex'" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--accent-blue);">ℹ️</button>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="btn pulse-btn" style="font-size: 1rem; padding: 10px 20px;" onclick="window.location.href='index.html'">⬅️ BACK TO ARENA</button>
+            <button onclick="document.getElementById('info-modal').style.display='flex'" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--accent-blue);">ℹ️</button>
+        </div>
+        
         <div class="logo">
             <span class="logo-text" style="font-size: 1.8rem; letter-spacing: 2px;">PRO<span style="color: var(--accent-blue); text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);">FILE</span></span>
         </div>
     </header>
-
     <main class="container" id="profile-page-container">
         <div class="card" style="max-width: 600px; margin: 0 auto; border-color: var(--accent-blue);">
             
