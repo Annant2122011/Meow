@@ -1253,15 +1253,29 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     if (currencyType === 'coin' && u.coins < finalPrice) return showToast("❌ Not enough coins!");
     if (currencyType === 'diamond' && u.diamonds < finalPrice) return showToast("❌ Not enough diamonds!");
 
-    // Deduct Assets & LOG IT (Using the new 'u' parameter)
+    // ✨ NEW: Generate a highly detailed Ledger description
+    const typeNames = {
+        'avatar': 'Avatar',
+        'theme': 'UI Theme',
+        'coin': 'Coin Skin',
+        'commentary': 'Voice Pack',
+        'background': 'Stadium Pitch',
+        'sfxRoar': 'Sound Effect'
+    };
+    let friendlyType = typeNames[type] || type;
+    let formattedItemName = itemId.replace(/-/g, ' ').toUpperCase(); 
+    let detailedReason = `Bought ${friendlyType}: ${formattedItemName}`;
+
+    // Deduct Assets & LOG IT (Using the detailed string)
     if (currencyType === 'coin') {
         u.coins -= finalPrice;
-        logTransaction(u, 'coin', -finalPrice, `Shop Purchase (${method})`);
+        logTransaction(u, 'coin', -finalPrice, detailedReason);
     } else {
         u.diamonds -= finalPrice;
-        logTransaction(u, 'diamond', -finalPrice, `Shop Purchase (${method})`);
+        logTransaction(u, 'diamond', -finalPrice, detailedReason);
     }
 
+    // Deduct Grinding Cards if applicable
     if (method === 'grind') u.cards[rarityType] -= cardsToDeduct;
 
     // Unlock Item
@@ -1283,7 +1297,6 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     
     renderShop();
 }
-
 function refundItem(type, itemId, refundAmt) {
     showConfirmModal(
         "RESTORE PURCHASE", 
