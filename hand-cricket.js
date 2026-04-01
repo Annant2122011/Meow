@@ -3568,7 +3568,36 @@ function formatCurrency(num) {
 }
 
 // UPDATE: Now takes 'u' (the user object) as the first parameter
-function logTransaction(u, type, amount, reason) {
+function logTransaction(arg1, arg2, arg3, arg4) {
+    // 1. Ensure we have a logged-in user
+    if (typeof currentUser === 'undefined' || !currentUser) {
+        currentUser = localStorage.getItem('hc_currentUser');
+    }
+    if (!currentUser) return;
+
+    let u, type, amount, reason;
+    let autoSave = false;
+
+    // 2. DETECT THE FORMAT
+    if (typeof arg1 === 'object') {
+        // NEW FORMAT: Called from Shop -> logTransaction(u, type, amount, reason)
+        u = arg1;
+        type = arg2;
+        amount = arg3;
+        reason = arg4;
+    } else {
+        // OLD FORMAT: Called from Match Engine -> logTransaction(type, amount, reason)
+        type = arg1;
+        amount = arg2;
+        reason = arg3;
+        
+        // Since 'u' wasn't passed, we must pull it from the database ourselves
+        let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+        u = db[currentUser];
+        autoSave = true; // Flag that we need to save the DB at the end
+    }
+
+    // 3. Generate precise timestamp
     let date = new Date();
     let exactTime = date.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     let exactDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -3576,14 +3605,25 @@ function logTransaction(u, type, amount, reason) {
     
     let logEntry = { amount: amount, reason: reason, time: preciseTimestamp };
     
+    // 4. Failsafe: Ensure arrays exist so it never crashes again
     if (!u.transactions) u.transactions = { coins: [], diamonds: [] };
     if (!u.transactions.coins) u.transactions.coins = [];
     if (!u.transactions.diamonds) u.transactions.diamonds = [];
 
+    // 5. Apply the transaction
     if (type === 'coin') {
         u.transactions.coins.unshift(logEntry);
+        if (autoSave) u.coins += amount; // Add coins if called the old way
     } else if (type === 'diamond') {
         u.transactions.diamonds.unshift(logEntry);
+        if (autoSave) u.diamonds = parseFloat((u.diamonds + amount).toFixed(2));
+    }
+
+    // 6. Save back to database ONLY if called the old way
+    if (autoSave) {
+        let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+        db[currentUser] = u;
+        localStorage.setItem('hc_usersDB', JSON.stringify(db));
     }
 }
 // ==========================================
