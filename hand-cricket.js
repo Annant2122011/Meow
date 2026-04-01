@@ -582,6 +582,17 @@ const shopItems = {
         { id: 'standard', name: 'Standard Crowd', price: 0, icon: '🗣️', rarity: 'common' },
         { id: 'massive', name: 'Stadium Eruption', price: 4999, icon: '🏟️', rarity: 'rare' },
         { id: 'alien', name: 'Alien Cheers', price: 19999, icon: '👽', rarity: 'epic' }
+    ],
+   exchange: [
+        { id: 'ex_1k', name: 'Handful of Coins', coins: 1000, diaPrice: 0.3, icon: '💰' },
+        { id: 'ex_5k', name: 'Coin Pouch', coins: 5000, diaPrice: 1.5, icon: '💰' },
+        { id: 'ex_10k', name: 'Coin Sack', coins: 10000, diaPrice: 3.0, icon: '💰' },
+        { id: 'ex_25k', name: 'Small Chest', coins: 25000, diaPrice: 7.2, icon: '🧰' },
+        { id: 'ex_50k', name: 'Large Chest', coins: 50000, diaPrice: 14.0, icon: '🧰' },
+        { id: 'ex_100k', name: 'Coin Vault', coins: 100000, diaPrice: 27.0, icon: '🏦' },
+        { id: 'ex_250k', name: 'Bank Reserve', coins: 250000, diaPrice: 65.0, icon: '🏦' },
+        { id: 'ex_500k', name: 'National Treasury', coins: 500000, diaPrice: 125.0, icon: '🏛️' },
+        { id: 'ex_1m', name: 'The Motherlode', coins: 1000000, diaPrice: 240.0, icon: '👑' }
     ]
 };
 let tossData = { caller: null, call: null, result: null };
@@ -1155,72 +1166,82 @@ function renderShop() {
 
     const sfxRoarContainer = document.getElementById('shop-sfxRoar');
     if (sfxRoarContainer) sfxRoarContainer.innerHTML = buildSection(shopItems.sfxRoar, 'sfxRoar', u.unlockedSfxRoar, u.equippedSfxRoar);
+
+   // Render Diamond Exchange Tab
+    const exchangeContainer = document.getElementById('shop-exchange');
+    if (exchangeContainer) {
+        let exHtml = '';
+        shopItems.exchange.forEach(pkg => {
+            exHtml += `
+                <div class="shop-item">
+                    <div class="shop-item-icon">${pkg.icon}</div>
+                    <div class="shop-item-name">${pkg.name} <br><span style="color:#ffd700; font-size:0.8em;">🪙 ${formatCurrency(pkg.coins)}</span></div>
+                    <button class="shop-btn buy" style="background: #00d2ff; color: black; border: none; margin-top: auto;" onclick="buyCoinsWithDiamonds('${pkg.id}')">💎 ${pkg.diaPrice.toFixed(1)}</button>
+                </div>
+            `;
+        });
+        exchangeContainer.innerHTML = exHtml;
+    }
 }
 function openShopModal(type, itemId) {
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
-    
-    // 1. Find the Item
-    let itemMap = {
-        'avatar': shopItems.avatars, 'theme': shopItems.themes, 'coin': shopItems.coins,
-        'commentary': shopItems.commentary, 'background': shopItems.backgrounds, 'sfxRoar': shopItems.sfxRoar
-    };
+    let itemMap = { 'avatar': shopItems.avatars, 'theme': shopItems.themes, 'coin': shopItems.coins, 'commentary': shopItems.commentary, 'background': shopItems.backgrounds, 'sfxRoar': shopItems.sfxRoar };
     let item = itemMap[type].find(i => i.id === itemId);
     if (!item) return;
 
-    // 2. Calculate Costs
     let rData = rarityData[item.rarity];
     let userCards = u.cards[item.rarity] || 0;
-    
-    let instantPrice = item.price;
+    let instantCoinPrice = item.price;
+    let instantDiaPrice = getDiamondPrice(item.price); // <-- Calculate Diamond Price
     let grindPrice = Math.floor(item.price * rData.discount);
     let hasEnoughCards = userCards >= rData.cardsReq;
 
-    // 3. Update Modal DOM
     document.getElementById('shop-item-title').innerHTML = `${item.icon || item.id} ${item.name} <span style="font-size: 0.6em; color: #a1a1aa;">(${item.rarity.toUpperCase()})</span>`;
     
-    // Option A: Grind
+    // Grind Option
     let reqsDiv = document.getElementById('shop-card-reqs');
     reqsDiv.innerHTML = `Cards Needed: <span style="color: ${hasEnoughCards ? '#00ff88' : '#ff2a2a'}">${userCards} / ${rData.cardsReq} ${item.rarity.toUpperCase()} Cards</span>`;
     
     let btnGrind = document.getElementById('btn-buy-grind');
     if (hasEnoughCards) {
-        btnGrind.disabled = false;
-        btnGrind.style.background = 'var(--accent-blue)';
-        btnGrind.style.color = 'black';
+        btnGrind.disabled = false; btnGrind.style.background = 'var(--accent-blue)'; btnGrind.style.color = 'black';
         btnGrind.innerHTML = `UNLOCK FOR 🪙 ${formatCurrency(grindPrice)}`;
-        btnGrind.onclick = () => processPurchase(type, itemId, 'grind', grindPrice, item.rarity, rData.cardsReq);
+        btnGrind.onclick = () => processPurchase(type, itemId, 'grind', grindPrice, 'coin', item.rarity, rData.cardsReq);
     } else {
-        btnGrind.disabled = true;
-        btnGrind.style.background = '#374151';
-        btnGrind.style.color = 'white';
+        btnGrind.disabled = true; btnGrind.style.background = '#374151'; btnGrind.style.color = 'white';
         btnGrind.innerHTML = `LOCKED (NEED CARDS)`;
     }
 
-    // Option B: Instant
-    let btnInstant = document.getElementById('btn-buy-instant');
-    btnInstant.innerHTML = `UNLOCK INSTANTLY FOR 🪙 ${formatCurrency(instantPrice)}`;
-    btnInstant.onclick = () => processPurchase(type, itemId, 'instant', instantPrice, null, 0);
+    // Instant Options (Coins OR Diamonds)
+    let btnCoin = document.getElementById('btn-buy-instant-coin');
+    btnCoin.innerHTML = `🪙 ${formatCurrency(instantCoinPrice)}`;
+    btnCoin.onclick = () => processPurchase(type, itemId, 'instant', instantCoinPrice, 'coin', null, 0);
 
-    // Show Modal
+    let btnDia = document.getElementById('btn-buy-instant-dia');
+    btnDia.innerHTML = `💎 ${instantDiaPrice.toFixed(1)}`;
+    btnDia.onclick = () => processPurchase(type, itemId, 'instant', instantDiaPrice, 'diamond', null, 0);
+
     document.getElementById('shop-purchase-modal').style.display = 'flex';
 }
 
-function processPurchase(type, itemId, method, finalPrice, rarityType, cardsToDeduct) {
+function processPurchase(type, itemId, method, finalPrice, currencyType, rarityType, cardsToDeduct) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
     let u = usersDB[currentUser];
     
-    if (u.coins < finalPrice) {
-        alert("Not enough coins!");
-        return;
-    }
+    // Check balances
+    if (currencyType === 'coin' && u.coins < finalPrice) return alert("Not enough coins!");
+    if (currencyType === 'diamond' && u.diamonds < finalPrice) return alert("Not enough diamonds!");
 
     // Deduct Assets
-    u.coins -= finalPrice;
-    logTransaction('coin', -finalPrice, `Shop Purchase (${method})`);
-
-    if (method === 'grind') {
-        u.cards[rarityType] -= cardsToDeduct;
+    if (currencyType === 'coin') {
+        u.coins -= finalPrice;
+        logTransaction('coin', -finalPrice, `Shop Purchase (${method})`);
+    } else {
+        u.diamonds -= finalPrice;
+        logTransaction('diamond', -finalPrice, `Shop Purchase (${method})`);
     }
+
+    if (method === 'grind') u.cards[rarityType] -= cardsToDeduct;
 
     // Unlock Item
     if (type === 'avatar') u.unlockedAvatars.push(itemId);
@@ -1230,15 +1251,14 @@ function processPurchase(type, itemId, method, finalPrice, rarityType, cardsToDe
     if (type === 'background') u.unlockedBackgrounds.push(itemId);
     if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);
     
-    // Save and Update UI
     localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
     
     document.getElementById('shop-purchase-modal').style.display = 'none';
     showToast(`🛍️ Item Unlocked Successfully!`);
     SoundManager.play('coinSpend');
     
-    const cText = document.getElementById('prof-coins');
-    if (cText) cText.innerText = formatCurrency(u.coins);
+    document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
+    document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
     
     renderShop();
 }
@@ -1459,6 +1479,8 @@ function renderProfilePage() {
     if (cText) {
         cText.innerText = formatCurrency(stats.coins);
     }
+   const dText = document.getElementById('prof-diamonds');
+    if (dText) dText.innerText = (stats.diamonds || 0).toFixed(2);
     
     document.getElementById('prof-username').innerText = currentUser;
     
@@ -1937,6 +1959,12 @@ function setDifficulty(level, btnId) {
         cControls.style.display = 'flex';
     }
 }
+function getDiamondPrice(coinPrice) {
+    if (coinPrice === 0) return 0;
+    // Scales dynamically: Base 2.5 for 10k, slightly cheaper per-coin at higher tiers
+    let dPrice = 2.5 + ((coinPrice - 10000) * 0.00023);
+    return Math.max(0.1, parseFloat(dPrice.toFixed(1)));
+}
 function callCoin(choice) {
     tossData.call = choice;
     document.getElementById('player-call-controls').style.display = 'none';
@@ -2266,6 +2294,38 @@ function getComputerThrowFallback() {
         } 
         return compNum; 
     }
+}
+function buyCoinsWithDiamonds(pkgId) {
+    let pkg = shopItems.exchange.find(p => p.id === pkgId);
+    if (!pkg) return;
+
+    showConfirmModal(
+        "DIAMOND EXCHANGE", 
+        `Trade 💎 ${pkg.diaPrice.toFixed(1)} Diamonds for 🪙 ${pkg.coins.toLocaleString()} Coins?`, 
+        () => {
+            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+            let u = db[currentUser];
+
+            if (u.diamonds >= pkg.diaPrice) {
+                u.diamonds -= pkg.diaPrice;
+                u.coins += pkg.coins;
+                
+                logTransaction('diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
+                logTransaction('coin', pkg.coins, `Diamond Exchange`);
+                
+                localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                
+                document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
+                document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+                
+                showToast(`💸 Exchange Successful! (+🪙${formatCurrency(pkg.coins)})`);
+                SoundManager.play('coinSpend');
+                renderShop();
+            } else {
+                showToast(`❌ Not enough Diamonds! Need ${pkg.diaPrice.toFixed(1)}`);
+            }
+        }
+    );
 }
 
 function getComputerThrow() { 
