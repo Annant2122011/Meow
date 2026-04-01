@@ -1191,3 +1191,37 @@ body.theme-blood {
     color: #a1a1aa;
     cursor: default;
 }
+/* =========================================================
+   DESKTOP & LAPTOP WIDESCREEN EXPANSION
+   ========================================================= */
+@media (min-width: 1024px) {
+    /* 1. Expand the main wrapper on ALL pages (Index, Tournament, Profile) */
+    .container {
+        max-width: 1400px !important; 
+        width: 95% !important;        
+        padding: 40px;
+    }
+
+    /* 2. Override the inline 'max-width: 600px' on the Profile Card */
+    #profile-page-container > .card {
+        max-width: 100% !important; 
+    }
+
+    /* 3. Make Shop grids wider and more spacious on PCs */
+    .shop-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+        gap: 25px;
+    }
+    
+    /* 4. Make Achievement badges fit better on wide screens */
+    .achievements-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+    }
+    
+    /* 5. Make the Charts larger and wider */
+    .chart-wrapper {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+}
