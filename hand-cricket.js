@@ -1511,10 +1511,8 @@ function renderProfilePage() {
         rText.classList.add(rankData.rank.class);
     }
     
-    const xText = document.getElementById('prof-xp');
-    if (xText) {
-        xText.innerText = rankData.xp;
-    }
+ const xpText = document.getElementById('prof-xp');
+if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
 
     document.getElementById('prof-matches').innerText = stats.matches;
     document.getElementById('prof-wins').innerText = stats.wins;
