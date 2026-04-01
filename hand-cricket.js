@@ -1292,9 +1292,22 @@ function refundItem(type, itemId, refundAmt) {
             let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
             let u = usersDB[currentUser];
             
+            // ✨ NEW: Generate a highly detailed Ledger description
+            const typeNames = {
+                'avatar': 'Avatar',
+                'theme': 'UI Theme',
+                'coin': 'Coin Skin',
+                'commentary': 'Voice Pack',
+                'background': 'Stadium Pitch',
+                'sfxRoar': 'Sound Effect'
+            };
+            let friendlyType = typeNames[type] || type;
+            let formattedItemName = itemId.replace(/-/g, ' ').toUpperCase(); 
+            let detailedReason = `Sold ${friendlyType}: ${formattedItemName}`;
+            
             // 1. Give Coins Back & Log it
             u.coins += refundAmt;
-            logTransaction(u, 'coin', refundAmt, `Item Refund (${itemId})`);
+            logTransaction(u, 'coin', refundAmt, detailedReason);
             
             // 2. Remove from Unlocked Inventory
             if (type === 'avatar') u.unlockedAvatars = u.unlockedAvatars.filter(id => id !== itemId);
