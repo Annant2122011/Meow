@@ -2148,7 +2148,14 @@ function continueToMatch() {
     if (tossScreen) {
         tossScreen.style.display = 'none';
     }
+    const tossScreen = document.getElementById('toss-screen');
+    const matchScreen = document.getElementById('match-screen');
     
+    if (tossScreen) tossScreen.style.display = 'none';
+    if (matchScreen) {
+        matchScreen.style.display = 'block';
+        matchScreen.style.visibility = 'visible';
+    }
     matchScreen.style.display = 'block';
    const actionArea = document.getElementById('hand-action-area');
     if (actionArea) actionArea.style.display = 'flex';
@@ -2158,6 +2165,9 @@ function continueToMatch() {
     gameState.commentaryHistory.push(`--- MATCH START | 1ST INNINGS | ${formatText} ---`);
     
     writeCommentary(gameState.isPlayerBatting ? "You are Batting first. Put up a massive total!" : "You are Bowling first. Take early wickets!");
+   if (typeof updateCommentary === 'function') updateCommentary();
+    
+    SoundManager.play('crowdRoar');
 }
 
 function ballsToOvers(balls) {
