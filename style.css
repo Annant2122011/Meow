@@ -513,6 +513,40 @@ header {
     .card { padding: 15px 10px; }
     .modal-content { padding: 20px; width: 95%; }
     .achievements-grid { grid-template-columns: 1fr 1fr; }
+.hand-icon { font-size: 3.5rem; }
+    .score-number { font-size: 2.2rem; }
+    .button-grid { gap: 8px; }
+    .hand-btn { font-size: 1.5rem; padding: 10px; }
+    .card { padding: 15px 10px; }
+    .modal-content { padding: 20px; width: 95%; }
+    .achievements-grid { grid-template-columns: 1fr 1fr; }
+
+    /* ADD THESE NEW RULES */
+    /* Stack the stats list instead of keeping it in columns */
+    #tab-stats ul {
+        column-count: 1 !important;
+        font-size: 1rem !important;
+    }
+    #tab-stats ul li span {
+        font-size: 1.2rem !important;
+    }
+    /* Make sure the charts stack vertically */
+    #tab-charts.active-content {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    /* Fix the giant buttons stretching off screen */
+    #player-decision-box .btn,
+    #player-call-controls .btn {
+        font-size: 1.2rem !important;
+        padding: 15px 20px !important;
+        width: 100%; /* Make them stack neatly */
+        margin-bottom: 10px;
+    }
+    .setup-btn {
+        font-size: 0.9rem !important;
+        padding: 10px !important;
+    }
 }
 /* =========================================================
    ACHIEVEMENT PROGRESS BARS
