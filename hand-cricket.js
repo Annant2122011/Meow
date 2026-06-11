@@ -14,7 +14,7 @@ const SoundManager = {
         coinSpend: 'assets/coin_spend.wav'
     },
     
-    init: function() {
+    init: function() {                                                                                                                                             
         this.bgm.loop = true;
         this.bgm.volume = 0.25; // Subtle background hum
     },
@@ -82,7 +82,7 @@ const AFKManager = {
 // ==========================================
 // 1. GAME STATE & DATABASES
 // ==========================================
-
+let matchEnded = false;
 let gameState = {
    matchActive: false,
     maxWickets: 3,
@@ -2116,6 +2116,27 @@ function processTossResult() {
 }
 
 function startMatch(playerOptsToBat) {
+    // Full State Resets to prevent old match scores from leaking into new games
+    gameState.gameOver = false;
+    matchEnded = false;
+    gameState.innings = 1;
+    gameState.target = null;
+    gameState.playerConsecZeros = 0;
+    gameState.compConsecZeros = 0;
+    gameState.commentaryHistory = [];
+    
+    // Clear live stats
+    gameState.playerStats = { 
+        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
+        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
+        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
+    };
+    gameState.compStats = { 
+        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
+        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
+        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
+    };
+
     gameState.isPlayerBatting = playerOptsToBat;
     gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
     continueToMatch();
@@ -2144,18 +2165,21 @@ function ballsToOvers(balls) {
 }
 
 function updateMatchUI() {
+    // FIX: Failsafe exit guard to prevent cross-page crashes if not on the match arena screen
+    if (!document.getElementById('innings-status')) return;
+
     if (gameState.innings === 1) {
         inningsStatus.innerText = "🏏 1ST INNINGS";
     } else {
         inningsStatus.innerText = "⚔️ 2ND INNINGS THE CHASE"; 
-        targetBox.style.display = 'block'; 
-        targetScoreUi.innerText = gameState.target;
+        if (targetBox) targetBox.style.display = 'block'; 
+        if (targetScoreUi) targetScoreUi.innerText = gameState.target;
     }
     
     const cLabel = document.querySelector('.computer-side .side-label');
     const cScoreLabel = document.querySelector('.computer-bg .score-label');
     
-    if (gameState.isTournament) {
+    if (gameState.isTournament && gameState.currentBoss !== null) {
         const boss = bossInfo[gameState.currentBoss];
         if (cLabel) {
             cLabel.innerText = `${boss.icon} ${boss.name}`;
@@ -2223,7 +2247,6 @@ function updateMatchUI() {
     
     updateAtmosphere();
 }
-
 // ==========================================
 // 6. CORE GAMEPLAY & MATCH AI LOGIC
 // ==========================================
@@ -2389,13 +2412,18 @@ function buyCoinsWithDiamonds(pkgId) {
                 u.diamonds -= pkg.diaPrice;
                 u.coins += pkg.coins;
                 
-                logTransaction('diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
-                logTransaction('coin', pkg.coins, `Diamond Exchange`);
+                // Fixed: Explicitly passing 'u' to prevent runtime transaction logging failures
+                logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
+                logTransaction(u, 'coin', pkg.coins, `Diamond Exchange`);
                 
                 localStorage.setItem('hc_usersDB', JSON.stringify(db));
                 
-                document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
-                document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+                if (document.getElementById('prof-coins')) {
+                    document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
+                }
+                if (document.getElementById('prof-diamonds')) {
+                    document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+                }
                 
                 showToast(`💸 Exchange Successful! (+🪙${formatCurrency(pkg.coins)})`);
                 SoundManager.play('coinSpend');
@@ -2406,7 +2434,6 @@ function buyCoinsWithDiamonds(pkgId) {
         }
     );
 }
-
 function getComputerThrow() { 
     if (gameState.isTournament) {
         return getBossThrow(gameState.currentBoss); 
@@ -2424,9 +2451,10 @@ function getComputerThrow() {
 }
 
 function playHand(playerNum) {
-   AFKManager.reset();
+    AFKManager.reset();
    
-    if (gameState.gameOver || gameState.isTransitioning) {
+    // Block input if game state is over or shifting innings to eliminate bugs
+    if (gameState.gameOver || gameState.isTransitioning || matchEnded) {
         return;
     }
     
@@ -2664,6 +2692,7 @@ function handleRuns(runs) {
 function checkMatchState() {
     const stats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
     
+    // Check if the chasing team passed the target line
     if (gameState.innings === 2 && stats.runs >= gameState.target) {
         return endGame(gameState.isPlayerBatting ? "PLAYER_WINS" : "COM_WINS");
     }
@@ -2677,6 +2706,7 @@ function checkMatchState() {
         if (gameState.innings === 1) {
             triggerInningsChange(stats, reason); 
         } else { 
+            // 2nd Innings Target resolution checks
             if (stats.runs < gameState.target - 1) {
                 endGame(gameState.isPlayerBatting ? "COM_WINS" : "PLAYER_WINS"); 
             } else if (stats.runs === gameState.target - 1) {
