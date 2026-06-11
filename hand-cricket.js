@@ -2451,6 +2451,9 @@ function getComputerThrow() {
 }
 
 function playHand(playerNum) {
+   if (gameState.isTransitioning || gameState.gameOver) {
+        return; 
+    }
     AFKManager.reset();
    
     // Block input if game state is over or shifting innings to eliminate bugs
@@ -2717,6 +2720,7 @@ function checkMatchState() {
 }
 
 function triggerInningsChange(currentBatterStats, reason) {
+   gameState.isTransitioning = true;
     gameState.innings = 2; 
     gameState.target = currentBatterStats.runs + 1; 
     gameState.isPlayerBatting = !gameState.isPlayerBatting;
