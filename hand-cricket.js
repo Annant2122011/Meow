@@ -901,10 +901,13 @@ function toggleHeaderButtons(mode) {
     }
 }
 function loginUser() {
-    const username = document.getElementById('username-input').value.trim().toUpperCase();
+    const usernameInput = document.getElementById('username-input');
     
-  if (!username) {
-        // Swap alert() for showToast()
+    // 1. Check if the input actually exists on this page
+    if (!usernameInput) return; 
+
+    const username = usernameInput.value.trim().toUpperCase();
+    if (!username) {
         showToast("⚠️ Arena requires a Player Name!");
         return;
     }
@@ -913,58 +916,33 @@ function loginUser() {
     localStorage.setItem(STORAGE_KEYS.CURRENT_USER, username);
     loadUser(username);
 }
-
 function loadUser(username) {
     currentUser = username;
     syncUserData(username);
     
+    // Safely attempt to hide the login modal and update headers if they exist
     const loginModal = document.getElementById('login-modal');
-    const profileBtn = document.getElementById('user-profile-btn');
+    if (loginModal) loginModal.style.display = 'none';
+    
     const avatarText = document.getElementById('avatar-text');
+    if (avatarText) avatarText.innerText = username.charAt(0);
     
-    if (loginModal) {
-        loginModal.style.display = 'none';
-    }
-    
-    if (profileBtn) {
-        profileBtn.style.display = 'block';
-    }
-    
-    if (avatarText) {
-        avatarText.innerText = username.charAt(0);
-    }
-    
-    applyRankUI(username, 'header-avatar-box');
     applyCosmetics();
-   toggleHeaderButtons('setup');
-    
+
     // TOURNAMENT INTERCEPTOR
     const activeBoss = localStorage.getItem(STORAGE_KEYS.TOURNEY_BOSS);
+    const setupScreen = document.getElementById('setup-screen');
     
     if (activeBoss !== null) {
         gameState.isTournament = true;
         gameState.currentBoss = parseInt(activeBoss);
-        const boss = bossInfo[gameState.currentBoss];
         
-        gameState.maxWickets = 3;
-        gameState.maxBalls = 30;
-        
-        if (setupScreen) {
-            setupScreen.style.display = 'none';
-        }
-        
-        const sub = document.querySelector('.game-subtitle');
-        if (sub) {
-            sub.innerText = `VS ${boss.icon} ${boss.name}`;
-            sub.style.color = boss.color;
-            sub.style.fontWeight = "bold";
-        }
+        // Only try to hide setup screen if it exists on the current DOM
+        if (setupScreen) setupScreen.style.display = 'none';
         
         goToToss();
     } else {
-        if (setupScreen) {
-            setupScreen.style.display = 'block';
-        }
+        if (setupScreen) setupScreen.style.display = 'block';
     }
 }
 
@@ -3328,11 +3306,28 @@ function generateAIInsight(result) {
     insightBox.innerText = insight;
 }
 function resetToToss() { 
-   cancelPendingAnimations(); // Kills background loops immediately
+    // Safely clear out active animations
+    if (typeof cancelPendingAnimations === 'function') {
+        cancelPendingAnimations(); 
+    }
+    
+    // Clear tournament state
     localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); 
-    location.reload(); 
+    
+    // Soft-reset DOM instead of hard reloading (if using the SPA structure)
+    const tossScreen = document.getElementById('toss-screen');
+    const matchScreen = document.getElementById('match-screen');
+    const setupScreen = document.getElementById('setup-screen');
+    
+    if (matchScreen) matchScreen.style.display = 'none';
+    if (tossScreen) tossScreen.style.display = 'none';
+    if (setupScreen) setupScreen.style.display = 'block';
+    
+    // Reset global state
+    if (typeof getFreshGameState === 'function') {
+        gameState = getFreshGameState();
+    }
 }
-
 function openAnalysis() { 
     const modal = document.getElementById('analysis-modal');
     if (modal) {
