@@ -3908,12 +3908,8 @@ function switchLedger(tabType) {
 }
 
 function renderLedger() {
-    // If somehow they got here logged out, send them to the main menu
     if (!currentUser) currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-    if (!currentUser) {
-        window.location.href = 'index.html';
-        return;
-    }
+    if (!currentUser) { window.location.href = 'index.html'; return; }
 
     const db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     const u = db[currentUser];
@@ -3921,31 +3917,49 @@ function renderLedger() {
 
     const listContainer = document.getElementById('ledger-list');
     const totalEl = document.getElementById('ledger-total');
+    
+    // Grab all tab buttons safely
     const tabCoins = document.getElementById('tab-btn-coins');
     const tabDiamonds = document.getElementById('tab-btn-diamonds');
+    const tabCards = document.getElementById('tab-btn-cards');
+    const tabXp = document.getElementById('tab-btn-xp');
     
-    // Failsafe: Don't run this code if we aren't on the Ledger page
     if (!listContainer || !totalEl) return; 
     
     listContainer.innerHTML = '';
 
-    // Handle UI Switching based on the active tab
+    // Reset all tab styling
+    [tabCoins, tabDiamonds, tabCards, tabXp].forEach(t => { if(t) { t.style.background = 'transparent'; t.style.borderBottom = 'none'; t.style.color = 'var(--text-dim)'; }});
+
     let historyArray = [];
+    
+    // Handle UI Switching based on the active tab
     if (activeLedgerTab === 'coins') {
         historyArray = u.transactions.coins || [];
         totalEl.innerHTML = `🪙 ${formatCurrency(u.coins)}`; 
         totalEl.style.color = '#ffd700';
-        tabCoins.className = 'ledger-tab active-coin';
-        tabDiamonds.className = 'ledger-tab';
-    } else {
+        if(tabCoins) { tabCoins.style.color = '#ffd700'; tabCoins.style.borderBottom = '3px solid #ffd700'; tabCoins.style.background = 'rgba(255,215,0,0.1)'; }
+        
+    } else if (activeLedgerTab === 'diamonds') {
         historyArray = u.transactions.diamonds || [];
-        totalEl.innerHTML = `💎 ${u.diamonds.toFixed(2)}`;
+        totalEl.innerHTML = `💎 ${(u.diamonds || 0).toFixed(2)}`;
         totalEl.style.color = '#00d2ff';
-        tabDiamonds.className = 'ledger-tab active-diamond';
-        tabCoins.className = 'ledger-tab';
+        if(tabDiamonds) { tabDiamonds.style.color = '#00d2ff'; tabDiamonds.style.borderBottom = '3px solid #00d2ff'; tabDiamonds.style.background = 'rgba(0,210,255,0.1)'; }
+        
+    } else if (activeLedgerTab === 'cards') {
+        historyArray = u.transactions.cards || [];
+        let totalCards = (u.cards.common||0) + (u.cards.uncommon||0) + (u.cards.rare||0) + (u.cards.epic||0) + (u.cards.legendary||0);
+        totalEl.innerHTML = `🃏 ${totalCards}`;
+        totalEl.style.color = '#a855f7'; // Epic purple
+        if(tabCards) { tabCards.style.color = '#a855f7'; tabCards.style.borderBottom = '3px solid #a855f7'; tabCards.style.background = 'rgba(168,85,247,0.1)'; }
+        
+    } else if (activeLedgerTab === 'xp') {
+        historyArray = u.transactions.xp || [];
+        totalEl.innerHTML = `🌟 ${formatCurrency(u.xp || 0)}`;
+        totalEl.style.color = '#00ff88'; // Neon green
+        if(tabXp) { tabXp.style.color = '#00ff88'; tabXp.style.borderBottom = '3px solid #00ff88'; tabXp.style.background = 'rgba(0,255,136,0.1)'; }
     }
 
-    // Render the items
     if (historyArray.length === 0) {
         listContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: gray; font-family: var(--font-display); font-size: 1.2rem;">NO TRANSACTIONS FOUND</div>';
         return;
@@ -3953,16 +3967,24 @@ function renderLedger() {
 
     historyArray.forEach(tx => {
         const row = document.createElement('div');
-        const isIncome = tx.amount > 0;
+        const isIncome = tx.amount >= 0;
         
         row.className = `ledger-row ${isIncome ? 'row-income' : 'row-expense'}`;
         
         const amountColor = isIncome ? 'var(--accent-neon)' : 'var(--accent-red)';
         const amountPrefix = isIncome ? '+' : '';
-        const currencySymbol = activeLedgerTab === 'coins' ? '🪙' : '💎';
+        
+        let currencySymbol = '🪙';
+        if(activeLedgerTab === 'diamonds') currencySymbol = '💎';
+        if(activeLedgerTab === 'cards') currencySymbol = '🃏';
+        if(activeLedgerTab === 'xp') currencySymbol = '🌟';
         
         let displayAmount = Math.abs(tx.amount);
-        displayAmount = activeLedgerTab === 'coins' ? formatCurrency(displayAmount) : displayAmount.toFixed(2);
+        if (activeLedgerTab === 'coins' || activeLedgerTab === 'xp') {
+            displayAmount = formatCurrency(displayAmount);
+        } else if (activeLedgerTab === 'diamonds') {
+            displayAmount = displayAmount.toFixed(2);
+        }
 
         row.innerHTML = `
             <div>
@@ -3976,13 +3998,6 @@ function renderLedger() {
         listContainer.appendChild(row);
     });
 }
-
-// Automatically boot up the ledger system if the page has loaded
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('ledger-total')) {
-        initLedger();
-    }
-});
 // ==========================================
 // TOURNAMENT PAGE INITIALIZATION
 // ==========================================
