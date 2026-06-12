@@ -672,15 +672,32 @@ function initializeDOM() {
 // 2. INITIALIZATION & DATA MANAGEMENT
 // ==========================================
 
+// ==========================================
+// 2. INITIALIZATION & DATA MANAGEMENT
+// ==========================================
+
 window.onload = function() {
-    // FIX: Ensure all DOM elements are bound before executing game logic
-    initializeDOM();
-    const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    // STEP 1: BIND DOM ELEMENTS FIRST
+    if (typeof initializeDOM === 'function') {
+        initializeDOM();
+    }
+
+    // STEP 2: INITIALIZE CORE GAME STATE & DATA VARIABLES
+    // Guarantees a perfectly clean slate if the user refreshes mid-match
+    if (typeof getFreshGameState === 'function') {
+        gameState = getFreshGameState();
+    }
+    tossData = { caller: null, call: null, result: null };
+
+    // STEP 3: IDENTIFY CURRENT PAGE CONTEXT
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
-    const isLedgerPage = document.getElementById('ledger-total') !== null; // 🚨 NEW: Ledger Page Check
+    const isLedgerPage = document.getElementById('ledger-total') !== null;
+    
+    // STEP 4: FETCH SECURE USER DATA (Using the updated key from Error #12)
+    const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
 
-    // If we are on Profile, Tournament, OR Ledger
+    // STEP 5: ROUTE TO APPROPRIATE PAGE LOGIC
     if (isProfilePage || isTournamentPage || isLedgerPage) {
         if (!storedUser) {
             window.location.href = 'index.html';
@@ -700,13 +717,18 @@ window.onload = function() {
         if (isTournamentPage) {
             renderTournamentPage();
         }
+
+        // Failsafe for ledger init
+        if (isLedgerPage && typeof initLedger === 'function') {
+            initLedger();
+        }
         
     } else {
-        // We are on index.html
+        // We are on index.html (Main Arena)
         if (storedUser) {
             loadUser(storedUser);
         } else {
-            const loginModal = document.getElementById('login-modal');
+            // Unregistered user - force login modal
             if (loginModal) {
                 loginModal.style.display = 'flex';
             }
@@ -1096,27 +1118,29 @@ function bindPfpUpload() {
 
 
 function applyCosmetics() {
-    // 1. Check for user and initialize 'u' FIRST
+    // 1. FAILSAFE: Ensure user and DB exist using the new STORAGE_KEYS
     if (!currentUser) return;
-    let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
+    let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    let u = db[currentUser];
+    if (!u) return;
 
     // 2. Apply Match Screen Background
-    const matchScreen = document.getElementById('match-screen');
+    // FIX: Uses the global matchScreen variable (no redeclaration)
     if (matchScreen) {
         matchScreen.className = ''; // wipe old backgrounds
-        matchScreen.classList.add(u.equippedBackground);
+        matchScreen.classList.add(u.equippedBackground || 'bg-default');
     }
 
     // 3. Apply New CSS Themes
     document.body.classList.remove('theme-synthwave', 'theme-blood', 'theme-matrix', 'theme-ocean', 'theme-gold');
-    if (u.equippedTheme !== 'default') {
+    if (u.equippedTheme && u.equippedTheme !== 'default') {
         document.body.classList.add('theme-' + u.equippedTheme);
     }
 
     // 4. Map the dynamic sounds based on equipped SFX
-    SoundManager.tracks.batCrack = `assets/bat_${u.equippedSfxBat}.mp3`;
-    SoundManager.tracks.crowdRoar = `assets/roar_${u.equippedSfxRoar}.mp3`;
-    SoundManager.tracks.howzat = `assets/wkt_${u.equippedSfxWicket}.mp3`;
+    SoundManager.tracks.batCrack = `assets/bat_${u.equippedSfxBat || 'wood'}.mp3`;
+    SoundManager.tracks.crowdRoar = `assets/roar_${u.equippedSfxRoar || 'standard'}.mp3`;
+    SoundManager.tracks.howzat = `assets/wkt_${u.equippedSfxWicket || 'howzat'}.mp3`;
     
     // 5. Update UI Elements
     let headerAv = document.getElementById('avatar-text'); 
@@ -1127,7 +1151,7 @@ function applyCosmetics() {
         if (u.customPFP) {
             el.innerHTML = `<img src="${u.customPFP}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
         } else {
-            el.innerText = u.equippedAvatar;
+            el.innerText = u.equippedAvatar || '👤';
         }
     };
     
@@ -1141,7 +1165,7 @@ function applyCosmetics() {
         coinHeads.className = 'coin-face coin-heads'; 
         coinTails.className = 'coin-face coin-tails';
         
-        if (u.equippedCoin !== 'default') {
+        if (u.equippedCoin && u.equippedCoin !== 'default') {
             coinHeads.classList.add('coin-' + u.equippedCoin); 
             coinTails.classList.add('coin-' + u.equippedCoin); 
         }
@@ -2043,9 +2067,12 @@ if (tossData.caller === 'player') {
     }
 }
 function getDiamondPrice(coinPrice) {
-    if (coinPrice === 0) return 0;
+    // FAILSAFE: Ensure coinPrice is a valid number to prevent NaN UI errors
+    let validPrice = Number(coinPrice);
+    if (isNaN(validPrice) || validPrice <= 0) return 0;
+    
     // Scales dynamically: Base 2.5 for 10k, slightly cheaper per-coin at higher tiers
-    let dPrice = 2.5 + ((coinPrice - 10000) * 0.00023);
+    let dPrice = 2.5 + ((validPrice - 10000) * 0.00023);
     return Math.max(0.1, parseFloat(dPrice.toFixed(1)));
 }
 function callCoin(choice) {
@@ -2151,6 +2178,7 @@ function continueToMatch() {
     }
     
     matchScreen.style.display = 'block';
+   applyCosmetics();
    const actionArea = document.getElementById('hand-action-area');
     if (actionArea) actionArea.style.display = 'flex';
     updateMatchUI();
