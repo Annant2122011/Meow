@@ -3175,10 +3175,12 @@ function saveLifetimeStats(result) {
         stats.cards.rare += dropResults.rare;
         stats.cards.epic += dropResults.epic;
         stats.cards.legendary += dropResults.legendary;
+       let cardDetails = `${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`;
+        logTransaction(stats, 'card', numCards, `Loot Drops (${cardDetails})`);
         
         // Show detailed Loot Toast
         setTimeout(() => {
-            showToast(`🃏 CARDS DROPPED: ${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`);
+            showToast(`🃏 CARDS DROPPED: ${dropResults.common}"C", ${dropResults.uncommon}"U", ${dropResults.rare}"R", ${dropResults.epic}"E", ${dropResults.legendary}"L"`);
         }, 5500); // Trigger after the initial XP/Coin toast
     }
     
