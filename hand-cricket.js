@@ -2,6 +2,9 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // Add this helper function to handle JSON parsing safely
+function getUsersDB() {
+    return safeJsonParse(localStorage.getItem(STORAGE_KEYS.USERS_DB), {});
+}
 function safeJsonParse(str) {
   try {
     return JSON.parse(str);
