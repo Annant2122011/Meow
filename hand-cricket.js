@@ -2207,24 +2207,43 @@ function callCoin(choice) {
     executeCoinFlip();
 }
 
+let isFlipping = false; // Lock to prevent double-clicks
+
 function executeCoinFlip() {
+    // 1. Lock the button so the user can't break the animation
+    if (isFlipping) return;
+    isFlipping = true;
+
     document.getElementById('comp-call-controls').style.display = 'none';
     const coin = document.getElementById('coin');
     
+    if (!coin) {
+        isFlipping = false;
+        return;
+    }
+
+    // 2. Reset the coin state before starting
+    coin.style.transition = 'none'; 
+    coin.style.transform = 'rotateY(0deg)';
+    
+    // Force a reflow so the browser sees the reset before the animation
+    coin.offsetHeight; 
+
+    // 3. Start Animation
     setTimeout(() => {
-        if (coin) {
-            coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
-        }
+        coin.style.transition = 'transform 3s cubic-bezier(0.2, 0.8, 0.3, 0.99)';
         
         tossData.result = Math.random() < 0.5 ? 'heads' : 'tails';
         
+        // Use relative rotation to ensure it always looks like it's spinning forward
         let rotateAmount = (tossData.result === 'heads') ? 1800 : 1980;
+        coin.style.transform = `rotateY(${rotateAmount}deg)`;
         
-        if (coin) {
-            coin.style.transform = `rotateY(${rotateAmount}deg)`;
-        }
-        
-        setTimeout(processTossResult, 3200);
+        // 4. Process result and unlock
+        setTimeout(() => {
+            processTossResult();
+            isFlipping = false; // Unlock
+        }, 3200);
     }, 50);
 }
 
