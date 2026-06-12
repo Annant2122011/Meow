@@ -1,6 +1,20 @@
 /* =========================================================
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
+// Add this helper function to handle JSON parsing safely
+function safeJsonParse(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null; // Return null or a default object if parsing fails
+  }
+}
+
+function syncUserData() {
+  // ... existing code ...
+  const data = safeJsonParse(localStorage.getItem('userData')); // Example usage
+  // ... rest of your function ...
+}
 // ==========================================
 // 0. SYSTEM CONFIGURATION & STORAGE KEYS
 // ==========================================
