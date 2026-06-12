@@ -793,7 +793,7 @@ window.onload = function() {
 };
 
 function syncUserData(username) {
-    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     if (!usersDB[username]) {
         usersDB[username] = {};
     }
@@ -1062,7 +1062,23 @@ function bindPfpUpload() {
                 currentCropper = null;
             }
         };
-
+/**
+ * Safely parses JSON from LocalStorage.
+ * @param {string} key - The localStorage key.
+ * @param {any} defaultValue - Value to return if parsing fails.
+ */
+function safeJsonParse(key, defaultValue = {}) {
+    try {
+        const item = localStorage.getItem(key);
+        if (item === null) return defaultValue; // Key doesn't exist
+        return JSON.parse(item);
+    } catch (e) {
+        console.error(`CRITICAL: Corrupted JSON data found for key "${key}".`, e);
+        // Wipe the corrupt key so the app can start fresh instead of crashing
+        localStorage.removeItem(key); 
+        return defaultValue;
+    }
+}
         // ==========================================
         // ACTION: USER CLICKS "CHANGE PICTURE"
         // ==========================================
@@ -1176,7 +1192,7 @@ function bindPfpUpload() {
 function applyCosmetics() {
     // 1. FAILSAFE: Ensure user and DB exist using the new STORAGE_KEYS
     if (!currentUser) return;
-    let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    let db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     let u = db[currentUser];
     if (!u) return;
 
@@ -1253,7 +1269,7 @@ function renderShop() {
     if (!currentUser) return;
     
     // 2. FAILSAFE: Parse the DB safely, defaulting to an empty object if null
-    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     let u = usersDB[currentUser];
     
     // 3. FAILSAFE: Ensure the specific user data exists
@@ -1549,7 +1565,7 @@ function getRankDetails(xp) {
 }
 // Levels scale mathematically: Lvl 1=0, Lvl 2=50, Lvl 3=100, Lvl 4=150...
 function applyRankUI(username, avatarBoxId) {
-    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    const usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     const xp = usersDB[username].xp || 0;
     
     let currentLevel = 1;
@@ -1605,7 +1621,7 @@ function getLevelColor(level) {
 function renderTournamentPage() {
     // 1. FAILSAFE: Ensure user data exists before reading stats
     if (!currentUser) return;
-    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    const usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     const stats = usersDB[currentUser];
     if (!stats) return; 
 
@@ -1675,7 +1691,7 @@ function resetGauntlet() {
 }
 
 function renderProfilePage() {
-    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    const usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     const stats = usersDB[currentUser];
     
     if (!stats) {
@@ -2375,7 +2391,7 @@ function getBossThrow(bossIndex) {
         return generateAIThrow(false);
     }
     
-    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
+    let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {}); 
     let stats = usersDB[currentUser] || {};
     
     let pMatchThrows = isCompBatting ? gameState.playerMatchBowling : gameState.playerMatchBatting;
@@ -2472,7 +2488,7 @@ function getBossThrow(bossIndex) {
 
 function getComputerThrowFallback() {
     let isCompBatting = !gameState.isPlayerBatting;
-    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
+    let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {}); 
     let stats = usersDB[currentUser];
     
     let safeZero = gameState.compConsecZeros < 2;
@@ -2611,7 +2627,7 @@ function getActiveCommentary() {
     
     // 1. Check which commentary pack the user has equipped
     if (currentUser) {
-        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+        let db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
         let u = db[currentUser];
         if (u && u.equippedCommentary) {
             packKey = u.equippedCommentary;
@@ -2690,7 +2706,7 @@ function handleWicket(num, type) {
     
     // 2. Persist career stats
     if (currentUser && !gameState.isPlayerBatting) { // If user took a wicket
-        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+        let db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
         if (db[currentUser]) {
             db[currentUser].wickets = (db[currentUser].wickets || 0) + 1;
             localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
@@ -3022,7 +3038,7 @@ function endGame(result) {
 function saveLifetimeStats(result) {
     if (!currentUser) return;
     
-    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
+    let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {}); 
     let stats = usersDB[currentUser];
     
     let matchXP = 0;
@@ -3724,7 +3740,7 @@ function logTransaction(arg1, arg2, arg3, arg4) {
         reason = arg3;
         
         // FAILSAFE: Add || {} to prevent parse crashes, and exit if user is missing
-        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+        let db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
         u = db[currentUser];
         
         if (!u) return; // Safely abort if the user doesn't exist
@@ -3868,7 +3884,7 @@ function renderLedger() {
         return;
     }
 
-    const db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+    const db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     const u = db[currentUser];
     if (!u) return;
 
