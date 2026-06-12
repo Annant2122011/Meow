@@ -1585,3 +1585,40 @@ body.theme-blood {
 #toast-container { 
     z-index: 10000 !important; 
 }
+/* ==========================================
+   MOBILE RESPONSIVE PATCH
+   ========================================== */
+@media (max-width: 600px) {
+    /* 1. Force the decision boxes to wrap elements */
+    #player-decision-box, 
+    #computer-decision-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* 2. Adjust the match buttons to form a neat mobile grid */
+    #player-decision-box .btn, 
+    #computer-decision-box .btn {
+        flex: 1 1 28%; /* Takes up roughly 1/3 of the row */
+        margin: 0;
+        padding: 12px 5px;
+        font-size: 1.2rem;
+        min-width: 70px;
+    }
+
+    /* 3. Ensure modals and cards don't bleed off the screen */
+    .card, 
+    div[style*="max-width: 500px"], 
+    div[style*="max-width: 450px"] {
+        width: 95% !important;
+        padding: 15px !important;
+        margin: 10px auto;
+    }
+
+    /* 4. Scale down massive neon fonts for mobile readability */
+    .neon-text {
+        font-size: 1.8rem !important;
+    }
+}
