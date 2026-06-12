@@ -19,9 +19,11 @@
     <main class="container">
         <div class="card" style="max-width: 800px; margin: 0 auto; border-color: #ffd700; padding: 0; overflow: hidden;">
             
-            <div style="display: flex; width: 100%;">
-                <div id="tab-btn-coins" class="ledger-tab" onclick="switchLedger('coins')">🪙 COIN HISTORY</div>
-                <div id="tab-btn-diamonds" class="ledger-tab" onclick="switchLedger('diamonds')">💎 DIAMOND HISTORY</div>
+            <div style="display: flex; width: 100%; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div id="tab-btn-coins" class="ledger-tab" style="flex: 1; padding: 15px 5px; font-size: 0.9rem;" onclick="switchLedger('coins')">🪙 COINS</div>
+                <div id="tab-btn-diamonds" class="ledger-tab" style="flex: 1; padding: 15px 5px; font-size: 0.9rem;" onclick="switchLedger('diamonds')">💎 DIAMONDS</div>
+                <div id="tab-btn-cards" class="ledger-tab" style="flex: 1; padding: 15px 5px; font-size: 0.9rem;" onclick="switchLedger('cards')">🃏 CARDS</div>
+                <div id="tab-btn-xp" class="ledger-tab" style="flex: 1; padding: 15px 5px; font-size: 0.9rem;" onclick="switchLedger('xp')">🌟 XP</div>
             </div>
 
             <div style="text-align: center; padding: 25px; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.1);">
