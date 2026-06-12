@@ -1251,9 +1251,6 @@ function renderShop() {
     const buildSection = (items, typeStr, unlockedArr, equippedId) => {
         let html = '';
     let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
-    
-    const buildSection = (items, typeStr, unlockedArr, equippedId) => {
-        let html = '';
         
         items.forEach(item => {
             let isUnlocked = unlockedArr.includes(item.id);
@@ -1736,8 +1733,7 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
     
 
     let achHtml = '';
-    
-    achievementList.forEach(ach => {
+ masterAchievements.forEach(ach => {
         let val = ach.getVal(stats);
         let level = 1;
         let nextTarget = ach.thresholds[0];
@@ -3186,7 +3182,7 @@ function evaluateAchievements(stats) {
     }
 
    
-    achievementList.forEach(ach => {
+   masterAchievements.forEach(ach => {
         let val = ach.getVal(stats);
         let level = 1;
         
