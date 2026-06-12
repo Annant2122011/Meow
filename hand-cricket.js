@@ -2,6 +2,15 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // ==========================================
+// 0. SYSTEM CONFIGURATION & STORAGE KEYS
+// ==========================================
+// Define these as hardcoded strings. Do not reference the object inside itself.
+const STORAGE_KEYS = {
+    USERS_DB: 'hc_usersDB_v2',       // The master database of all players
+    CURRENT_USER: 'hc_currentUser',  // The currently logged-in player
+    TOURNEY_BOSS: 'hc_tourneyBoss'   // The active campaign boss
+};
+// ==========================================
 // ANIMATION TRACKING (To prevent battery drain)
 // ==========================================
 let confettiAnimId = null;
@@ -105,14 +114,7 @@ const SoundManager = {
     }
 };
 SoundManager.init();
-// ==========================================
-// 0. SYSTEM CONFIGURATION & STORAGE KEYS
-// ==========================================
-const STORAGE_KEYS = {
-    USERS_DB: STORAGE_KEYS.USERS_DB,
-    CURRENT_USER: STORAGE_KEYS.CURRENT_USER,
-    TOURNEY_BOSS: STORAGE_KEYS.TOURNEY_BOSS
-};
+
 // ==========================================
 // ⏳ AFK MANAGER (Anti-Idle System)
 // ==========================================
