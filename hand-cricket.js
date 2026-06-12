@@ -94,10 +94,7 @@ function cancelPendingAnimations() {
 }
 // ==========================================
 // ⚡ EVENT DELEGATION CONTROLLER
-// ==========================================
-function bindGlobalEvents() {
-    // Attach ONE listener to the container, not the buttons
-    const decisionBox = document.getElementById('player-decision-box');
+ const decisionBox = document.getElementById('match-button-grid');
     
     if (decisionBox) {
         decisionBox.addEventListener('click', function(e) {
@@ -2265,7 +2262,8 @@ function continueToMatch() {
     if (tossScreen) {
         tossScreen.style.display = 'none';
     }
-    
+    const resultScreen = document.getElementById('toss-result-screen');
+    if (resultScreen) resultScreen.style.display = 'none';
     matchScreen.style.display = 'block';
    applyCosmetics();
    const actionArea = document.getElementById('hand-action-area');
