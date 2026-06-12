@@ -3074,6 +3074,8 @@ function saveLifetimeStats(result) {
     stats.xp = Math.max(0, (stats.xp || 0) + matchXP);
     stats.coins = (stats.coins || 0) + matchCoins;
     gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
+   if (matchXP !== 0) logTransaction(stats, 'xp', matchXP, `Match Result (${result})`);
+    if (matchCoins !== 0) logTransaction(stats, 'coin', matchCoins, `Match Reward`);
 
     stats.matches += 1;
     
