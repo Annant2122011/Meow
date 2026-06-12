@@ -3969,4 +3969,3 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTournamentPage();
     }
 });
-}
