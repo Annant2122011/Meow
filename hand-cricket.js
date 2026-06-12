@@ -4009,3 +4009,14 @@ document.addEventListener('DOMContentLoaded', () => {
         initLedger();
     }
 });
+// ==========================================
+// TOURNAMENT PAGE INITIALIZATION
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    // Check if we are currently on the tournament page
+    const bossGrid = document.getElementById('boss-grid-container');
+    if (bossGrid) {
+        // Run the render function if the element exists
+        renderTournamentPage();
+    }
+});
