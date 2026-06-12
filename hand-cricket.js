@@ -704,8 +704,7 @@ function initializeDOM() {
 window.onload = function() {
    // 1. RE-HYDRATE SESSION (The Fix)
     restoreSession();
-   // GATEKEEPER: Stop execution if session is broken
-    if (!validateSession()) return;
+   
     // STEP 1: BIND DOM ELEMENTS FIRST
     if (typeof initializeDOM === 'function') {
         initializeDOM();
