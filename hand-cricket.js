@@ -2,6 +2,11 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // ==========================================
+// ANIMATION TRACKING (To prevent battery drain)
+// ==========================================
+let confettiAnimId = null;
+let coinAnimId = null;
+// ==========================================
 // TOURNAMENT BOSS DATABASE (CAMPAIGN MODE)
 // ==========================================
 const bossInfo = [
@@ -40,6 +45,16 @@ function validateSession() {
     // and compare it to Date.now() here.
     
     return true;
+}
+function cancelPendingAnimations() {
+    if (confettiAnimId) {
+        cancelAnimationFrame(confettiAnimId);
+        confettiAnimId = null;
+    }
+    if (coinAnimId) {
+        cancelAnimationFrame(coinAnimId);
+        coinAnimId = null;
+    }
 }
 // ==========================================
 // ⚡ EVENT DELEGATION CONTROLLER
@@ -2257,6 +2272,7 @@ function processTossResult() {
 }
 
 function startMatch(playerOptsToBat) {
+   cancelPendingAnimations(); // Kills background loops immediately
     // 1. Temporarily save the settings the user just chose
     let tempMaxWickets = gameState.maxWickets;
     let tempMaxBalls = gameState.maxBalls;
@@ -3334,6 +3350,7 @@ function generateAIInsight(result) {
     insightBox.innerText = insight;
 }
 function resetToToss() { 
+   cancelPendingAnimations(); // Kills background loops immediately
     localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); 
     location.reload(); 
 }
@@ -3506,7 +3523,6 @@ function downloadPDF() {
 }
 
 function fireConfetti() {
-function fireConfetti() {
     // 1. FAILSAFE: Strictly check if it's a loaded function, not just 'undefined'
     if (typeof confetti !== 'function') {
         console.warn("Confetti CDN unavailable. Skipping animation.");
@@ -3535,8 +3551,9 @@ function fireConfetti() {
             });
             
             if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
+            // STORE THE ID HERE:
+            confettiAnimId = requestAnimationFrame(frame);
+        }
         } catch (e) {
             console.error("Confetti frame crashed. Terminating animation loop.", e);
             // The loop gracefully ends here because we DO NOT call requestAnimationFrame again.
@@ -3601,6 +3618,7 @@ function closeConfirmModal() {
     pendingConfirmAction = null;
 }
 function exitGameTab() {
+   cancelPendingAnimations(); // Kills background loops immediately
     // 1. Show the sleek confirmation modal first
     showConfirmModal(
         "EXIT ARENA", 
