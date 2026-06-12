@@ -3153,6 +3153,8 @@ function saveLifetimeStats(result) {
         // Calculate Diamonds
         let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
         if (result === "PLAYER_WINS") matchDiamonds += 0.10;
+       // 🛑 ADD THIS LINE TO ACTUALLY UPDATE THE USER BALANCE:
+        stats.diamonds = parseFloat(((stats.diamonds || 0) + matchDiamonds).toFixed(2));
         
      logTransaction(stats, 'diamond', matchDiamonds, 'Match Reward (' + result + ')');
         
