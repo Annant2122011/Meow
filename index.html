@@ -52,16 +52,16 @@
     ⚙️ MATCH SETUP ⚙️
 </h3>
                 <p style="color: var(--accent-blue); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">SELECT FORMAT</p>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
-                    <button id="btn-fmt-1" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(1, Infinity, 'btn-fmt-1')">Classic (Protect your wicket to survive)</button>
-                    <button id="btn-fmt-3" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(3, 30, 'btn-fmt-3')">T5 (5 Overs)</button>
-                    <button id="btn-fmt-5" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(5, 60, 'btn-fmt-5')">T10 (10 Overs)</button>
-                </div>
+               <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
+    <button id="btn-fmt-t5" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(3, 30, 'btn-fmt-t5')">T5</button>
+    <button id="btn-fmt-t10" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(5, 60, 'btn-fmt-t10')">T10</button>
+    <button id="btn-fmt-classic" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setFormat(5, Infinity, 'btn-fmt-classic')">Classic</button>
+</div>
                 <p style="color: var(--accent-red); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px;">AI DIFFICULTY</p>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap;">
-                    <button id="btn-diff-easy" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('easy', 'btn-diff-easy')">🟢 Casual AI</button>
-                    <button id="btn-diff-hard" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.2rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="setDifficulty('hard', 'btn-diff-hard')">🔴 Pro AI (Learns)</button>
-              <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+               <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
+    <button id="btn-diff-easy" class="btn pulse-btn setup-btn active-setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setDifficulty('easy', 'btn-diff-easy')">NORMAL MODE</button>
+    <button id="btn-diff-pro" class="btn pulse-btn setup-btn" style="padding: 10px 20px; font-size: 1.1rem; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="setDifficulty('hard', 'btn-diff-pro')">AI MODE</button>
+</div>
                 <button class="btn-hollow-pulse" onclick="goToToss()">🪙 PROCEED TO TOSS</button>
                 <button class="btn-hollow-pulse" onclick="window.location.href='tournament.html'">🏆 ENTER THE GAUNTLET (CAMPAIGN)</button>
             </div>
