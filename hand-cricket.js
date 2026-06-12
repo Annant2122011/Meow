@@ -755,6 +755,7 @@ window.onload = function() {
     // STEP 1: BIND DOM ELEMENTS FIRST
     if (typeof initializeDOM === 'function') {
         initializeDOM();
+       bindGlobalEvents();
     }
 
     // STEP 2: INITIALIZE CORE GAME STATE & DATA VARIABLES
