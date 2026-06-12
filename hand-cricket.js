@@ -22,13 +22,6 @@ function safeJsonParse(key, defaultValue = {}) {
 function getUsersDB() {
     return safeJsonParse(localStorage.getItem(STORAGE_KEYS.USERS_DB), {});
 }
-function safeJsonParse(str) {
-  try {
-    return JSON.parse(str);
-  } catch (e) {
-    return null; // Return null or a default object if parsing fails
-  }
-}
 
 function syncUserData() {
   // ... existing code ...
