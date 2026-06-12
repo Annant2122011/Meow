@@ -134,10 +134,15 @@
 
                 <div id="hand-action-area" class="action-area">
                     <p style="color: var(--text-bright); margin-bottom: 15px; font-weight: bold;">THROW YOUR NUMBER:</p>
-                    <div class="button-grid">
-                        <button class="hand-btn" onclick="playHand(1)">1</button><button class="hand-btn" onclick="playHand(2)">2</button><button class="hand-btn" onclick="playHand(3)">3</button><button class="hand-btn" onclick="playHand(4)">4</button><button class="hand-btn" onclick="playHand(5)">5</button><button class="hand-btn" onclick="playHand(6)">6</button>
-                        <button id="zero-btn" class="hand-btn" style="grid-column: span 3; font-size: 1.5rem;" onclick="playHand(0)">🛡️ 0</button>
-                    </div>
+                    <div id="player-decision-box" class="button-grid">
+    <button class="hand-btn" data-value="1">1</button>
+    <button class="hand-btn" data-value="2">2</button>
+    <button class="hand-btn" data-value="3">3</button>
+    <button class="hand-btn" data-value="4">4</button>
+    <button class="hand-btn" data-value="5">5</button>
+    <button class="hand-btn" data-value="6">6</button>
+    <button id="zero-btn" class="hand-btn" style="grid-column: span 3;" data-value="0">🛡️ 0</button>
+</div>
                 </div>
 
                 <div id="end-game-controls" class="end-game-controls">
