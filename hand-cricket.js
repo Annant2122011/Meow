@@ -83,40 +83,45 @@ const AFKManager = {
 // 1. GAME STATE & DATABASES
 // ==========================================
 let matchEnded = false;
-let gameState = {
-   matchActive: false,
-    maxWickets: 3,
-    maxBalls: 30,
-    aiDifficulty: 'easy',
-    playerHistory: [],
-    tossChoice: null,
-    isPlayerBatting: null,
-    innings: 1,
-    target: null,
-    gameOver: false,
-    isTransitioning: false,
-    playerConsecZeros: 0,
-    compConsecZeros: 0,
-    commentaryHistory: [],
-    
-    // TOURNAMENT STATE
-    isTournament: false,
-    currentBoss: null,
-    playerMatchBatting: { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 },
-    playerMatchBowling: { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 },
-    
-    playerStats: {
-        runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0,
-        wicketsLost: 0, hitCentury: false, dots: 0, currentWicketRuns: 0,
-        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }]
-    },
-    compStats: {
-        runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0,
-        wicketsLost: 0, dots: 0, currentWicketRuns: 0, dismissalHistory: [],
-        wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }]
-    }
-};
 
+// 1. Create a factory function for a perfectly clean state
+function getFreshGameState() {
+    return {
+        matchActive: false,
+        maxWickets: 3,
+        maxBalls: 30,
+        aiDifficulty: 'easy',
+        playerHistory: [],
+        tossChoice: null,
+        isPlayerBatting: null,
+        innings: 1,
+        target: null,
+        gameOver: false,
+        isTransitioning: false,
+        playerConsecZeros: 0,
+        compConsecZeros: 0,
+        commentaryHistory: [],
+        
+        isTournament: false,
+        currentBoss: null,
+        playerMatchBatting: { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 },
+        playerMatchBowling: { '0': 0, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0 },
+        
+        playerStats: {
+            runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0,
+            wicketsLost: 0, hitCentury: false, dots: 0, currentWicketRuns: 0, fives: 0,
+            dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }]
+        },
+        compStats: {
+            runs: 0, balls: 0, fours: 0, sixes: 0, outOn: '-', extras: 0,
+            wicketsLost: 0, hitCentury: false, dots: 0, currentWicketRuns: 0, fives: 0,
+            dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }]
+        }
+    };
+}
+
+// 2. Initialize the global variable safely
+let gameState = getFreshGameState();
 // MULTI-VARIATION COMMENTARY MASTER DATABASE
 const commentaryMaster = {
     // 🎙️ Standard EN (Basic)
@@ -595,6 +600,32 @@ const shopItems = {
         { id: 'ex_1m', name: 'The Motherlode', coins: 1000000, diaPrice: 240.0, icon: '👑' }
     ]
 };
+// MASTER ACHIEVEMENTS DATABASE
+const masterAchievements = [
+    { id: 'veteran', icon: '🎖️', title: 'Veteran', desc: 'Play matches', thresholds: [50, 100, 250, 500, 1000], getVal: s => s.matches },
+    { id: 'champion', icon: '🏆', title: 'Champion', desc: 'Win matches', thresholds: [20, 50, 150, 300, 500], getVal: s => s.wins },
+    { id: 'runmachine', icon: '🚀', title: 'Run Machine', desc: 'Career runs', thresholds: [1000, 5000, 15000, 30000, 50000], getVal: s => s.totalRuns },
+    { id: 'wickettaker', icon: '🎳', title: 'Wicket Taker', desc: 'Take wickets', thresholds: [50, 200, 500, 1000, 2000], getVal: s => s.totalWicketsTaken },
+    { id: 'sixerking', icon: '👍', title: 'Sixer King', desc: 'Hit sixes', thresholds: [100, 500, 1000, 2500, 5000], getVal: s => s.careerSixes },
+    { id: 'boundaryhitter', icon: '⚡', title: 'Boundary Hitter', desc: 'Hit fours', thresholds: [200, 1000, 2500, 5000, 10000], getVal: s => s.careerFours },
+    { id: 'duckhunter', icon: '🦆', title: 'Duck Hunter', desc: 'AI Ducks', thresholds: [5, 25, 50, 100, 250], getVal: s => s.aiDucksGivens },
+    { id: 'chaser', icon: '🏃', title: 'Chaser', desc: 'Winning chases', thresholds: [10, 50, 100, 250, 500], getVal: s => s.successfulChases },
+    { id: 'luckycoin', icon: '🪙', title: 'Lucky Coin', desc: 'Win tosses', thresholds: [25, 100, 250, 500, 1000], getVal: s => s.tossesWon },
+    { id: 'marathon', icon: '🥵', title: 'Marathon', desc: 'Face balls', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsFaced },
+    { id: 'unbreakable', icon: '🛡️', title: 'Unbreakable', desc: 'Not-Outs', thresholds: [10, 50, 100, 250, 500], getVal: s => s.notOutMatches },
+    { id: 'economical', icon: '📉', title: 'Economical', desc: 'Bowl dot balls', thresholds: [100, 500, 2000, 5000, 10000], getVal: s => s.careerDotsBowled },
+    { id: 'wall', icon: '🧱', title: 'The Wall', desc: 'Defend successfully', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.careerDefenses },
+    { id: 'centurion', icon: '🏏', title: 'Centurion', desc: 'Score centuries', thresholds: [1, 10, 25, 50, 100], getVal: s => s.careerCenturies || 0 },
+    { id: 'fiftymaker', icon: '💥', title: 'Fifty Maker', desc: 'Score half-centuries', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerFifties || 0 },
+    { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 }, 
+    { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 20, 50, 100, 250], getVal: s => s.bossesDefeated || 0 },
+    { id: 'xp_farmer', icon: '🌟', title: 'XP Farmer', desc: 'Lifetime XP', thresholds: [5000, 25000, 100000, 250000, 1000000], getVal: s => s.xp || 0 },
+    { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
+    { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
+    { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
+    { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
+    { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
+];
 let tossData = { caller: null, call: null, result: null };
 let currentUser = null;
 let srChartInstance = null;
@@ -609,24 +640,34 @@ const handEmojis = { 0: '🛡️', 1: '☝️', 2: '✌️', 3: '🤟', 4: '🖖
 
 // DOM Elements
 
-const tossResultScreen = document.getElementById('toss-result-screen');
-const playerDecisionBox = document.getElementById('player-decision-box');
-const computerDecisionBox = document.getElementById('computer-decision-box');
-const matchScreen = document.getElementById('match-screen');
-const tossScreen = document.getElementById('toss-screen');
-const setupScreen = document.getElementById('setup-screen');
-const inningsStatus = document.getElementById('innings-status');
-const commentaryBox = document.getElementById('hand-commentary');
-const targetBox = document.getElementById('target-box');
-const targetScoreUi = document.getElementById('target-score');
-const actionArea = document.getElementById('hand-action-area');
-const zeroBtn = document.getElementById('zero-btn'); 
+// 1. Declare DOM Elements globally
+let tossResultScreen, playerDecisionBox, computerDecisionBox, matchScreen;
+let tossScreen, setupScreen, inningsStatus, commentaryBox, targetBox;
+let targetScoreUi, actionArea, zeroBtn, loginModal;
 
+// 2. Centralized function to bind them when the HTML is ready
+function initializeDOM() {
+    tossResultScreen = document.getElementById('toss-result-screen');
+    playerDecisionBox = document.getElementById('player-decision-box');
+    computerDecisionBox = document.getElementById('computer-decision-box');
+    matchScreen = document.getElementById('match-screen');
+    tossScreen = document.getElementById('toss-screen');
+    setupScreen = document.getElementById('setup-screen');
+    inningsStatus = document.getElementById('innings-status');
+    commentaryBox = document.getElementById('hand-commentary');
+    targetBox = document.getElementById('target-box');
+    targetScoreUi = document.getElementById('target-score');
+    actionArea = document.getElementById('hand-action-area');
+    zeroBtn = document.getElementById('zero-btn');
+    loginModal = document.getElementById('login-modal');
+}
 // ==========================================
 // 2. INITIALIZATION & DATA MANAGEMENT
 // ==========================================
 
 window.onload = function() {
+    // FIX: Ensure all DOM elements are bound before executing game logic
+    initializeDOM();
     const storedUser = localStorage.getItem('hc_currentUser');
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
@@ -1121,6 +1162,19 @@ const rarityData = {
 };
 
 function renderShop() {
+    // 1. FAILSAFE: Ensure currentUser exists before doing anything
+    if (!currentUser) return;
+    
+    // 2. FAILSAFE: Parse the DB safely, defaulting to an empty object if null
+    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    let u = usersDB[currentUser];
+    
+    // 3. FAILSAFE: Ensure the specific user data exists
+    if (!u) return;
+
+    // ... [KEEP THE REST OF YOUR EXISTING CODE BELOW THIS LINE] ...
+    const buildSection = (items, typeStr, unlockedArr, equippedId) => {
+        let html = '';
     let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
     
     const buildSection = (items, typeStr, unlockedArr, equippedId) => {
@@ -1353,39 +1407,6 @@ function refundItem(type, itemId, refundAmt) {
         }
     );
 }
-function buyCoinsWithDiamonds(pkgId) {
-    let pkg = shopItems.exchange.find(p => p.id === pkgId);
-    if (!pkg) return;
-
-    showConfirmModal(
-        "DIAMOND EXCHANGE", 
-        `Trade 💎 ${pkg.diaPrice.toFixed(1)} Diamonds for 🪙 ${pkg.coins.toLocaleString()} Coins?`, 
-        () => {
-            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
-            let u = db[currentUser];
-
-            if (u.diamonds >= pkg.diaPrice) {
-                u.diamonds -= pkg.diaPrice;
-                u.coins += pkg.coins;
-                
-                logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
-                logTransaction(u, 'coin', pkg.coins, `Diamond Exchange`);
-                
-                localStorage.setItem('hc_usersDB', JSON.stringify(db));
-                
-                document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
-                document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
-                
-                showToast(`💸 Exchange Successful! (+🪙${formatCurrency(pkg.coins)})`);
-                SoundManager.play('coinSpend');
-                renderShop();
-            } else {
-                showToast(`❌ Not enough Diamonds! Need ${pkg.diaPrice.toFixed(1)}`);
-            }
-        }
-    );
-}
-
 function equipItem(type, itemId) {
     let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
     let u = usersDB[currentUser];
@@ -1619,32 +1640,7 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
     }
     document.getElementById('prof-best-spell').innerText = bestSpellText;
 
-    // BUILD DYNAMIC 5-TIER ACHIEVEMENTS
-    const achievementList = [
-        { id: 'veteran', icon: '🎖️', title: 'Veteran', desc: 'Play matches', thresholds: [50, 100, 250, 500, 1000], getVal: s => s.matches },
-        { id: 'champion', icon: '🏆', title: 'Champion', desc: 'Win matches', thresholds: [20, 50, 150, 300, 500], getVal: s => s.wins },
-        { id: 'runmachine', icon: '🚀', title: 'Run Machine', desc: 'Career runs', thresholds: [1000, 5000, 15000, 30000, 50000], getVal: s => s.totalRuns },
-        { id: 'wickettaker', icon: '🎳', title: 'Wicket Taker', desc: 'Take wickets', thresholds: [50, 200, 500, 1000, 2000], getVal: s => s.totalWicketsTaken },
-        { id: 'sixerking', icon: '👍', title: 'Sixer King', desc: 'Hit sixes', thresholds: [100, 500, 1000, 2500, 5000], getVal: s => s.careerSixes },
-        { id: 'boundaryhitter', icon: '⚡', title: 'Boundary Hitter', desc: 'Hit fours', thresholds: [200, 1000, 2500, 5000, 10000], getVal: s => s.careerFours },
-        { id: 'duckhunter', icon: '🦆', title: 'Duck Hunter', desc: 'AI Ducks', thresholds: [5, 25, 50, 100, 250], getVal: s => s.aiDucksGivens },
-        { id: 'chaser', icon: '🏃', title: 'Chaser', desc: 'Winning chases', thresholds: [10, 50, 100, 250, 500], getVal: s => s.successfulChases },
-        { id: 'luckycoin', icon: '🪙', title: 'Lucky Coin', desc: 'Win tosses', thresholds: [25, 100, 250, 500, 1000], getVal: s => s.tossesWon },
-        { id: 'marathon', icon: '🥵', title: 'Marathon', desc: 'Face balls', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsFaced },
-        { id: 'unbreakable', icon: '🛡️', title: 'Unbreakable', desc: 'Not-Outs', thresholds: [10, 50, 100, 250, 500], getVal: s => s.notOutMatches },
-        { id: 'economical', icon: '📉', title: 'Economical', desc: 'Bowl dot balls', thresholds: [100, 500, 2000, 5000, 10000], getVal: s => s.careerDotsBowled },
-        { id: 'wall', icon: '🧱', title: 'The Wall', desc: 'Defend successfully', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.careerDefenses },
-        { id: 'centurion', icon: '🏏', title: 'Centurion', desc: 'Score centuries', thresholds: [1, 10, 25, 50, 100], getVal: s => s.careerCenturies || 0 },
-        { id: 'fiftymaker', icon: '💥', title: 'Fifty Maker', desc: 'Score half-centuries', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerFifties || 0 },
-        { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 }, 
-        { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 20, 50, 100, 250], getVal: s => s.bossesDefeated || 0 },
-        { id: 'xp_farmer', icon: '🌟', title: 'XP Farmer', desc: 'Lifetime XP', thresholds: [5000, 25000, 100000, 250000, 1000000], getVal: s => s.xp || 0 },
-        { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
-        { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
-        { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
-        { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
-        { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
-    ];
+    
 
     let achHtml = '';
     
@@ -1698,7 +1694,8 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
     }
 
    // CHARTS GENERATION
-
+// FAILSAFE: Only draw charts if the external library loaded successfully
+   if (typeof Chart !== 'undefined') {
     if (srChartInstance) srChartInstance.destroy();
     if (runsChartInstance) runsChartInstance.destroy();
     if (throwDnaInstance) throwDnaInstance.destroy();
@@ -1736,7 +1733,7 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
         });
     }
 
-  
+   }
    const runsCtxElement = document.getElementById('runsBarChart');
     if (runsCtxElement) {
         runsChartInstance = new Chart(runsCtxElement.getContext('2d'), {
@@ -2027,15 +2024,15 @@ function setDifficulty(level, btnId) {
     const resultScreen = document.getElementById('toss-result-screen');
     if (resultScreen) resultScreen.style.display = 'none';
 
-    if (tossData.caller === 'player') {
-        statusText.innerHTML = "You won the chance to call! <br><span class='dynamic-theme-text'>Heads or Tails?</span>";
-        pControls.style.display = 'flex';
-        cControls.style.display = 'none';
+if (tossData.caller === 'player') {
+        if (statusText) statusText.innerHTML = "You won the chance to call! <br><span class='dynamic-theme-text'>Heads or Tails?</span>";
+        if (pControls) pControls.style.display = 'flex';
+        if (cControls) cControls.style.display = 'none';
     } else {
         tossData.call = Math.random() < 0.5 ? 'heads' : 'tails';
-        statusText.innerHTML = `Computer is calling... <br><span style='color: var(--accent-red); text-transform: uppercase;'>${tossData.call}</span>`;
-        pControls.style.display = 'none';
-        cControls.style.display = 'flex';
+        if (statusText) statusText.innerHTML = `Computer is calling... <br><span style='color: var(--accent-red); text-transform: uppercase;'>${tossData.call}</span>`;
+        if (pControls) pControls.style.display = 'none';
+        if (cControls) cControls.style.display = 'flex';
     }
 }
 function getDiamondPrice(coinPrice) {
@@ -2116,32 +2113,29 @@ function processTossResult() {
 }
 
 function startMatch(playerOptsToBat) {
-    // Full State Resets to prevent old match scores from leaking into new games
-    gameState.gameOver = false;
-    matchEnded = false;
-    gameState.innings = 1;
-    gameState.target = null;
-    gameState.playerConsecZeros = 0;
-    gameState.compConsecZeros = 0;
-    gameState.commentaryHistory = [];
-    
-    // Clear live stats
-    gameState.playerStats = { 
-        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
-        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
-        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
-    };
-    gameState.compStats = { 
-        runs: 0, balls: 0, fours: 0, sixes: 0, fives: 0, extras: 0, wicketsLost: 0, 
-        dots: 0, currentWicketRuns: 0, outOn: '-', hitCentury: false,
-        dismissalHistory: [], wicketRunsHistory: [], wormData: [{ ball: 0, runs: 0, wkt: false }] 
-    };
+    // 1. Temporarily save the settings the user just chose
+    let tempMaxWickets = gameState.maxWickets;
+    let tempMaxBalls = gameState.maxBalls;
+    let tempDifficulty = gameState.aiDifficulty;
+    let tempTourney = gameState.isTournament;
+    let tempBoss = gameState.currentBoss;
 
+    // 2. Wipe the entire state clean
+    matchEnded = false;
+    gameState = getFreshGameState();
+
+    // 3. Restore the match settings
+    gameState.maxWickets = tempMaxWickets;
+    gameState.maxBalls = tempMaxBalls;
+    gameState.aiDifficulty = tempDifficulty;
+    gameState.isTournament = tempTourney;
+    gameState.currentBoss = tempBoss;
+
+    // 4. Set batting order and begin
     gameState.isPlayerBatting = playerOptsToBat;
     gameState.commentaryHistory.push(`👤 You elected to ${playerOptsToBat ? 'BAT' : 'BOWL'} first.`);
     continueToMatch();
 }
-
 function continueToMatch() {
    gameState.matchActive = true;
    toggleHeaderButtons('match');
@@ -3056,32 +3050,7 @@ function evaluateAchievements(stats) {
         stats.achLevels = {};
     }
 
-    const achievementList = [
-        { id: 'veteran', icon: '🎖️', title: 'Veteran', desc: 'Play matches', thresholds: [50, 100, 250, 500, 1000], getVal: s => s.matches },
-        { id: 'champion', icon: '🏆', title: 'Champion', desc: 'Win matches', thresholds: [20, 50, 150, 300, 500], getVal: s => s.wins },
-        { id: 'runmachine', icon: '🚀', title: 'Run Machine', desc: 'Career runs', thresholds: [1000, 5000, 15000, 30000, 50000], getVal: s => s.totalRuns },
-        { id: 'wickettaker', icon: '🎳', title: 'Wicket Taker', desc: 'Take wickets', thresholds: [50, 200, 500, 1000, 2000], getVal: s => s.totalWicketsTaken },
-        { id: 'sixerking', icon: '👍', title: 'Sixer King', desc: 'Hit sixes', thresholds: [100, 500, 1000, 2500, 5000], getVal: s => s.careerSixes },
-        { id: 'boundaryhitter', icon: '⚡', title: 'Boundary Hitter', desc: 'Hit fours', thresholds: [200, 1000, 2500, 5000, 10000], getVal: s => s.careerFours },
-        { id: 'duckhunter', icon: '🦆', title: 'Duck Hunter', desc: 'AI Ducks', thresholds: [5, 25, 50, 100, 250], getVal: s => s.aiDucksGivens },
-        { id: 'chaser', icon: '🏃', title: 'Chaser', desc: 'Winning chases', thresholds: [10, 50, 100, 250, 500], getVal: s => s.successfulChases },
-        { id: 'luckycoin', icon: '🪙', title: 'Lucky Coin', desc: 'Win tosses', thresholds: [25, 100, 250, 500, 1000], getVal: s => s.tossesWon },
-        { id: 'marathon', icon: '🥵', title: 'Marathon', desc: 'Face balls', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsFaced },
-        { id: 'unbreakable', icon: '🛡️', title: 'Unbreakable', desc: 'Not-Outs', thresholds: [10, 50, 100, 250, 500], getVal: s => s.notOutMatches },
-        { id: 'economical', icon: '📉', title: 'Economical', desc: 'Bowl dot balls', thresholds: [100, 500, 2000, 5000, 10000], getVal: s => s.careerDotsBowled },
-        { id: 'wall', icon: '🧱', title: 'The Wall', desc: 'Defend successfully', thresholds: [50, 200, 500, 1000, 2500], getVal: s => s.careerDefenses },
-        { id: 'centurion', icon: '🏏', title: 'Centurion', desc: 'Score centuries', thresholds: [1, 10, 25, 50, 100], getVal: s => s.careerCenturies || 0 },
-        { id: 'fiftymaker', icon: '💥', title: 'Fifty Maker', desc: 'Score half-centuries', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerFifties || 0 },
-        { id: 'sniper', icon: '🎯', title: 'Sniper', desc: 'Wicket at 0 runs', thresholds: [5, 25, 50, 100, 250], getVal: s => s.careerSnipes || 0 }, 
-        { id: 'boss_slayer', icon: '⚔️', title: 'Boss Slayer', desc: 'Defeat Bosses', thresholds: [5, 20, 50, 100, 250], getVal: s => s.bossesDefeated || 0 },
-        { id: 'xp_farmer', icon: '🌟', title: 'XP Farmer', desc: 'Lifetime XP', thresholds: [5000, 25000, 100000, 250000, 1000000], getVal: s => s.xp || 0 },
-        { id: 'loyalist', icon: '🕒', title: 'Loyalist', desc: 'Total balls bowled', thresholds: [500, 2500, 10000, 25000, 50000], getVal: s => s.totalBallsBowled },
-        { id: 'bowling_machine', icon: '🦾', title: 'Bowling Machine', desc: 'Runs conceded', thresholds: [1000, 5000, 25000, 50000, 100000], getVal: s => s.totalRunsConceded },
-        { id: 'giant_killer', icon: '👹', title: 'Giant Killer', desc: 'Beat Cricket God', thresholds: [1, 5, 10, 25, 50], getVal: s => s.godDefeats || 0 },
-        { id: 'double_centurion', icon: '🚀', title: 'Double Centurion', desc: 'Score 200s', thresholds: [1, 5, 10, 25, 50], getVal: s => s.careerDoubleCenturies || 0 },
-        { id: 'fifer', icon: '🔥', title: 'Five-for', desc: 'Take 5 wkts in match', thresholds: [1, 5, 10, 25, 50], getVal: s => s.fiveWicketHauls || 0 }
-    ];
-
+   
     achievementList.forEach(ach => {
         let val = ach.getVal(stats);
         let level = 1;
@@ -3598,15 +3567,18 @@ function logTransaction(arg1, arg2, arg3, arg4) {
         type = arg2;
         amount = arg3;
         reason = arg4;
-    } else {
+  } else {
         // OLD FORMAT: Called from Match Engine -> logTransaction(type, amount, reason)
         type = arg1;
         amount = arg2;
         reason = arg3;
         
-        // Since 'u' wasn't passed, we must pull it from the database ourselves
-        let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+        // FAILSAFE: Add || {} to prevent parse crashes, and exit if user is missing
+        let db = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
         u = db[currentUser];
+        
+        if (!u) return; // Safely abort if the user doesn't exist
+        
         autoSave = true; // Flag that we need to save the DB at the end
     }
 
