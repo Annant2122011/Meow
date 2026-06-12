@@ -1707,9 +1707,14 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
    document.getElementById('prof-hs').innerText = stats.highestScore + (stats.highestScoreNotOut ? '*' : '');
     document.getElementById('prof-ducks').innerText = stats.ducks;
     
+    // Find this block around line 1098 and update it:
     let batAvg = "0.00";
-    if (stats.matches > 0) {
-        batAvg = (stats.totalRuns / stats.matches).toFixed(2);
+    const dismissals = stats.totalDismissals || 0;
+    if (dismissals > 0) {
+        batAvg = (stats.totalRuns / dismissals).toFixed(2);
+    } else {
+        // Failsafe: If you've never been dismissed, your average is your total runs
+        batAvg = stats.totalRuns.toFixed(2);
     }
     document.getElementById('prof-bat-avg').innerText = batAvg;
     
@@ -3092,8 +3097,21 @@ function saveLifetimeStats(result) {
     stats.careerFives = (stats.careerFives || 0) + (gameState.playerStats.fives || 0);
     stats.careerDotsBowled += gameState.compStats.dots; 
     
-    if (gameState.playerStats.runs > stats.highestScore) {
-        stats.highestScore = gameState.playerStats.runs;
+  // Find where stats.highestScore is updated and replace it with this:
+    gameState.playerStats.wicketRunsHistory.forEach(w => { 
+        if (w.runs === 0) stats.ducks += 1; 
+        stats.last35Innings.push({ runs: w.runs, notOut: false }); 
+        
+        // 👉 ADD THIS CHECK HERE to capture individual innings scores (like your 68!)
+        if (w.runs > stats.highestScore) {
+            stats.highestScore = w.runs;
+            stats.highestScoreNotOut = false;
+        }
+    });
+    
+    // Also check your current active/unfinished wicket run at the end of the match
+    if (gameState.playerStats.currentWicketRuns > stats.highestScore) {
+        stats.highestScore = gameState.playerStats.currentWicketRuns;
         stats.highestScoreNotOut = (gameState.playerStats.wicketsLost < gameState.maxWickets);
     }
     
