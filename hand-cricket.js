@@ -585,49 +585,6 @@ const commentaryMaster = {
         ]
     }
 };
-// 10-BOSS GAUNTLET DATABASE
-const bossInfo = [
-    { 
-        name: "The Rookie", icon: "🟢", color: "gray", desc: "Plays entirely randomly. A good warmup.", 
-        taunts: { wkt: ["Oops, did I do that?", "Beginner's luck!"], six: ["Wow, I hit it far!", "That felt good!"] } 
-    },
-    { 
-        name: "The Wall", icon: "🧱", color: "#00d2ff", desc: "Defends heavily. Hard to score boundaries against.", 
-        taunts: { wkt: ["Impenetrable.", "You cannot break the wall.", "Patience is key."], six: ["A rare breach.", "Calculated risk."] } 
-    },
-    { 
-        name: "The Slogger", icon: "🏏", color: "orange", desc: "Highly aggressive. Throws massive numbers.", 
-        taunts: { wkt: ["A minor setback!", "I swing for the fences!"], six: ["OUT OF THE STADIUM!", "HAVE SOME OF THAT!", "TOO EASY!"] } 
-    },
-    { 
-        name: "The Illusionist", icon: "🎭", color: "#b91c1c", desc: "Throws opposites. If you go high, he goes low.", 
-        taunts: { wkt: ["Sleight of hand!", "Look over there!"], six: ["An illusion broke...", "Tricky!"] } 
-    },
-    { 
-        name: "The Copycat", icon: "🪞", color: "#00bfa5", desc: "Mirrors your previous move perfectly.", 
-        taunts: { wkt: ["Stop hitting yourself!", "I'm just like you!"], six: ["I let you have that one.", "Copying is hard..."] } 
-    },
-    { 
-        name: "The Gambler", icon: "🎲", color: "#facc15", desc: "Takes wild guesses. Brilliant or awful.", 
-        taunts: { wkt: ["Jackpot!", "Snake eyes for you!"], six: ["Bust!", "I'll double down next time!"] } 
-    },
-    { 
-        name: "The Mathematician", icon: "🧮", color: "#9333ea", desc: "Calculates the weighted average of your throws.", 
-        taunts: { wkt: ["Statistically inevitable.", "The numbers don't lie."], six: ["A statistical anomaly.", "Margin of error..."] } 
-    },
-    { 
-        name: "The Sniper", icon: "🎯", color: "#ff2a2a", desc: "Reads lifetime stats. Highly predictive.", 
-        taunts: { wkt: ["Predictable.", "Right in my crosshairs.", "I knew you'd throw that."], six: ["Precision strike.", "Calculated."] } 
-    },
-    { 
-        name: "Grandmaster", icon: "🧙‍♂️", color: "#00ff88", desc: "Reads CURRENT match patterns. Learns in real-time.", 
-        taunts: { wkt: ["Checkmate.", "Your patterns betray you.", "I am three moves ahead."], six: ["Flawless execution.", "Masterclass."] } 
-    },
-    { 
-        name: "Cricket God", icon: "👑", color: "#fbbf24", desc: "The ultimate challenge. Near-perfect prediction.", 
-        taunts: { wkt: ["Bow to the God.", "You cannot defy destiny."], six: ["A mere mortal strikes?", "Blasphemy!"] } 
-    }
-];
 
 // SHOP DATABASE (HYBRID COLLECTION SYSTEM)
 const shopItems = {
