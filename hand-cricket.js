@@ -23,11 +23,7 @@ function getUsersDB() {
     return safeJsonParse(localStorage.getItem(STORAGE_KEYS.USERS_DB), {});
 }
 
-function syncUserData() {
-  // ... existing code ...
-  const data = safeJsonParse(localStorage.getItem('userData')); // Example usage
-  // ... rest of your function ...
-}
+
 // ==========================================
 // 0. SYSTEM CONFIGURATION & STORAGE KEYS
 // ==========================================
@@ -817,6 +813,7 @@ window.onload = function() {
 };
 
 function syncUserData(username) {
+    const data = safeJsonParse(localStorage.getItem('userData')); // Example usage
     let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
     if (!usersDB[username]) {
         usersDB[username] = {};
@@ -1264,7 +1261,7 @@ function renderShop() {
     // ... [KEEP THE REST OF YOUR EXISTING CODE BELOW THIS LINE] ...
     const buildSection = (items, typeStr, unlockedArr, equippedId) => {
         let html = '';
-    let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
+  safeJsonParse(STORAGE_KEYS.USERS_DB, {})[currentUser];
         
         items.forEach(item => {
             let isUnlocked = unlockedArr.includes(item.id);
@@ -1548,7 +1545,8 @@ function getRankDetails(xp) {
 }
 // Levels scale mathematically: Lvl 1=0, Lvl 2=50, Lvl 3=100, Lvl 4=150...
 function applyRankUI(username, avatarBoxId) {
-    const xp = (usersDB[username]?.xp) || 0;  // Safe navigation with optional chaining
+   const db = safeJsonParse(STORAGE_KEYS.USERS_DB, {});
+   const xp = (db[username]?.xp) || 0;  // Safe navigation with optional chaining
     
     let currentLevel = 1;
     let xpRequiredForNext = 50; 
