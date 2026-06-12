@@ -3343,11 +3343,19 @@ function downloadPDF() {
 }
 
 function fireConfetti() {
-    if (typeof confetti !== 'undefined') {
-        var duration = 3000; 
-        var end = Date.now() + duration;
-        
-        (function frame() {
+function fireConfetti() {
+    // 1. FAILSAFE: Strictly check if it's a loaded function, not just 'undefined'
+    if (typeof confetti !== 'function') {
+        console.warn("Confetti CDN unavailable. Skipping animation.");
+        return;
+    }
+    
+    var duration = 3000; 
+    var end = Date.now() + duration;
+    
+    (function frame() {
+        // 2. FAILSAFE: Wrap in a try-catch so an internal error breaks the loop
+        try {
             confetti({ 
                 particleCount: 5, 
                 angle: 60, 
@@ -3366,10 +3374,12 @@ function fireConfetti() {
             if (Date.now() < end) {
                 requestAnimationFrame(frame);
             }
-        }());
-    }
+        } catch (e) {
+            console.error("Confetti frame crashed. Terminating animation loop.", e);
+            // The loop gracefully ends here because we DO NOT call requestAnimationFrame again.
+        }
+    }());
 }
-
 function showToast(message) {
     const container = document.getElementById('toast-container');
     if (!container) return;
