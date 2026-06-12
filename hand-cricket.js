@@ -1,6 +1,23 @@
 /* =========================================================
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
+/**
+ * Safely parses JSON from LocalStorage.
+ * @param {string} key - The localStorage key.
+ * @param {any} defaultValue - Value to return if parsing fails.
+ */
+function safeJsonParse(key, defaultValue = {}) {
+    try {
+        const item = localStorage.getItem(key);
+        if (item === null) return defaultValue; // Key doesn't exist
+        return JSON.parse(item);
+    } catch (e) {
+        console.error(`CRITICAL: Corrupted JSON data found for key "${key}".`, e);
+        // Wipe the corrupt key so the app can start fresh instead of crashing
+        localStorage.removeItem(key); 
+        return defaultValue;
+    }
+}
 // Add this helper function to handle JSON parsing safely
 function getUsersDB() {
     return safeJsonParse(localStorage.getItem(STORAGE_KEYS.USERS_DB), {});
@@ -1030,23 +1047,7 @@ function bindPfpUpload() {
                 currentCropper = null;
             }
         };
-/**
- * Safely parses JSON from LocalStorage.
- * @param {string} key - The localStorage key.
- * @param {any} defaultValue - Value to return if parsing fails.
- */
-function safeJsonParse(key, defaultValue = {}) {
-    try {
-        const item = localStorage.getItem(key);
-        if (item === null) return defaultValue; // Key doesn't exist
-        return JSON.parse(item);
-    } catch (e) {
-        console.error(`CRITICAL: Corrupted JSON data found for key "${key}".`, e);
-        // Wipe the corrupt key so the app can start fresh instead of crashing
-        localStorage.removeItem(key); 
-        return defaultValue;
-    }
-}
+
         // ==========================================
         // ACTION: USER CLICKS "CHANGE PICTURE"
         // ==========================================
