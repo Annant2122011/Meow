@@ -42,6 +42,25 @@ function validateSession() {
     return true;
 }
 // ==========================================
+// ⚡ EVENT DELEGATION CONTROLLER
+// ==========================================
+function bindGlobalEvents() {
+    // Attach ONE listener to the container, not the buttons
+    const decisionBox = document.getElementById('player-decision-box');
+    
+    if (decisionBox) {
+        decisionBox.addEventListener('click', function(e) {
+            // Check if the clicked element is actually a button
+            if (e.target.tagName === 'BUTTON') {
+                const val = parseInt(e.target.getAttribute('data-value'));
+                if (!isNaN(val)) {
+                    playHand(val);
+                }
+            }
+        });
+    }
+}
+// ==========================================
 // 🏏 SOUND MANAGER (AAA Audio Engine)
 // ==========================================
 const SoundManager = {
