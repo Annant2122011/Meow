@@ -31,7 +31,14 @@ const SoundManager = {
     }
 };
 SoundManager.init();
-
+// ==========================================
+// 0. SYSTEM CONFIGURATION & STORAGE KEYS
+// ==========================================
+const STORAGE_KEYS = {
+    USERS_DB: STORAGE_KEYS.USERS_DB,
+    CURRENT_USER: STORAGE_KEYS.CURRENT_USER,
+    TOURNEY_BOSS: STORAGE_KEYS.TOURNEY_BOSS
+};
 // ==========================================
 // ⏳ AFK MANAGER (Anti-Idle System)
 // ==========================================
@@ -668,7 +675,7 @@ function initializeDOM() {
 window.onload = function() {
     // FIX: Ensure all DOM elements are bound before executing game logic
     initializeDOM();
-    const storedUser = localStorage.getItem('hc_currentUser');
+    const storedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     const isProfilePage = document.getElementById('profile-page-container') !== null;
     const isTournamentPage = document.getElementById('tournament-page-container') !== null;
     const isLedgerPage = document.getElementById('ledger-total') !== null; // 🚨 NEW: Ledger Page Check
@@ -708,7 +715,7 @@ window.onload = function() {
 };
 
 function syncUserData(username) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     if (!usersDB[username]) {
         usersDB[username] = {};
     }
@@ -783,7 +790,7 @@ function syncUserData(username) {
     if (!u.transactions.coins) u.transactions.coins = [];
     if (!u.transactions.diamonds) u.transactions.diamonds = [];
     
-    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
 }
 function toggleHeaderButtons(mode) {
     const backBtn = document.getElementById('header-back-btn');
@@ -831,7 +838,7 @@ function loginUser() {
     }
     
     syncUserData(username);
-    localStorage.setItem('hc_currentUser', username);
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER, username);
     loadUser(username);
 }
 
@@ -860,7 +867,7 @@ function loadUser(username) {
    toggleHeaderButtons('setup');
     
     // TOURNAMENT INTERCEPTOR
-    const activeBoss = localStorage.getItem('hc_tourney_boss');
+    const activeBoss = localStorage.getItem(STORAGE_KEYS.TOURNEY_BOSS);
     
     if (activeBoss !== null) {
         gameState.isTournament = true;
@@ -895,7 +902,7 @@ function logoutUser() {
         "Are you sure you want to log out? You will need your username to log back in.", 
         () => {
             // This runs if the user clicks "YES"
-            localStorage.removeItem('hc_currentUser');
+            localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
             window.location.href = 'index.html'; // Or 'auth.html' (Whatever your login page is named)
         }
     );
@@ -907,7 +914,7 @@ function bindPfpUpload() {
     profBox.style.cursor = 'pointer'; 
     
     profBox.onclick = () => {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
         let userStats = usersDB[currentUser];
         
         let isFirstTime = !userStats.hasBoughtPFP;
@@ -1042,11 +1049,11 @@ function bindPfpUpload() {
             let finalImageUrl = croppedCanvas.toDataURL('image/png');
 
             // Save and Deduct Coins
-            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
             db[currentUser].coins -= cost;
             db[currentUser].hasBoughtPFP = true;
             db[currentUser].customPFP = finalImageUrl;
-            localStorage.setItem('hc_usersDB', JSON.stringify(db));
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
             
             applyCosmetics(); 
            const cText = document.getElementById('prof-coins');
@@ -1066,9 +1073,9 @@ function bindPfpUpload() {
             desc.innerHTML = `Removing your PFP to return to the default emoji is <b style="color: var(--accent-blue);">FREE</b>.<br><br>However, uploading a new picture later will cost 🪙 5,000 coins. Proceed?`;
             
             document.getElementById('btn-pfp-proceed').onclick = () => {
-                let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+                let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
                 db[currentUser].customPFP = null; 
-                localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
                 applyCosmetics();
                 closePfpModal();
                 showToast("🗑️ Profile Picture Removed.");
@@ -1091,7 +1098,7 @@ function bindPfpUpload() {
 function applyCosmetics() {
     // 1. Check for user and initialize 'u' FIRST
     if (!currentUser) return;
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
 
     // 2. Apply Match Screen Background
     const matchScreen = document.getElementById('match-screen');
@@ -1166,7 +1173,7 @@ function renderShop() {
     if (!currentUser) return;
     
     // 2. FAILSAFE: Parse the DB safely, defaulting to an empty object if null
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     let u = usersDB[currentUser];
     
     // 3. FAILSAFE: Ensure the specific user data exists
@@ -1175,7 +1182,7 @@ function renderShop() {
     // ... [KEEP THE REST OF YOUR EXISTING CODE BELOW THIS LINE] ...
     const buildSection = (items, typeStr, unlockedArr, equippedId) => {
         let html = '';
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
     
     const buildSection = (items, typeStr, unlockedArr, equippedId) => {
         let html = '';
@@ -1260,7 +1267,7 @@ function renderShop() {
 }
 
 function openShopModal(type, itemId) {
-    let u = JSON.parse(localStorage.getItem('hc_usersDB'))[currentUser];
+    let u = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB))[currentUser];
     let itemMap = { 'avatar': shopItems.avatars, 'theme': shopItems.themes, 'coin': shopItems.coins, 'commentary': shopItems.commentary, 'background': shopItems.backgrounds, 'sfxRoar': shopItems.sfxRoar };
     let item = itemMap[type].find(i => i.id === itemId);
     if (!item) return;
@@ -1301,7 +1308,7 @@ function openShopModal(type, itemId) {
 }
 
 function processPurchase(type, itemId, method, finalPrice, currencyType, rarityType, cardsToDeduct) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
     let u = usersDB[currentUser];
     
     if (currencyType === 'coin' && u.coins < finalPrice) return showToast("❌ Not enough coins!");
@@ -1340,7 +1347,7 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     if (type === 'background') u.unlockedBackgrounds.push(itemId);
     if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);
     
-    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
     
     document.getElementById('shop-purchase-modal').style.display = 'none';
     showToast(`🛍️ Item Unlocked Successfully!`);
@@ -1357,7 +1364,7 @@ function refundItem(type, itemId, refundAmt) {
         "RESTORE PURCHASE", 
         `Are you sure you want to sell this item? You will receive 🪙 ${formatCurrency(refundAmt)} (25% of base price).`, 
         () => {
-            let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+            let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
             let u = usersDB[currentUser];
             
             // ✨ Generate a highly detailed Ledger description for SELLING
@@ -1394,7 +1401,7 @@ function refundItem(type, itemId, refundAmt) {
             if (type === 'sfxRoar' && u.equippedSfxRoar === itemId) u.equippedSfxRoar = 'standard';
             
             // 4. Save and Update UI
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
             
             showToast(`♻️ Item Sold! (+🪙${formatCurrency(refundAmt)})`);
             SoundManager.play('coinSpend'); 
@@ -1408,7 +1415,7 @@ function refundItem(type, itemId, refundAmt) {
     );
 }
 function equipItem(type, itemId) {
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
     let u = usersDB[currentUser];
     
     if (type === 'avatar') u.equippedAvatar = itemId;
@@ -1418,7 +1425,7 @@ function equipItem(type, itemId) {
     if (type === 'background') u.equippedBackground = itemId;
     if (type === 'sfxRoar') u.equippedSfxRoar = itemId;
     
-    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
     
     applyCosmetics(); 
     renderShop();
@@ -1462,7 +1469,7 @@ function getRankDetails(xp) {
 }
 // Levels scale mathematically: Lvl 1=0, Lvl 2=50, Lvl 3=100, Lvl 4=150...
 function applyRankUI(username, avatarBoxId) {
-    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     const xp = usersDB[username].xp || 0;
     
     let currentLevel = 1;
@@ -1516,7 +1523,7 @@ function getLevelColor(level) {
 // ==========================================
 
 function renderTournamentPage() {
-    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     const stats = usersDB[currentUser];
     const tLevel = stats.tournamentLevel || 0;
     
@@ -1551,7 +1558,7 @@ function renderTournamentPage() {
 }
 
 function startBossFight(index) {
-    localStorage.setItem('hc_tourney_boss', index);
+    localStorage.setItem(STORAGE_KEYS.TOURNEY_BOSS, index);
     window.location.href = 'index.html';
 }
 
@@ -1559,10 +1566,10 @@ function resetGauntlet() {
     if (!currentUser) return;
     
     if (confirm("🚨 WARNING: Are you sure you want to restart The Gauntlet? All your defeated bosses will be locked again!")) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
         if (usersDB[currentUser]) {
             usersDB[currentUser].tournamentLevel = 0;
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
             renderTournamentPage();
             showToast("🔄 The Gauntlet has been restarted!");
         }
@@ -1570,7 +1577,7 @@ function resetGauntlet() {
 }
 
 function renderProfilePage() {
-    const usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     const stats = usersDB[currentUser];
     
     if (!stats) {
@@ -2082,9 +2089,9 @@ function processTossResult() {
     gameState.commentaryHistory.push(`🪙 TOSS: It's ${tossData.result.toUpperCase()}! ${playerWins ? 'You won the toss!' : 'Computer won the toss.'}`);
 
     if (playerWins && currentUser) {
-        let uDB = JSON.parse(localStorage.getItem('hc_usersDB'));
+        let uDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
         uDB[currentUser].tossesWon = (uDB[currentUser].tossesWon || 0) + 1;
-        localStorage.setItem('hc_usersDB', JSON.stringify(uDB));
+        localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(uDB));
     }
 
     const winText = document.getElementById('toss-winner-text');
@@ -2252,7 +2259,7 @@ function getBossThrow(bossIndex) {
         return Math.floor(Math.random() * 6) + 1;
     }
     
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
     let stats = usersDB[currentUser] || {};
     
     let pMatchThrows = isCompBatting ? gameState.playerMatchBowling : gameState.playerMatchBatting;
@@ -2361,7 +2368,7 @@ function getBossThrow(bossIndex) {
 
 function getComputerThrowFallback() {
     let isCompBatting = !gameState.isPlayerBatting;
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
     let stats = usersDB[currentUser];
     
     if (!stats || !stats.battingThrows) {
@@ -2399,7 +2406,7 @@ function buyCoinsWithDiamonds(pkgId) {
         "DIAMOND EXCHANGE", 
         `Trade 💎 ${pkg.diaPrice.toFixed(1)} Diamonds for 🪙 ${pkg.coins.toLocaleString()} Coins?`, 
         () => {
-            let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+            let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
             let u = db[currentUser];
 
             if (u.diamonds >= pkg.diaPrice) {
@@ -2410,7 +2417,7 @@ function buyCoinsWithDiamonds(pkgId) {
                 logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
                 logTransaction(u, 'coin', pkg.coins, `Diamond Exchange`);
                 
-                localStorage.setItem('hc_usersDB', JSON.stringify(db));
+                localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
                 
                 if (document.getElementById('prof-coins')) {
                     document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
@@ -2461,7 +2468,7 @@ function playHand(playerNum) {
     }
 
     if (currentUser) { 
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
         let stats = usersDB[currentUser]; 
         
         if (gameState.isPlayerBatting) {
@@ -2470,7 +2477,7 @@ function playHand(playerNum) {
             stats.bowlingThrows[playerNum] = (stats.bowlingThrows[playerNum] || 0) + 1; 
         }
         
-        localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
+        localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB)); 
     }
 
     const compNum = getComputerThrow();
@@ -2614,10 +2621,10 @@ function handleDefense() {
     writeCommentary(comment, null);
 
     if (gameState.isPlayerBatting && currentUser) { 
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
         if (usersDB[currentUser]) { 
             usersDB[currentUser].careerDefenses += 1; 
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB)); 
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB)); 
         } 
     }
 }
@@ -2875,11 +2882,11 @@ function endGame(result) {
 
     // Handle Tournament Progress
     if (gameState.isTournament) {
-        let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')); 
+        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
         let stats = usersDB[currentUser];
         if (result === "PLAYER_WINS" && stats.tournamentLevel === gameState.currentBoss) {
             stats.tournamentLevel++; 
-            localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
             setTimeout(() => { showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); }, 1000);
         }
         
@@ -2887,7 +2894,7 @@ function endGame(result) {
             const returnBtn = endControls.querySelectorAll('button')[2];
             if (returnBtn) {
                 returnBtn.innerText = "🔙 TO GAUNTLET";
-                returnBtn.onclick = function() { localStorage.removeItem('hc_tourney_boss'); window.location.href = 'tournament.html'; };
+                returnBtn.onclick = function() { localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); window.location.href = 'tournament.html'; };
             }
         }
     }
@@ -2895,7 +2902,7 @@ function endGame(result) {
 function saveLifetimeStats(result) {
     if (!currentUser) return;
     
-    let usersDB = JSON.parse(localStorage.getItem('hc_usersDB')) || {}; 
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
     let stats = usersDB[currentUser];
     
     let matchXP = 0;
@@ -3003,7 +3010,7 @@ function saveLifetimeStats(result) {
 
     evaluateAchievements(stats);
     usersDB[currentUser] = stats; 
-    localStorage.setItem('hc_usersDB', JSON.stringify(usersDB));
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
    // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
     if (result !== "FORFEIT") {
         // Calculate Diamonds
@@ -3171,7 +3178,7 @@ function generateAIInsight(result) {
     insightBox.innerText = insight;
 }
 function resetToToss() { 
-    localStorage.removeItem('hc_tourney_boss'); 
+    localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); 
     location.reload(); 
 }
 
@@ -3563,7 +3570,7 @@ function formatCurrency(num) {
 function logTransaction(arg1, arg2, arg3, arg4) {
     // 1. Ensure we have a logged-in user
     if (typeof currentUser === 'undefined' || !currentUser) {
-        currentUser = localStorage.getItem('hc_currentUser');
+        currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     }
     if (!currentUser) return;
 
@@ -3584,7 +3591,7 @@ function logTransaction(arg1, arg2, arg3, arg4) {
         reason = arg3;
         
         // FAILSAFE: Add || {} to prevent parse crashes, and exit if user is missing
-        let db = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
         u = db[currentUser];
         
         if (!u) return; // Safely abort if the user doesn't exist
@@ -3616,9 +3623,9 @@ function logTransaction(arg1, arg2, arg3, arg4) {
 
     // 6. Save back to database ONLY if called the old way
     if (autoSave) {
-        let db = JSON.parse(localStorage.getItem('hc_usersDB'));
+        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
         db[currentUser] = u;
-        localStorage.setItem('hc_usersDB', JSON.stringify(db));
+        localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
     }
 }
 // ==========================================
@@ -3629,7 +3636,7 @@ function openLedgerModal(currencyType) {
     if (!currentUser) return;
     
     // Grab fresh data directly from the save file
-    const db = JSON.parse(localStorage.getItem('hc_usersDB'));
+    const db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
     const u = db[currentUser];
     
     const modal = document.getElementById('ledger-modal');
@@ -3722,13 +3729,13 @@ function switchLedger(tabType) {
 
 function renderLedger() {
     // If somehow they got here logged out, send them to the main menu
-    if (!currentUser) currentUser = localStorage.getItem('hc_currentUser');
+    if (!currentUser) currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
     if (!currentUser) {
         window.location.href = 'index.html';
         return;
     }
 
-    const db = JSON.parse(localStorage.getItem('hc_usersDB')) || {};
+    const db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     const u = db[currentUser];
     if (!u) return;
 
