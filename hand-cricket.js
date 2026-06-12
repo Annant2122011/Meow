@@ -2,27 +2,6 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // ==========================================
-// 🎙️ COMMENTARY SYSTEM DATABASE
-// ==========================================
-const commentaryMaster = {
-    'default': {
-        '0': ["Solid defense.", "Played carefully.", "No run there.", "Straight to the fielder."],
-        '1': ["Just a single.", "Tucked away for one.", "Quick single taken.", "Rotates the strike."],
-        '2': ["Pushed into the gap for two.", "Good running between the wickets.", "Two runs added."],
-        '3': ["Great placement, they'll get three.", "Excellent running!", "Stopped just inside the boundary."],
-        '4': ["CRACKING SHOT! That's a boundary!", "Pierces the field for four!", "One bounce over the rope!"],
-        '5': ["Five runs?! Bizarre play!", "Overthrows! They get five.", "Rare five runs!"],
-        '6': ["SIX! OUT OF THE PARK!", "Massive hit! It's gone into the stands!", "What a glorious six!"],
-        'wicket': ["BOWLED HIM!", "Caught! What a dismissal!", "He's out of here!", "Knocked him over!"]
-    },
-    'aggressive': {
-        '0': ["He's struggling to get it away!", "Blocked, but he looks anxious.", "Dot ball. Pressure building!"],
-        '4': ["SMASHED! He showed no mercy!", "Bullet to the boundary!", "Absolutely pulverized for four!"],
-        '6': ["HE HAS SENT THAT INTO ORBIT!", "VIOLENT STRIKE! SIX RUNS!", "THAT IS MONSTROUS!"],
-        'wicket': ["DESTROYED! Absolute carnage!", "HE IS GONE! What a fiery delivery!"]
-    }
-};
-// ==========================================
 // TOURNAMENT BOSS DATABASE (CAMPAIGN MODE)
 // ==========================================
 const bossInfo = [
@@ -151,6 +130,18 @@ const AFKManager = {
 // 1. GAME STATE & DATABASES
 // ==========================================
 let matchEnded = false;
+function restoreSession() {
+    // 1. Retrieve the saved user key
+    const savedUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    
+    // 2. If it exists, re-assign it to your global variable
+    if (savedUser) {
+        currentUser = savedUser;
+        console.log("System: Session successfully re-hydrated for " + currentUser);
+    } else {
+        currentUser = null;
+    }
+}
 
 // 1. Create a factory function for a perfectly clean state
 function getFreshGameState() {
@@ -738,6 +729,8 @@ function initializeDOM() {
 // ==========================================
 
 window.onload = function() {
+   // 1. RE-HYDRATE SESSION (The Fix)
+    restoreSession();
    // GATEKEEPER: Stop execution if session is broken
     if (!validateSession()) return;
     // STEP 1: BIND DOM ELEMENTS FIRST
