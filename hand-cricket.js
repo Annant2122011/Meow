@@ -38,6 +38,31 @@ const bossInfo = [
     { id: 'boss10', name: 'Mythical Master', avatar: '🌌', difficulty: 'hard', reqXp: 100000, rewardCoins: 500000, rewardDia: 50.0, desc: 'Beyond human limits. The ultimate test.' }
 ];
 // ==========================================
+// 🛡️ SESSION VALIDATOR
+// ==========================================
+function validateSession() {
+    const currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    const usersDB = localStorage.getItem(STORAGE_KEYS.USERS_DB);
+
+    // 1. Check if the user is logged out OR the database was wiped
+    if (!currentUser || !usersDB) {
+        console.warn("Session invalid. Wiping cache and redirecting to login.");
+        localStorage.clear(); // Clean up corrupted state
+        
+        // 2. Redirect to index.html if we aren't already there
+        if (!window.location.href.includes('index.html')) {
+            window.location.href = 'index.html';
+        }
+        return false;
+    }
+    
+    // 3. Optional: Add a timeout check (e.g., 24-hour limit)
+    // If you want to force re-login after a day, you can store a timestamp
+    // and compare it to Date.now() here.
+    
+    return true;
+}
+// ==========================================
 // 🏏 SOUND MANAGER (AAA Audio Engine)
 // ==========================================
 const SoundManager = {
