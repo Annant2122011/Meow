@@ -94,11 +94,12 @@ function cancelPendingAnimations() {
 }
 // ==========================================
 // ⚡ EVENT DELEGATION CONTROLLER
- const decisionBox = document.getElementById('match-button-grid');
+// ==========================================
+function bindGlobalEvents() {
+    const decisionBox = document.getElementById('match-button-grid'); 
     
     if (decisionBox) {
         decisionBox.addEventListener('click', function(e) {
-            // Check if the clicked element is actually a button
             if (e.target.tagName === 'BUTTON') {
                 const val = parseInt(e.target.getAttribute('data-value'));
                 if (!isNaN(val)) {
@@ -107,6 +108,7 @@ function cancelPendingAnimations() {
             }
         });
     }
+}
 
 // ==========================================
 // 🏏 SOUND MANAGER (AAA Audio Engine)
