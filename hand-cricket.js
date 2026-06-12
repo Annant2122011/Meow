@@ -45,6 +45,30 @@ const STORAGE_KEYS = {
     TOURNEY_BOSS: 'hc_tourneyBoss'   // The active campaign boss
 };
 // ==========================================
+// 🛡️ SESSION VALIDATOR
+// ==========================================
+function validateSession() {
+    const currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+    const usersDB = localStorage.getItem(STORAGE_KEYS.USERS_DB);
+
+    // 1. Check if the user is logged out OR the database was wiped
+    if (!currentUser || !usersDB) {
+        console.warn("Session invalid. Wiping cache and redirecting to login.");
+        localStorage.clear(); // Clean up corrupted state
+        
+        // 2. Redirect to index.html if we aren't already there
+        if (!window.location.href.includes('index.html') && !window.location.pathname.endsWith('/')) {
+            window.location.href = 'index.html';
+            return false; // Only stop execution if we are redirecting away
+        }
+        
+        // 3. ALLOW the script to continue if we are on index.html so new players can sign up!
+        return true; 
+    }
+    
+    return true;
+}
+// ==========================================
 // ANIMATION TRACKING (To prevent battery drain)
 // ==========================================
 let confettiAnimId = null;
