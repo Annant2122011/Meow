@@ -34,9 +34,7 @@ const bossInfo = [
     // 3. Optional: Add a timeout check (e.g., 24-hour limit)
     // If you want to force re-login after a day, you can store a timestamp
     // and compare it to Date.now() here.
-    
-    return true;
-}
+   
 function cancelPendingAnimations() {
     if (confettiAnimId) {
         cancelAnimationFrame(confettiAnimId);
