@@ -3774,18 +3774,27 @@ function logTransaction(arg1, arg2, arg3, arg4) {
     
     let logEntry = { amount: amount, reason: reason, time: preciseTimestamp };
     
-    // 4. Failsafe: Ensure arrays exist so it never crashes again
-    if (!u.transactions) u.transactions = { coins: [], diamonds: [] };
+  // [Inside logTransaction] Replace lines 1475 to 1488 with this:
+    
+    // 4. Failsafe: Ensure arrays exist so it never crashes
+    if (!u.transactions) u.transactions = { coins: [], diamonds: [], cards: [], xp: [] };
     if (!u.transactions.coins) u.transactions.coins = [];
     if (!u.transactions.diamonds) u.transactions.diamonds = [];
+    if (!u.transactions.cards) u.transactions.cards = [];
+    if (!u.transactions.xp) u.transactions.xp = [];
 
-    // 5. Apply the transaction
+    // 5. Apply the transaction to the correct ledger
     if (type === 'coin') {
         u.transactions.coins.unshift(logEntry);
-        if (autoSave) u.coins += amount; // Add coins if called the old way
+        if (autoSave) u.coins += amount; 
     } else if (type === 'diamond') {
         u.transactions.diamonds.unshift(logEntry);
         if (autoSave) u.diamonds = parseFloat((u.diamonds + amount).toFixed(2));
+    } else if (type === 'card') {
+        u.transactions.cards.unshift(logEntry);
+    } else if (type === 'xp') {
+        u.transactions.xp.unshift(logEntry);
+        if (autoSave) u.xp = Math.max(0, (u.xp || 0) + amount);
     }
 
     // 6. Save back to database ONLY if called the old way
