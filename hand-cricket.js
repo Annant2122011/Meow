@@ -2,6 +2,27 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // ==========================================
+// 🎙️ COMMENTARY SYSTEM DATABASE
+// ==========================================
+const commentaryMaster = {
+    'default': {
+        '0': ["Solid defense.", "Played carefully.", "No run there.", "Straight to the fielder."],
+        '1': ["Just a single.", "Tucked away for one.", "Quick single taken.", "Rotates the strike."],
+        '2': ["Pushed into the gap for two.", "Good running between the wickets.", "Two runs added."],
+        '3': ["Great placement, they'll get three.", "Excellent running!", "Stopped just inside the boundary."],
+        '4': ["CRACKING SHOT! That's a boundary!", "Pierces the field for four!", "One bounce over the rope!"],
+        '5': ["Five runs?! Bizarre play!", "Overthrows! They get five.", "Rare five runs!"],
+        '6': ["SIX! OUT OF THE PARK!", "Massive hit! It's gone into the stands!", "What a glorious six!"],
+        'wicket': ["BOWLED HIM!", "Caught! What a dismissal!", "He's out of here!", "Knocked him over!"]
+    },
+    'aggressive': {
+        '0': ["He's struggling to get it away!", "Blocked, but he looks anxious.", "Dot ball. Pressure building!"],
+        '4': ["SMASHED! He showed no mercy!", "Bullet to the boundary!", "Absolutely pulverized for four!"],
+        '6': ["HE HAS SENT THAT INTO ORBIT!", "VIOLENT STRIKE! SIX RUNS!", "THAT IS MONSTROUS!"],
+        'wicket': ["DESTROYED! Absolute carnage!", "HE IS GONE! What a fiery delivery!"]
+    }
+};
+// ==========================================
 // TOURNAMENT BOSS DATABASE (CAMPAIGN MODE)
 // ==========================================
 const bossInfo = [
@@ -2313,11 +2334,25 @@ function updateMatchUI() {
 // 6. CORE GAMEPLAY & MATCH AI LOGIC
 // ==========================================
 
+// ==========================================
+// 6. CORE GAMEPLAY & MATCH AI LOGIC
+// ==========================================
+
+// 1. STANDARDIZED AI THROW GENERATOR
+function generateAIThrow(allowZero = true) {
+    // If 0 is not allowed (to prevent 3-zero hit wicket suicide), return 1-6
+    if (!allowZero) return Math.floor(Math.random() * 6) + 1;
+    // Otherwise, standard 0-6 throw
+    return Math.floor(Math.random() * 7);
+}
+
 function getBossThrow(bossIndex) {
     let isCompBatting = !gameState.isPlayerBatting;
     
-    if (gameState.compConsecZeros >= 2) {
-        return Math.floor(Math.random() * 6) + 1;
+    // FAILSAFE: Ensure the AI knows if it is safe to throw a 0 (Defend/Wide)
+    let safeZero = gameState.compConsecZeros < 2;
+    if (!safeZero) {
+        return generateAIThrow(false);
     }
     
     let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
@@ -2330,20 +2365,15 @@ function getBossThrow(bossIndex) {
         let maxT = '1';
         let maxV = -1;
         for (let k in throwsObj) { 
-            if (throwsObj[k] > maxV) { 
-                maxV = throwsObj[k]; 
-                maxT = k; 
-            } 
+            if (throwsObj[k] > maxV) { maxV = throwsObj[k]; maxT = k; } 
         }
         return parseInt(maxT);
     };
 
     let snipe = (target) => {
         if (isCompBatting) {
-            let safe = Math.floor(Math.random() * 6) + 1;
-            while(safe === target) {
-                safe = Math.floor(Math.random() * 6) + 1;
-            }
+            let safe = generateAIThrow(safeZero);
+            while(safe === target) { safe = generateAIThrow(safeZero); }
             return safe;
         } else { 
             return target; 
@@ -2352,7 +2382,7 @@ function getBossThrow(bossIndex) {
 
     switch (bossIndex) {
         case 0: // Rookie
-            return Math.floor(Math.random() * 6) + 1;
+            return generateAIThrow(safeZero);
             
         case 1: // Wall
             if (isCompBatting) { 
@@ -2379,51 +2409,44 @@ function getBossThrow(bossIndex) {
             
         case 4: // Copycat
             if (gameState.playerHistory.length > 0) {
-                return gameState.playerHistory[gameState.playerHistory.length - 1];
+                let copy = gameState.playerHistory[gameState.playerHistory.length - 1];
+                if (copy === 0 && !safeZero) return generateAIThrow(false);
+                return copy;
             }
-            return Math.floor(Math.random() * 6) + 1;
+            return generateAIThrow(safeZero);
             
         case 5: // Gambler
             if (Math.random() < 0.3) { 
                 let currT = getLikely(pMatchThrows); 
                 return snipe(currT); 
             }
-            return Math.floor(Math.random() * 6) + 1;
+            return generateAIThrow(safeZero);
             
         case 6: // Mathematician
             let hist = gameState.playerHistory.slice(-5);
-            if (hist.length === 0) {
-                return Math.floor(Math.random() * 6) + 1;
-            }
+            if (hist.length === 0) return generateAIThrow(safeZero);
             let avg = Math.round(hist.reduce((a,b)=>a+b,0) / hist.length);
+            if (avg === 0 && !safeZero) return generateAIThrow(false);
             return snipe(avg);
             
         case 7: // Sniper
             let lifeLikely = getLikely(pLifeThrows);
-            if (Math.random() < 0.6) {
-                return snipe(lifeLikely);
-            }
-            return Math.floor(Math.random() * 6) + 1;
+            if (Math.random() < 0.6) return snipe(lifeLikely);
+            return generateAIThrow(safeZero);
             
         case 8: // Grandmaster
             let matchLikely = getLikely(pMatchThrows);
-            if (pMatchThrows[matchLikely] < 3) {
-                return getComputerThrowFallback();
-            }
-            if (Math.random() < 0.8) {
-                return snipe(matchLikely);
-            }
-            return Math.floor(Math.random() * 6) + 1;
+            if (pMatchThrows[matchLikely] < 3) return getComputerThrowFallback();
+            if (Math.random() < 0.8) return snipe(matchLikely);
+            return generateAIThrow(safeZero);
             
         case 9: // Cricket God
             let mLike = getLikely(pMatchThrows);
-            if (Math.random() < 0.9) {
-                return snipe(mLike);
-            }
-            return Math.floor(Math.random() * 6) + 1;
+            if (Math.random() < 0.9) return snipe(mLike);
+            return generateAIThrow(safeZero);
             
         default:
-            return Math.floor(Math.random() * 6) + 1;
+            return generateAIThrow(safeZero);
     }
 }
 
@@ -2432,8 +2455,10 @@ function getComputerThrowFallback() {
     let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {}; 
     let stats = usersDB[currentUser];
     
+    let safeZero = gameState.compConsecZeros < 2;
+
     if (!stats || !stats.battingThrows) {
-        return Math.floor(Math.random() * 7);
+        return generateAIThrow(safeZero);
     }
 
     if (!isCompBatting) { 
@@ -2441,72 +2466,39 @@ function getComputerThrowFallback() {
         let likelyThrow = Object.keys(pBats).reduce((a, b) => pBats[a] > pBats[b] ? a : b); 
         
         if (Math.random() < 0.75) {
-            return parseInt(likelyThrow);
+            let parsed = parseInt(likelyThrow);
+            if (parsed === 0 && !safeZero) return generateAIThrow(false);
+            return parsed;
         } else {
-            return Math.floor(Math.random() * 7);
+            return generateAIThrow(safeZero);
         }
     } else { 
         let pBowls = stats.bowlingThrows; 
         let likelyThrow = Object.keys(pBowls).reduce((a, b) => pBowls[a] > pBowls[b] ? a : b); 
         
-        let compNum = Math.floor(Math.random() * 7); 
+        let compNum = generateAIThrow(safeZero); 
         let attempts = 0; 
         
         while (compNum === parseInt(likelyThrow) && attempts < 5) { 
-            compNum = Math.floor(Math.random() * 7); 
+            compNum = generateAIThrow(safeZero); 
             attempts++; 
         } 
         return compNum; 
     }
 }
-function buyCoinsWithDiamonds(pkgId) {
-    let pkg = shopItems.exchange.find(p => p.id === pkgId);
-    if (!pkg) return;
 
-    showConfirmModal(
-        "DIAMOND EXCHANGE", 
-        `Trade 💎 ${pkg.diaPrice.toFixed(1)} Diamonds for 🪙 ${pkg.coins.toLocaleString()} Coins?`, 
-        () => {
-            let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB));
-            let u = db[currentUser];
-
-            if (u.diamonds >= pkg.diaPrice) {
-                u.diamonds -= pkg.diaPrice;
-                u.coins += pkg.coins;
-                
-                // Fixed: Explicitly passing 'u' to prevent runtime transaction logging failures
-                logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
-                logTransaction(u, 'coin', pkg.coins, `Diamond Exchange`);
-                
-                localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
-                
-                if (document.getElementById('prof-coins')) {
-                    document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
-                }
-                if (document.getElementById('prof-diamonds')) {
-                    document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
-                }
-                
-                showToast(`💸 Exchange Successful! (+🪙${formatCurrency(pkg.coins)})`);
-                SoundManager.play('coinSpend');
-                renderShop();
-            } else {
-                showToast(`❌ Not enough Diamonds! Need ${pkg.diaPrice.toFixed(1)}`);
-            }
-        }
-    );
-}
 function getComputerThrow() { 
     if (gameState.isTournament) {
         return getBossThrow(gameState.currentBoss); 
     }
     
-    if (gameState.compConsecZeros >= 2) {
-        return Math.floor(Math.random() * 6) + 1; 
+    let safeZero = gameState.compConsecZeros < 2;
+    if (!safeZero) {
+        return generateAIThrow(false); 
     }
     
     if (gameState.aiDifficulty === 'easy' || !currentUser) {
-        return Math.floor(Math.random() * 7); 
+        return generateAIThrow(safeZero); 
     }
     
     return getComputerThrowFallback(); 
@@ -2578,13 +2570,41 @@ function playHand(playerNum) {
         handleRuns(gameState.isPlayerBatting ? playerNum : compNum);
     }
 
-    if (!gameState.isTransitioning && !gameState.gameOver) { 
+  if (!gameState.isTransitioning && !gameState.gameOver) { 
+        // 1. Force the UI to refresh
         updateMatchUI(); 
+        
+        // 2. Check if the match is over (e.g. target reached or overs finished)
         checkMatchState(); 
+        
+        // 3. Optional: Trigger a tiny forced reflow if the scoreboard isn't moving
+        const scoreboard = document.getElementById('match-screen');
+        if (scoreboard) scoreboard.style.display = 'block'; 
     }
 }
 function getRandomCommentary(arr) { 
     return arr[Math.floor(Math.random() * arr.length)]; 
+}
+   // --- ADD THIS NEW FUNCTION HERE ---
+function getActiveCommentary() {
+    let packKey = 'default';
+    
+    // 1. Check which commentary pack the user has equipped
+    if (currentUser) {
+        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+        let u = db[currentUser];
+        if (u && u.equippedCommentary) {
+            packKey = u.equippedCommentary;
+        }
+    }
+    
+    // 2. FAILSAFE: If the pack doesn't exist (e.g., deleted from shop), force 'default'
+    if (!commentaryMaster || !commentaryMaster[packKey]) {
+        packKey = 'default';
+    }
+    
+    // 3. Return the correct dictionary of phrases so getRandomCommentary can use it!
+    return commentaryMaster[packKey];
 }
 function writeCommentary(text, triggerType = null) {
     let finalOutput = `> ${text}`;
@@ -2614,7 +2634,6 @@ function handleWicket(num, type) {
     
     if (!gameState.isPlayerBatting) {
         gameState.compStats.dots++; 
-       
     }
     
     const batterName = gameState.isPlayerBatting ? "You" : "Computer";
@@ -2630,18 +2649,38 @@ function handleWicket(num, type) {
     let tType = gameState.isPlayerBatting ? "wkt" : null;
     let comment = "";
     
+    // Commentary logic remains the same
     if (type === 'STUMPED') {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(getActiveCommentary().wkt_stumped).replace("[BATTER]", batterName);
+       comment = getRandomCommentary(getActiveCommentary().wkt_stumped).replace("[BATTER]", batterName);
     } else if (type === 'HIT_WICKET') {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(getActiveCommentary().wkt_hit).replace("[BATTER]", batterName);
+       comment = getRandomCommentary(getActiveCommentary().wkt_hit).replace("[BATTER]", batterName);
     } else {
        SoundManager.play('howzat');
-        comment = getRandomCommentary(getActiveCommentary().wkt_bowled).replace("[BATTER]", batterName).replace("[NUM]", num);
+       comment = getRandomCommentary(getActiveCommentary().wkt_bowled).replace("[BATTER]", batterName).replace("[NUM]", num);
     }
     
     writeCommentary(comment, tType);
+
+    // --- INTEGRATION HOOKS (Add these!) ---
+    
+    // 1. Refresh the Scoreboard
+    updateMatchUI();
+    
+    // 2. Persist career stats
+    if (currentUser && !gameState.isPlayerBatting) { // If user took a wicket
+        let db = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
+        if (db[currentUser]) {
+            db[currentUser].wickets = (db[currentUser].wickets || 0) + 1;
+            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(db));
+        }
+    }
+
+    // 3. Check for match end
+    if (gameState.currentWickets >= gameState.maxWickets) {
+        endMatch('all_out');
+    }
 }
 function handleWide(batterNum) {
     const currentBatterStats = gameState.isPlayerBatting ? gameState.playerStats : gameState.compStats;
@@ -3618,12 +3657,25 @@ gameState.playerHistory = [];
 // ==========================================
 
 function formatCurrency(num) {
-    if (num >= 1e11) return (num / 1e11).toFixed(2) + 'Kb'; // Kharab
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'Ab';  // Arab
-    if (num >= 1e7) return (num / 1e7).toFixed(2) + 'C';   // Crore
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';   // Million
-    if (num >= 1e5) return (num / 1e5).toFixed(2) + 'L';   // Lakh
-    if (num >= 1000) return (num / 1000).toFixed(2) + 'K'; // Thousand
+    // 1. Convert to number to ensure arithmetic works
+    num = Number(num);
+    
+    // 2. Crore Threshold (10,000,000)
+    if (num >= 10000000) {
+        return (num / 10000000).toFixed(2) + 'Cr';
+    }
+    
+    // 3. Lakh Threshold (100,000)
+    if (num >= 100000) {
+        return (num / 100000).toFixed(2) + 'L';
+    }
+    
+    // 4. Thousands Threshold (1,000)
+    if (num >= 1000) {
+        return (num / 1000).toFixed(2) + 'K';
+    }
+    
+    // 5. Default: Just the number
     return num.toString();
 }
 
