@@ -1558,3 +1558,30 @@ body.theme-blood {
     text-shadow: 0 0 10px rgba(0,210,255,0.5); 
     background: rgba(0,210,255,0.05); 
 }
+/* ==========================================
+   MASTER MODAL Z-INDEX HIERARCHY
+   ========================================== */
+/* 1. Base modals (Login, setup, etc.) */
+.modal-overlay { 
+    z-index: 1000; 
+} 
+
+/* 2. Secondary viewing modals */
+#info-modal { 
+    z-index: 2000 !important; 
+} 
+
+/* 3. Deep interaction modals */
+#shop-purchase-modal { 
+    z-index: 3000 !important; 
+} 
+
+/* 4. CRITICAL: Confirmations must ALWAYS overlay everything else to prevent soft-locks */
+#custom-confirm-modal { 
+    z-index: 9999 !important; 
+} 
+
+/* 5. Notifications hover above the entire universe */
+#toast-container { 
+    z-index: 10000 !important; 
+}
