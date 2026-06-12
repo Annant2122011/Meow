@@ -2,6 +2,21 @@
    CRICPULSE FUN-GUN ARENA | ULTIMATE STATS & AI ENGINE
    ========================================================= */
 // ==========================================
+// TOURNAMENT BOSS DATABASE (CAMPAIGN MODE)
+// ==========================================
+const bossInfo = [
+    { id: 'boss1', name: 'Gully Gang', avatar: '🏏', difficulty: 'easy', reqXp: 0, rewardCoins: 1000, rewardDia: 0.5, desc: 'The street legends of the neighborhood.' },
+    { id: 'boss2', name: 'Club Smashers', avatar: '🧢', difficulty: 'easy', reqXp: 1000, rewardCoins: 2500, rewardDia: 1.0, desc: 'Local club champions trying to prove themselves.' },
+    { id: 'boss3', name: 'State Titans', avatar: '🦁', difficulty: 'easy', reqXp: 3000, rewardCoins: 5000, rewardDia: 2.0, desc: 'The pride of the state. Strong fundamentals.' },
+    { id: 'boss4', name: 'National Heroes', avatar: '🦅', difficulty: 'hard', reqXp: 7000, rewardCoins: 10000, rewardDia: 3.5, desc: 'The country\'s best. Prepare for a challenge.' },
+    { id: 'boss5', name: 'World All-Stars', avatar: '🌍', difficulty: 'hard', reqXp: 15000, rewardCoins: 25000, rewardDia: 5.0, desc: 'A team compiled of the globe\'s elite players.' },
+    { id: 'boss6', name: 'Spin Cartel', avatar: '🌪️', difficulty: 'hard', reqXp: 22500, rewardCoins: 50000, rewardDia: 7.5, desc: 'Masters of the turning ball. Hard to read.' },
+    { id: 'boss7', name: 'Pace Battery', avatar: '⚡', difficulty: 'hard', reqXp: 30000, rewardCoins: 75000, rewardDia: 10.0, desc: 'Fearsome 150kmph speedsters.' },
+    { id: 'boss8', name: 'The Invincibles', avatar: '🛡️', difficulty: 'hard', reqXp: 45000, rewardCoins: 100000, rewardDia: 15.0, desc: 'They have never lost a home series.' },
+    { id: 'boss9', name: 'Cricket God', avatar: '👑', difficulty: 'hard', reqXp: 75000, rewardCoins: 250000, rewardDia: 25.0, desc: 'The absolute pinnacle of the sport.' },
+    { id: 'boss10', name: 'Mythical Master', avatar: '🌌', difficulty: 'hard', reqXp: 100000, rewardCoins: 500000, rewardDia: 50.0, desc: 'Beyond human limits. The ultimate test.' }
+];
+// ==========================================
 // 🏏 SOUND MANAGER (AAA Audio Engine)
 // ==========================================
 const SoundManager = {
@@ -1547,8 +1562,12 @@ function getLevelColor(level) {
 // ==========================================
 
 function renderTournamentPage() {
+    // 1. FAILSAFE: Ensure user data exists before reading stats
+    if (!currentUser) return;
     const usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)) || {};
     const stats = usersDB[currentUser];
+    if (!stats) return; 
+
     const tLevel = stats.tournamentLevel || 0;
     
     let html = '<div class="boss-grid">';
@@ -1558,18 +1577,28 @@ function renderTournamentPage() {
         let actionHtml = `<span class="locked-badge">🔒 LOCKED</span>`;
         
         if (i < tLevel) {
+            // Defeated Boss
             statusClass = 'boss-defeated';
             actionHtml = `<span class="defeated-badge">✅ DEFEATED</span> <button class="fight-btn" style="background:gray; margin-left:15px; font-size: 0.9rem;" onclick="startBossFight(${i})">REPLAY</button>`;
+        
         } else if (i === tLevel) {
-            statusClass = 'boss-active';
-            actionHtml = `<button class="fight-btn" onclick="startBossFight(${i})">⚔️ FIGHT</button>`;
+            // Active Boss - Check if they have enough XP to unlock!
+            let playerXp = stats.xp || 0;
+            if (playerXp >= boss.reqXp) {
+                statusClass = 'boss-active';
+                actionHtml = `<button class="fight-btn" onclick="startBossFight(${i})">⚔️ FIGHT</button>`;
+            } else {
+                actionHtml = `<span class="locked-badge" style="color:var(--accent-red); font-size: 0.85rem;">🔒 REQUIRES ${boss.reqXp.toLocaleString()} XP</span>`;
+            }
         }
         
+        // Fallback color since our database doesn't have boss.color
+        const bossColor = boss.color || 'var(--accent-blue)'; 
+        
         html += `
-            <div class="boss-card ${statusClass}" style="border-left: 5px solid ${boss.color};">
-                <div class="boss-icon">${boss.icon}</div>
-                <div class="boss-info">
-                    <div class="boss-name" style="color: ${i === tLevel ? boss.color : 'white'};">${boss.name}</div>
+            <div class="boss-card ${statusClass}" style="border-left: 5px solid ${bossColor};">
+                <div class="boss-icon">${boss.avatar}</div> <div class="boss-info">
+                    <div class="boss-name" style="color: ${i === tLevel ? bossColor : 'white'};">${boss.name}</div>
                     <div class="boss-desc">${boss.desc}</div>
                 </div>
                 <div>${actionHtml}</div>
@@ -1578,9 +1607,13 @@ function renderTournamentPage() {
     });
     
     html += '</div>';
-    document.getElementById('boss-grid-container').innerHTML = html;
+    
+    // FAILSAFE: Only inject if the container exists on the current page
+    const container = document.getElementById('boss-grid-container');
+    if (container) {
+        container.innerHTML = html;
+    }
 }
-
 function startBossFight(index) {
     localStorage.setItem(STORAGE_KEYS.TOURNEY_BOSS, index);
     window.location.href = 'index.html';
