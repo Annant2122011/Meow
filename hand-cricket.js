@@ -3977,3 +3977,4 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTournamentPage();
     }
 });
+}
