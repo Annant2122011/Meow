@@ -3001,58 +3001,22 @@ function endGame(result) {
 
     gameState.commentaryHistory.push(`\n--- MATCH ENDED | ${inningsStatus.innerText} ---`);
     
-    // CRITICAL: Calculate and save stats FIRST
-    saveLifetimeStats(result);
-
-    populateStats('an-p', gameState.playerStats, gameState.compStats); 
-    populateStats('an-c', gameState.compStats, gameState.playerStats);
-
-   
-    // Populate Match Rewards UI (XP and Coins)
-    const xpDisplay = document.getElementById('gain-xp');
-    const coinDisplay = document.getElementById('gain-coins');
-    const gains = gameState.lastMatchGains || { xp: 0, coins: 0 };
-    if (xpDisplay && coinDisplay) {
-        xpDisplay.style.color = gains.xp >= 1000 ? "var(--accent-blue)" : "white";
-        xpDisplay.innerText = `+${gains.xp.toLocaleString()} XP`;
-        coinDisplay.innerText = `+${gains.coins.toLocaleString()} Coins`;
-    }
-
-    generateAIInsight(result); 
-
-    // Handle Tournament Progress
-    if (gameState.isTournament) {
-        let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
-        let stats = usersDB[currentUser];
-        if (result === "PLAYER_WINS" && stats.tournamentLevel === gameState.currentBoss) {
-            stats.tournamentLevel++; 
-            localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
-            setTimeout(() => { showToast(`🏆 BOSS DEFEATED! Level ${stats.tournamentLevel} Unlocked!`); }, 1000);
-        }
-        
-        if (endControls) {
-            const returnBtn = endControls.querySelectorAll('button')[2];
-            if (returnBtn) {
-                returnBtn.innerText = "🔙 TO GAUNTLET";
-                returnBtn.onclick = function() { localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); window.location.href = 'tournament.html'; };
-            }
-        }
-    }
-}
-function saveLifetimeStats(result) {
+    function saveLifetimeStats(result) {
     if (!currentUser) return;
     
     let usersDB = safeJsonParse(STORAGE_KEYS.USERS_DB, {}); 
     let stats = usersDB[currentUser];
     
+    // 1. Declare ALL reward variables at the top level
     let matchXP = 0;
     let matchCoins = 0;
+    let matchDiamonds = 0; 
 
     if (result === "FORFEIT") {
         // THE 200 XP PENALTY
         matchXP = -200;
     } else {
-        // NORMAL MATCH XP CALCULATION
+        // NORMAL MATCH XP & COIN CALCULATION
         matchXP = 100; 
         if (result === "PLAYER_WINS") matchXP += 400;
         
@@ -3073,15 +3037,30 @@ function saveLifetimeStats(result) {
         
         matchXP += bossBonusXP;
         matchCoins = Math.floor(matchXP * 0.5);
+
+        // 2. Calculate Diamonds here so we can save them to lastMatchGains
+        matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
+        if (result === "PLAYER_WINS") matchDiamonds += 0.10;
     }
     
-    // Apply XP (using Math.max so it never drops below 0)
+    // 3. Apply Balances securely
     stats.xp = Math.max(0, (stats.xp || 0) + matchXP);
     stats.coins = (stats.coins || 0) + matchCoins;
-    gameState.lastMatchGains = { xp: matchXP, coins: matchCoins };
-   if (matchXP !== 0) logTransaction(stats, 'xp', matchXP, `Match Result (${result})`);
-    if (matchCoins !== 0) logTransaction(stats, 'coin', matchCoins, `Match Reward`);
+    if (result !== "FORFEIT") {
+        stats.diamonds = parseFloat(((stats.diamonds || 0) + matchDiamonds).toFixed(2));
+    }
 
+    // 4. Update the game state so the End Screen UI can read ALL THREE values
+    gameState.lastMatchGains = { xp: matchXP, coins: matchCoins, diamonds: matchDiamonds };
+    
+    // 5. Log all transactions
+    if (matchXP !== 0) logTransaction(stats, 'xp', matchXP, `Match Result (${result})`);
+    if (matchCoins !== 0) logTransaction(stats, 'coin', matchCoins, `Match Reward`);
+    if (matchDiamonds !== 0 && result !== "FORFEIT") logTransaction(stats, 'diamond', matchDiamonds, `Match Reward (${result})`);
+
+    // ==========================================
+    // LIFETIME STATS TRACKING 
+    // ==========================================
     stats.matches += 1;
     
     // A forfeit counts as a loss
@@ -3090,19 +3069,17 @@ function saveLifetimeStats(result) {
     else stats.ties += 1;
     
     stats.totalRuns += gameState.playerStats.runs; 
-   stats.totalWicketsTaken = (stats.totalWicketsTaken || 0) + gameState.compStats.wicketsLost;
+    stats.totalWicketsTaken = (stats.totalWicketsTaken || 0) + gameState.compStats.wicketsLost;
     stats.totalBallsFaced += gameState.playerStats.balls;
     stats.careerSixes += gameState.playerStats.sixes; 
     stats.careerFours += gameState.playerStats.fours;
     stats.careerFives = (stats.careerFives || 0) + (gameState.playerStats.fives || 0);
     stats.careerDotsBowled += gameState.compStats.dots; 
     
-  // Find where stats.highestScore is updated and replace it with this:
     gameState.playerStats.wicketRunsHistory.forEach(w => { 
         if (w.runs === 0) stats.ducks += 1; 
         stats.last35Innings.push({ runs: w.runs, notOut: false }); 
         
-        // 👉 ADD THIS CHECK HERE to capture individual innings scores (like your 68!)
         if (w.runs > stats.highestScore) {
             stats.highestScore = w.runs;
             stats.highestScoreNotOut = false;
@@ -3118,7 +3095,7 @@ function saveLifetimeStats(result) {
     if (result === "PLAYER_WINS" && gameState.innings === 2 && gameState.isPlayerBatting) stats.successfulChases += 1;
 
     if (gameState.playerStats.runs >= 50 && gameState.playerStats.runs < 100) stats.careerFifties = (stats.careerFifties || 0) + 1;
-   if (gameState.playerStats.runs >= 100) stats.careerCenturies = (stats.careerCenturies || 0) + 1;
+    if (gameState.playerStats.runs >= 100) stats.careerCenturies = (stats.careerCenturies || 0) + 1;
     if (gameState.playerStats.runs >= 200) stats.careerDoubleCenturies = (stats.careerDoubleCenturies || 0) + 1;
     if (gameState.compStats.wicketsLost >= 5) stats.fiveWicketHauls = (stats.fiveWicketHauls || 0) + 1;
     stats.totalExtrasReceived = (stats.totalExtrasReceived || 0) + gameState.playerStats.extras;
@@ -3158,8 +3135,6 @@ function saveLifetimeStats(result) {
         }
     }
     
-  // ... (rest of your stats above) ...
-
     if (!stats.last60SR) stats.last60SR = [];
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
     stats.last60SR.push(parseFloat(pSR)); 
@@ -3167,19 +3142,10 @@ function saveLifetimeStats(result) {
 
     evaluateAchievements(stats);
     
-    // ❌ DO NOT SAVE HERE. 
-
-    // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
+    // ==========================================
+    // 🃏 CARD LOOT ENGINE 
+    // ==========================================
     if (result !== "FORFEIT") {
-        // Calculate Diamonds
-        let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
-        if (result === "PLAYER_WINS") matchDiamonds += 0.10;
-        
-        // 🛑 ACTUALLY UPDATE THE USER BALANCE:
-        stats.diamonds = parseFloat(((stats.diamonds || 0) + matchDiamonds).toFixed(2));
-        logTransaction(stats, 'diamond', matchDiamonds, 'Match Reward (' + result + ')');
-        
-        // Calculate Card Drops
         let numCards = result === "PLAYER_WINS" ? 10 : (result === "TIE" ? 7 : 4);
         let dropResults = { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 };
         
@@ -3192,7 +3158,7 @@ function saveLifetimeStats(result) {
             else dropResults.common++;                      // 50% chance
         }
         
-        // Update Card Balances
+        // Save Cards to DB
         stats.cards.common += dropResults.common;
         stats.cards.uncommon += dropResults.uncommon;
         stats.cards.rare += dropResults.rare;
@@ -3204,19 +3170,22 @@ function saveLifetimeStats(result) {
         
         // Show detailed Loot Toast
         setTimeout(() => {
-            showToast(`🃏 CARDS DROPPED: ${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`);
+            showToast(`🃏 CARDS DROPPED: ${dropResults.common}"C", ${dropResults.uncommon}"U", ${dropResults.rare}"R", ${dropResults.epic}"E", ${dropResults.legendary}"L"`);
         }, 5500); // Trigger after the initial XP/Coin toast
     }
 
-    // ✅ SAVE HERE! (After everything is calculated)
+    // ==========================================
+    // 💾 FINAL SAVE AND TOAST
+    // ==========================================
+    // FIXED: Save happens at the absolute bottom, ensuring Diamonds and Cards are saved!
     usersDB[currentUser] = stats; 
     localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
     
-    // TOAST NOTIFICATION UPDATE
     if (result === "FORFEIT") {
         showToast(`⚠️ Match Forfeited. Stats Saved | 200 XP Deducted.`);
     } else {
-        showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
+        // Ultimate Toast!
+        showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins | 💎 +${matchDiamonds.toFixed(2)} Diamonds!`);
     }
 }
 function evaluateAchievements(stats) {
