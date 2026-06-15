@@ -4006,3 +4006,4 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTournamentPage();
     }
 });
+}
