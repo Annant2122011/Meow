@@ -3158,23 +3158,26 @@ function saveLifetimeStats(result) {
         }
     }
     
+  // ... (rest of your stats above) ...
+
     if (!stats.last60SR) stats.last60SR = [];
     let pSR = gameState.playerStats.balls > 0 ? ((gameState.playerStats.runs / gameState.playerStats.balls) * 100).toFixed(2) : "0.00";
     stats.last60SR.push(parseFloat(pSR)); 
     while (stats.last60SR.length > 60) { stats.last60SR.shift(); }
 
     evaluateAchievements(stats);
-    usersDB[currentUser] = stats; 
-    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
-   // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
+    
+    // ❌ DO NOT SAVE HERE. 
+
+    // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
     if (result !== "FORFEIT") {
         // Calculate Diamonds
         let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
         if (result === "PLAYER_WINS") matchDiamonds += 0.10;
-       // 🛑 ADD THIS LINE TO ACTUALLY UPDATE THE USER BALANCE:
-        stats.diamonds = parseFloat(((stats.diamonds || 0) + matchDiamonds).toFixed(2));
         
-     logTransaction(stats, 'diamond', matchDiamonds, 'Match Reward (' + result + ')');
+        // 🛑 ACTUALLY UPDATE THE USER BALANCE:
+        stats.diamonds = parseFloat(((stats.diamonds || 0) + matchDiamonds).toFixed(2));
+        logTransaction(stats, 'diamond', matchDiamonds, 'Match Reward (' + result + ')');
         
         // Calculate Card Drops
         let numCards = result === "PLAYER_WINS" ? 10 : (result === "TIE" ? 7 : 4);
@@ -3189,20 +3192,25 @@ function saveLifetimeStats(result) {
             else dropResults.common++;                      // 50% chance
         }
         
-        // Save Cards to DB
+        // Update Card Balances
         stats.cards.common += dropResults.common;
         stats.cards.uncommon += dropResults.uncommon;
         stats.cards.rare += dropResults.rare;
         stats.cards.epic += dropResults.epic;
         stats.cards.legendary += dropResults.legendary;
-       let cardDetails = `${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`;
+        
+        let cardDetails = `${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`;
         logTransaction(stats, 'card', numCards, `Loot Drops (${cardDetails})`);
         
         // Show detailed Loot Toast
         setTimeout(() => {
-            showToast(`🃏 CARDS DROPPED: ${dropResults.common}"C", ${dropResults.uncommon}"U", ${dropResults.rare}"R", ${dropResults.epic}"E", ${dropResults.legendary}"L"`);
+            showToast(`🃏 CARDS DROPPED: ${dropResults.common}C, ${dropResults.uncommon}U, ${dropResults.rare}R, ${dropResults.epic}E, ${dropResults.legendary}L`);
         }, 5500); // Trigger after the initial XP/Coin toast
     }
+
+    // ✅ SAVE HERE! (After everything is calculated)
+    usersDB[currentUser] = stats; 
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
     
     // TOAST NOTIFICATION UPDATE
     if (result === "FORFEIT") {
