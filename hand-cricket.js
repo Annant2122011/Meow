@@ -3047,6 +3047,7 @@ function saveLifetimeStats(result) {
     
     let matchXP = 0;
     let matchCoins = 0;
+   let matchDiamonds = 0; // 👈 ADD THIS LINE HERE
 
     if (result === "FORFEIT") {
         // THE 200 XP PENALTY
@@ -3172,7 +3173,7 @@ function saveLifetimeStats(result) {
     // --- 💎 DIAMOND & 🃏 CARD LOOT ENGINE ---
     if (result !== "FORFEIT") {
         // Calculate Diamonds
-        let matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
+         matchDiamonds = 0.05 - 0.01; // Base play reward minus tax
         if (result === "PLAYER_WINS") matchDiamonds += 0.10;
         
         // 🛑 ACTUALLY UPDATE THE USER BALANCE:
