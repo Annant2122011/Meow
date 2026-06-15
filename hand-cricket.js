@@ -3216,7 +3216,7 @@ function saveLifetimeStats(result) {
     if (result === "FORFEIT") {
         showToast(`⚠️ Match Forfeited. Stats Saved | 200 XP Deducted.`);
     } else {
-        showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins!`);
+       showToast(`⬆️ +${matchXP} XP | 🪙 +${matchCoins} Coins | 💎 +${matchDiamonds.toFixed(2)} Diamonds!`);
     }
 }
 function evaluateAchievements(stats) {
