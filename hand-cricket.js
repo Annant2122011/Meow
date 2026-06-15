@@ -3000,6 +3000,7 @@ function endGame(result) {
     }
 
     gameState.commentaryHistory.push(`\n--- MATCH ENDED | ${inningsStatus.innerText} ---`);
+}
     
     function saveLifetimeStats(result) {
     if (!currentUser) return;
