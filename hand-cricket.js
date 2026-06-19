@@ -3435,7 +3435,6 @@ function downloadPDF() {
         // Calculate Advanced Stats
         let pBoundRuns = (pStats.fours * 4) + (pStats.sixes * 6);
         let pTotalBounds = pStats.fours + pStats.sixes;
-        let pRunningRuns = pStats.runs - pBoundRuns;
         let pBpct = pStats.runs > 0 ? ((pBoundRuns / pStats.runs) * 100).toFixed(2) : "0.00";
         let pRR = pStats.balls > 0 ? ((pStats.runs / (pStats.balls/6))).toFixed(2) : "0.00";
         let pSR = pStats.balls > 0 ? ((pStats.runs / pStats.balls) * 100).toFixed(2) : "0.00";
@@ -3443,7 +3442,6 @@ function downloadPDF() {
 
         let cBoundRuns = (cStats.fours * 4) + (cStats.sixes * 6);
         let cTotalBounds = cStats.fours + cStats.sixes;
-        let cRunningRuns = cStats.runs - cBoundRuns;
         let cBpct = cStats.runs > 0 ? ((cBoundRuns / cStats.runs) * 100).toFixed(2) : "0.00";
         let cRR = cStats.balls > 0 ? ((cStats.runs / (cStats.balls/6))).toFixed(2) : "0.00";
         let cSR = cStats.balls > 0 ? ((cStats.runs / cStats.balls) * 100).toFixed(2) : "0.00";
@@ -3454,7 +3452,7 @@ function downloadPDF() {
         const innEl = document.getElementById('innings-status');
         if (innEl) innStatusText = innEl.innerText.replace(/[🏏⚔️🏆💀🤝]/g, '').trim();
 
-        // 🌟 PRO MAX FEATURE 1: Performance Grade Calculation
+        // Performance Grade Calculation
         let isWin = innStatusText.includes("WON");
         let isLoss = innStatusText.includes("COMPUTER");
         let matchGrade = "B";
@@ -3465,7 +3463,7 @@ function downloadPDF() {
         } else if (isLoss) {
             matchGrade = pSR_num < 100 ? "F" : (pSR_num < 130 ? "D" : "C");
         } else {
-            matchGrade = "C"; // Tie
+            matchGrade = "C"; 
         }
 
         let gradeColor = "#10b981"; // Green A
@@ -3473,12 +3471,12 @@ function downloadPDF() {
         if(matchGrade === "B" || matchGrade === "C") gradeColor = "#f59e0b"; // Yellow B/C
         if(matchGrade === "D" || matchGrade === "F") gradeColor = "#ef4444"; // Red D/F
 
-        // 🌟 PRO MAX FEATURE 2: Extract Current Player Data
+        // Extract Current Player Data
         let playerDisplayName = currentUser || "GUEST PLAYER";
         let rankTitle = "Unranked";
         let u = safeJsonParse(STORAGE_KEYS.USERS_DB, {})[currentUser];
         if (u) {
-            rankTitle = getRankDetails(u.xp || 0).title; // Uses your existing rank function!
+            rankTitle = getRankDetails(u.xp || 0).title; 
         }
 
         let formatStr = gameState.maxBalls === Infinity ? "Classic" : `T${gameState.maxBalls/6}`;
@@ -3491,15 +3489,15 @@ function downloadPDF() {
         let wormImgHtml = '';
         if (wormCanvas) {
             try {
-                // High-quality JPEG for the PDF
                 const wormDataUrl = wormCanvas.toDataURL('image/jpeg', 1.0);
-                wormImgHtml = `<img src="${wormDataUrl}" style="width: 100%; max-width: 700px; border-radius: 8px; margin-top: 15px; mix-blend-mode: multiply;">`;
+                wormImgHtml = `<img src="${wormDataUrl}" style="width: 100%; max-width: 650px; border-radius: 8px; margin-top: 15px; mix-blend-mode: multiply;">`;
             } catch (e) { console.log("Chart render error", e); }
         }
 
-        // 🌟 PRO MAX FEATURE 3: The Ultra-Premium HTML/CSS Template
+        // 🌟 FIX 1: Width reduced to 710px to perfectly fit A4 margins
+        // 🌟 FIX 2: Replaced all Flexbox with bulletproof float/table layouts
         let pdfHTML = `
-            <div style="width: 800px; padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; color: #0f172a; position: relative; overflow: hidden; box-sizing: border-box;">
+            <div style="width: 710px; margin: 0 auto; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; color: #0f172a; position: relative; overflow: hidden; box-sizing: border-box;">
                 
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0, 0, 0, 0.03); font-weight: 900; white-space: nowrap; z-index: 0; pointer-events: none; text-align: center; line-height: 1;">
                     OFFICIAL MATCH RECORD<br>CRICPULSE ARENA
@@ -3507,83 +3505,87 @@ function downloadPDF() {
 
                 <div style="position: relative; z-index: 1;">
                     
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px;">
-                        <div>
-                            <h1 style="margin: 0; font-size: 38px; font-weight: 900; letter-spacing: 2px; color: #0f172a;">HAND CLASH <span style="color: #3b82f6;">PRO</span></h1>
-                            <p style="margin: 5px 0 0 0; font-size: 14px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Advanced Match Analytics</p>
-                        </div>
-                        <div style="text-align: right; font-size: 12px; color: #64748b; line-height: 1.6;">
-                            Match ID: <span style="font-weight: bold; color: #0f172a;">${matchID}</span><br>
-                            Date: <span style="font-weight: bold; color: #0f172a;">${dateStr}</span><br>
-                            Format: <span style="font-weight: bold; color: #0f172a;">${formatStr} / ${gameState.maxWickets} Wkts</span><br>
-                            Difficulty: <span style="font-weight: bold; color: #0f172a;">${diffStr}</span>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-                        <div style="flex: 2; background: #0f172a; border-radius: 12px; padding: 25px; display: flex; flex-direction: column; justify-content: center;">
-                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Final Result</div>
-                            <div style="color: white; font-size: 26px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">${innStatusText}</div>
-                            <div style="color: #64748b; font-size: 14px; margin-top: 10px; font-weight: 600;">Player Profile: <span style="color: #38bdf8;">${playerDisplayName} (${rankTitle})</span></div>
-                        </div>
-                        <div style="flex: 1; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center;">
-                            <div style="color: #64748b; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Performance Grade</div>
-                            <div style="display: inline-block; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; background: ${gradeColor}; color: white; font-size: 36px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">${matchGrade}</div>
-                        </div>
-                    </div>
-
-                    <table style="width: 100%; border-spacing: 20px 0; margin-left: -20px; margin-right: -20px; margin-bottom: 30px; table-layout: fixed;">
+                    <table style="width: 100%; border-bottom: 4px solid #0f172a; padding-bottom: 15px; margin-bottom: 25px; border-spacing: 0;">
                         <tr>
-                            <td style="width: 50%; vertical-align: top;">
-                                <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-top: 6px solid #3b82f6; border-radius: 12px; padding: 25px;">
-                                    <div style="font-size: 18px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #3b82f6;">👤 YOUR PERFORMANCE</div>
-                                    <table style="width: 100%; font-size: 14px; line-height: 2;">
-                                        <tr><td style="color: #64748b; font-weight: 600;">Runs / Wickets</td><td style="font-weight: 800; color: #0f172a; text-align:right;"><span style="font-size: 18px; color: #3b82f6;">${pStats.runs}</span> <span style="color:#ef4444;">/ ${pStats.wicketsLost}</span></td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Balls Faced</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pStats.balls}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Strike Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pSR}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Run Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pRR}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Boundaries</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pTotalBounds} <span style="font-size: 12px; color:#64748b;">(${pStats.fours}x4 / ${pStats.sixes}x6)</span></td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Boundary %</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pBpct}%</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Bowling Eco</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${pEco}</td></tr>
-                                    </table>
-                                </div>
+                            <td style="vertical-align: bottom; padding: 0;">
+                                <h1 style="margin: 0; font-size: 34px; font-weight: 900; letter-spacing: 1px; color: #0f172a;">HAND CLASH <span style="color: #3b82f6;">PRO</span></h1>
+                                <p style="margin: 5px 0 0 0; font-size: 13px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Advanced Match Analytics</p>
                             </td>
-                            <td style="width: 50%; vertical-align: top;">
-                                <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-top: 6px solid #ef4444; border-radius: 12px; padding: 25px;">
-                                    <div style="font-size: 18px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #ef4444;">🤖 COM PERFORMANCE</div>
-                                    <table style="width: 100%; font-size: 14px; line-height: 2;">
-                                        <tr><td style="color: #64748b; font-weight: 600;">Runs / Wickets</td><td style="font-weight: 800; color: #0f172a; text-align:right;"><span style="font-size: 18px; color: #ef4444;">${cStats.runs}</span> <span style="color:#ef4444;">/ ${cStats.wicketsLost}</span></td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Balls Faced</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cStats.balls}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Strike Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cSR}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Run Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cRR}</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Boundaries</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cTotalBounds} <span style="font-size: 12px; color:#64748b;">(${cStats.fours}x4 / ${cStats.sixes}x6)</span></td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Boundary %</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cBpct}%</td></tr>
-                                        <tr style="border-top: 1px dashed #cbd5e1;"><td style="color: #64748b; font-weight: 600;">Bowling Eco</td><td style="font-weight: 800; color: #0f172a; text-align:right;">${cEco}</td></tr>
-                                    </table>
-                                </div>
+                            <td style="text-align: right; font-size: 12px; color: #64748b; line-height: 1.5; vertical-align: bottom; padding: 0;">
+                                Match ID: <span style="font-weight: bold; color: #0f172a;">${matchID}</span><br>
+                                Date: <span style="font-weight: bold; color: #0f172a;">${dateStr}</span><br>
+                                Format: <span style="font-weight: bold; color: #0f172a;">${formatStr} / ${gameState.maxWickets} Wkts</span><br>
+                                Difficulty: <span style="font-weight: bold; color: #0f172a;">${diffStr}</span>
                             </td>
                         </tr>
                     </table>
 
-                    <div class="html2pdf__page-break"></div>
+                    <div style="margin-bottom: 25px; overflow: hidden;">
+                        <div style="float: left; width: 66%; background: #0f172a; border-radius: 10px; padding: 20px; box-sizing: border-box;">
+                            <div style="color: #94a3b8; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Final Result</div>
+                            <div style="color: white; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">${innStatusText}</div>
+                            <div style="color: #64748b; font-size: 13px; margin-top: 8px; font-weight: 600;">Player Profile: <span style="color: #38bdf8;">${playerDisplayName} (${rankTitle})</span></div>
+                        </div>
+                        <div style="float: right; width: 30%; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; text-align: center; box-sizing: border-box;">
+                            <div style="color: #64748b; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Match Grade</div>
+                            <div style="display: inline-block; width: 50px; height: 50px; line-height: 50px; border-radius: 50%; background: ${gradeColor}; color: white; font-size: 26px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin: 0 auto;">${matchGrade}</div>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                    <div style="margin-bottom: 30px; overflow: hidden;">
+                        <div style="float: left; width: 48%; background: #f8fafc; border: 2px solid #e2e8f0; border-top: 6px solid #3b82f6; border-radius: 10px; padding: 15px; box-sizing: border-box;">
+                            <div style="font-size: 16px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; color: #3b82f6;">👤 YOUR PERFORMANCE</div>
+                            <table style="width: 100%; font-size: 13px; line-height: 2; border-collapse: collapse;">
+                                <tr><td style="color: #64748b; font-weight: 600;">Runs/Wkts</td><td style="font-weight: 800; color: #0f172a; text-align:right;"><span style="font-size: 16px; color: #3b82f6;">${pStats.runs}</span><span style="color:#ef4444;">/${pStats.wicketsLost}</span></td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Balls Faced</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pStats.balls}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Strike Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pSR}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Run Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pRR}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Boundaries</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pTotalBounds} <span style="font-size: 10px; color:#64748b;">(${pStats.fours}x4 / ${pStats.sixes}x6)</span></td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Boundary %</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pBpct}%</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Bowling Eco</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${pEco}</td></tr>
+                            </table>
+                        </div>
+                        
+                        <div style="float: right; width: 48%; background: #f8fafc; border: 2px solid #e2e8f0; border-top: 6px solid #ef4444; border-radius: 10px; padding: 15px; box-sizing: border-box;">
+                            <div style="font-size: 16px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; color: #ef4444;">🤖 COM PERFORMANCE</div>
+                            <table style="width: 100%; font-size: 13px; line-height: 2; border-collapse: collapse;">
+                                <tr><td style="color: #64748b; font-weight: 600;">Runs/Wkts</td><td style="font-weight: 800; color: #0f172a; text-align:right;"><span style="font-size: 16px; color: #ef4444;">${cStats.runs}</span><span style="color:#ef4444;">/${cStats.wicketsLost}</span></td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Balls Faced</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cStats.balls}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Strike Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cSR}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Run Rate</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cRR}</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Boundaries</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cTotalBounds} <span style="font-size: 10px; color:#64748b;">(${cStats.fours}x4 / ${cStats.sixes}x6)</span></td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Boundary %</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cBpct}%</td></tr>
+                                <tr><td style="color: #64748b; font-weight: 600; border-top: 1px dashed #cbd5e1;">Bowling Eco</td><td style="font-weight: 800; color: #0f172a; text-align:right; border-top: 1px dashed #cbd5e1;">${cEco}</td></tr>
+                            </table>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </div>
+
+                    <div class="html2pdf__page-break" style="display: block; width: 100%; height: 0;"></div>
                     
-                    <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
-                        <div style="font-size: 20px; font-weight: 900; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Match Worm Chart</div>
-                        <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">Visual progression of runs per ball</div>
+                    <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 30px;">
+                        <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Match Worm Chart</div>
+                        <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Visual progression of runs per ball</div>
                         ${wormImgHtml}
                     </div>
 
-                    <div class="html2pdf__page-break"></div>
+                    <div class="html2pdf__page-break" style="display: block; width: 100%; height: 0;"></div>
                     
                     <div style="margin-top: 30px;">
-                        <div style="font-size: 22px; font-weight: 900; border-bottom: 4px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; color: #0f172a;">BALL-BY-BALL AUDIT LOG</div>
-                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 13px; line-height: 1.6; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #f8fafc; padding: 5px;">
+                        <div style="font-size: 20px; font-weight: 900; border-bottom: 4px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; color: #0f172a;">BALL-BY-BALL AUDIT LOG</div>
+                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.6; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #f8fafc; padding: 5px;">
         `;
 
-        // Process logs with dynamic Esports coloring
+        // 🌟 FIX 3: Grammar & Typo Auto-Corrector for the Audit Logs
         gameState.commentaryHistory.forEach(log => {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
+            
+            // Clean up original game logic grammar specifically for the PDF
+            safeText = safeText.replace(/You is/gi, "You are");
+            safeText = safeText.replace(/5 runa ilke/gi, "5 runs like");
+            safeText = safeText.replace(/open the green/gi, "upon the green");
             
             let color = "#334155", fontWeight = "normal", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #e2e8f0";
             const upperText = safeText.toUpperCase();
@@ -3606,12 +3608,11 @@ function downloadPDF() {
                 </div>
             </div>`;
 
-        // 🌟 PRO MAX FEATURE 4: Crank the Rendering Engine limits to max
         const opt = {
             margin:       0.3,
             filename:     `HandClash_Report_${matchID}.pdf`,
-            image:        { type: 'jpeg', quality: 1.0 }, // Max Quality
-            html2canvas:  { scale: 4, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' }, // 4x Resolution rendering
+            image:        { type: 'jpeg', quality: 1.0 }, 
+            html2canvas:  { scale: 3, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' }, 
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
             pagebreak:    { mode: 'css' }
         };
