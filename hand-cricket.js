@@ -3705,6 +3705,15 @@ if (tBox) tBox.style.display = 'none';
     
    // 3. SHOW THE SETUP SCREEN (OR REDIRECT TO GAUNTLET)
     toggleHeaderButtons('setup');
+   // 👇 ADD THIS LINE TO FIX THE LOOP 👇
+    localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS);
+
+    if (gameState.isTournament) {
+        window.location.href = 'tournament.html';
+    } else {
+        const setupScreen = document.getElementById('setup-screen');
+        if (setupScreen) setupScreen.style.display = 'block';
+    }
 
     if (gameState.isTournament) {
         window.location.href = 'tournament.html';
