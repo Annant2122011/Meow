@@ -2093,6 +2093,9 @@ function setDifficulty(level, btnId) {
 
   function goToToss() {
      SoundManager.startBGM();
+     // 👇 ADD THIS TO HIDE THE SETUP TEXT
+    const gameHeader = document.querySelector('.game-header');
+    if (gameHeader) gameHeader.style.display = 'none';
     // 1. Update the Header Buttons
     toggleHeaderButtons('toss');
 
@@ -2303,7 +2306,7 @@ function updateMatchUI() {
         inningsStatus.innerText = "🏏 1ST INNINGS";
     } else {
         inningsStatus.innerText = "⚔️ 2ND INNINGS THE CHASE"; 
-        if (targetBox) targetBox.style.display = 'block'; 
+        if (targetBox) targetBox.style.display = 'flex'; 
         if (targetScoreUi) targetScoreUi.innerText = gameState.target;
     }
     
@@ -3367,6 +3370,9 @@ function resetToToss() {
     
     // Clear tournament state
     localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); 
+   // 👇 ADD THIS TO BRING THE SETUP TEXT BACK
+    const gameHeader = document.querySelector('.game-header');
+    if (gameHeader) gameHeader.style.display = 'block';
     
     // Soft-reset DOM instead of hard reloading
     const tossScreen = document.getElementById('toss-screen');
@@ -3743,13 +3749,9 @@ if (tBox) tBox.style.display = 'none';
     } else {
         const setupScreen = document.getElementById('setup-screen');
         if (setupScreen) setupScreen.style.display = 'block';
-    }
-
-    if (gameState.isTournament) {
-        window.location.href = 'tournament.html';
-    } else {
-        const setupScreen = document.getElementById('setup-screen');
-        if (setupScreen) setupScreen.style.display = 'block';
+       // 👇 ADD THIS TO BRING THE SETUP TEXT BACK
+        const gameHeader = document.querySelector('.game-header');
+        if (gameHeader) gameHeader.style.display = 'block';
     }
   
    // 4. WIPE THE GAME STATE CLEAN
