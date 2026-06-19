@@ -971,7 +971,7 @@ function loadUser(username) {
         if (setupScreen) setupScreen.style.display = 'block';
     }
 }
-
+function loadUser(username) {
 function logoutUser() {
     showConfirmModal(
         "SYSTEM DISCONNECT", 
@@ -2097,7 +2097,7 @@ function setDifficulty(level, btnId) {
 
 
   function goToToss() {
-     SoundManager.startBGM();
+   
      // 👇 ADD THIS TO HIDE THE SETUP TEXT
     const gameHeader = document.querySelector('.game-header');
     if (gameHeader) gameHeader.style.display = 'none';
