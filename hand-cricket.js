@@ -2273,6 +2273,12 @@ function continueToMatch() {
     }
     const resultScreen = document.getElementById('toss-result-screen');
     if (resultScreen) resultScreen.style.display = 'none';
+    // 👇 ADD THESE LINES TO CLEAN UP THE UI
+    const pDecision = document.getElementById('player-decision-box');
+    if (pDecision) pDecision.style.display = 'none';
+    const cDecision = document.getElementById('computer-decision-box');
+    if (cDecision) cDecision.style.display = 'none';
+
     matchScreen.style.display = 'block';
    applyCosmetics();
    const actionArea = document.getElementById('hand-action-area');
@@ -3362,14 +3368,30 @@ function resetToToss() {
     // Clear tournament state
     localStorage.removeItem(STORAGE_KEYS.TOURNEY_BOSS); 
     
-    // Soft-reset DOM instead of hard reloading (if using the SPA structure)
+    // Soft-reset DOM instead of hard reloading
     const tossScreen = document.getElementById('toss-screen');
     const matchScreen = document.getElementById('match-screen');
     const setupScreen = document.getElementById('setup-screen');
     
+    // 👇 ADD THESE VARIABLES
+    const tossResultScreen = document.getElementById('toss-result-screen');
+    const pDecision = document.getElementById('player-decision-box');
+    const cDecision = document.getElementById('computer-decision-box');
+    const endControls = document.getElementById('end-game-controls');
+    
     if (matchScreen) matchScreen.style.display = 'none';
     if (tossScreen) tossScreen.style.display = 'none';
+    
+    // 👇 HIDE THE LEFTOVER BOXES HERE
+    if (tossResultScreen) tossResultScreen.style.display = 'none';
+    if (pDecision) pDecision.style.display = 'none';
+    if (cDecision) cDecision.style.display = 'none';
+    if (endControls) endControls.style.display = 'none';
+    
     if (setupScreen) setupScreen.style.display = 'block';
+    
+    // 👇 RESET THE HEADERS
+    toggleHeaderButtons('setup');
     
     // Reset global state
     if (typeof getFreshGameState === 'function') {
@@ -3701,7 +3723,7 @@ function executeForfeit(applyPenalty) {
     }
 
     // 2. HIDE ALL ACTIVE SCREENS
-   const screensToHide = ['toss-screen', 'match-screen', 'post-match-screen', 'toss-result-screen'];
+   const screensToHide = ['toss-screen', 'match-screen', 'post-match-screen', 'toss-result-screen','player-decision-box','computer-decision-box'];
 screensToHide.forEach(id => {
     let el = document.getElementById(id);
     if (el) el.style.display = 'none';
