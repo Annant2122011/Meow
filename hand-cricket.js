@@ -3573,7 +3573,7 @@ function downloadPDF() {
                         <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.6; background: #f8fafc; padding: 5px;">
         `;
 
-        gameState.commentaryHistory.forEach(log => {
+      gameState.commentaryHistory.forEach(log => {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
             
@@ -3581,22 +3581,25 @@ function downloadPDF() {
             safeText = safeText.replace(/5 runa ilke/gi, "5 runs like");
             safeText = safeText.replace(/open the green/gi, "upon the green");
             
-            let color = "#334155", fontWeight = "normal", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #e2e8f0", avoidBreak = "";
+            // 👇 HIGH CONTRAST COLORS: Pure black base text with a heavier 600 weight
+            let color = "#000000", fontWeight = "600", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #94a3b8", avoidBreak = "";
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS", "CASTLED!"];
             
             if (wicketKeywords.some(kw => upperText.includes(kw))) {
-                color = "#dc2626"; fontWeight = "bold"; bgColor = "#fef2f2"; avoidBreak = "page-break-inside: avoid;";
+                // Deep Crimson Red for Wickets
+                color = "#991b1b"; fontWeight = "900"; bgColor = "#fef2f2"; avoidBreak = "page-break-inside: avoid;";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                color = "#2563eb"; fontWeight = "bold"; bgColor = "#eff6ff"; avoidBreak = "page-break-inside: avoid;";
+                // Deep Navy Blue for Boundaries
+                color = "#1e3a8a"; fontWeight = "900"; bgColor = "#eff6ff"; avoidBreak = "page-break-inside: avoid;";
             } else if (safeText.includes("---")) {
-                bgColor = "#e2e8f0"; borderBottom = "2px solid #cbd5e1"; padding = "12px"; fontWeight = "800"; color = "#0f172a"; avoidBreak = "page-break-inside: avoid;";
+                // Inverted Header Blocks: White text on Dark Slate background
+                bgColor = "#475569"; borderBottom = "2px solid #1e293b"; padding = "12px"; fontWeight = "900"; color = "#ffffff"; avoidBreak = "page-break-inside: avoid;";
             }
 
-            // 👇 FIX 2: Added 'border-left' and 'border-right' directly to the individual lines instead of the wrapper 👇
-            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; border-left: 2px solid #e2e8f0; border-right: 2px solid #e2e8f0; ${avoidBreak}">${safeText}</div>`;
+            // The border-left and border-right remain to keep the chain intact!
+            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; border-left: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; ${avoidBreak}">${safeText}</div>`;
         });
-
         pdfHTML += `
                         </div>
                     </div>
