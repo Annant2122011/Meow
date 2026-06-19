@@ -1582,6 +1582,7 @@ function applyRankUI(username, avatarBoxId) {
     // Animate the stunning UI progress bar
     const lvlText = document.getElementById('prof-level-text');
     const progBar = document.getElementById('prof-level-bar');
+   const xpProgressText = document.getElementById('prof-xp-progress-text');
     if (lvlText) lvlText.innerText = `LEVEL ${currentLevel}`;
     if (progBar) progBar.style.width = `${progressPercent}%`;
 
