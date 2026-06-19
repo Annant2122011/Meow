@@ -3494,12 +3494,11 @@ function downloadPDF() {
             } catch (e) { console.log("Chart render error", e); }
         }
 
-        // 🌟 FIX 1: Width reduced to 710px to perfectly fit A4 margins
-        // 🌟 FIX 2: Replaced all Flexbox with bulletproof float/table layouts
+      // 🌟 FIX 1: Removed 'overflow: hidden' so it stops cutting off text
         let pdfHTML = `
-            <div style="width: 710px; margin: 0 auto; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; color: #0f172a; position: relative; overflow: hidden; box-sizing: border-box;">
+            <div style="width: 710px; margin: 0 auto; padding: 30px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff; color: #0f172a; position: relative; box-sizing: border-box;">
                 
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0, 0, 0, 0.03); font-weight: 900; white-space: nowrap; z-index: 0; pointer-events: none; text-align: center; line-height: 1;">
+                <div style="position: absolute; top: 350px; left: 50%; transform: translateX(-50%) rotate(-45deg); font-size: 80px; color: rgba(0, 0, 0, 0.03); font-weight: 900; white-space: nowrap; z-index: 0; pointer-events: none; text-align: center; line-height: 1;">
                     OFFICIAL MATCH RECORD<br>CRICPULSE ARENA
                 </div>
 
@@ -3533,7 +3532,7 @@ function downloadPDF() {
                         <div style="clear: both;"></div>
                     </div>
 
-                    <div style="margin-bottom: 30px; overflow: hidden;">
+                    <div class="avoid-break" style="margin-bottom: 30px; overflow: hidden;">
                         <div style="float: left; width: 48%; background: #f8fafc; border: 2px solid #e2e8f0; border-top: 6px solid #3b82f6; border-radius: 10px; padding: 15px; box-sizing: border-box;">
                             <div style="font-size: 16px; font-weight: 800; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; color: #3b82f6;">👤 YOUR PERFORMANCE</div>
                             <table style="width: 100%; font-size: 13px; line-height: 2; border-collapse: collapse;">
@@ -3561,45 +3560,39 @@ function downloadPDF() {
                         </div>
                         <div style="clear: both;"></div>
                     </div>
-
-                    <div class="html2pdf__page-break" style="display: block; width: 100%; height: 0;"></div>
                     
-                    <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 30px;">
+                    <div class="avoid-break" style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 30px;">
                         <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Match Worm Chart</div>
                         <div style="font-size: 13px; color: #64748b; margin-bottom: 10px;">Visual progression of runs per ball</div>
                         ${wormImgHtml}
                     </div>
-
-                    <div class="html2pdf__page-break" style="display: block; width: 100%; height: 0;"></div>
                     
                     <div style="margin-top: 30px;">
-                        <div style="font-size: 20px; font-weight: 900; border-bottom: 4px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; color: #0f172a;">BALL-BY-BALL AUDIT LOG</div>
+                        <div class="avoid-break" style="font-size: 20px; font-weight: 900; border-bottom: 4px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; color: #0f172a;">BALL-BY-BALL AUDIT LOG</div>
                         <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.6; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #f8fafc; padding: 5px;">
         `;
 
-        // 🌟 FIX 3: Grammar & Typo Auto-Corrector for the Audit Logs
         gameState.commentaryHistory.forEach(log => {
             let safeText = log.replace(/[🪙🤖👤💥🏏🎯🧤😱↔️🙅‍♂️😬🎁🛡️🧱🛑👀🔥⚡🤌🚀🛸🤯🏃🏃‍♂️🚨🤦‍♂️😲🪵🏆💀🤝👍]/g, '').trim();
             safeText = safeText.replace('↳', '>').trim();
             
-            // Clean up original game logic grammar specifically for the PDF
             safeText = safeText.replace(/You is/gi, "You are");
             safeText = safeText.replace(/5 runa ilke/gi, "5 runs like");
             safeText = safeText.replace(/open the green/gi, "upon the green");
             
-            let color = "#334155", fontWeight = "normal", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #e2e8f0";
+            let color = "#334155", fontWeight = "normal", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #e2e8f0", avoidBreak = "";
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS", "CASTLED!"];
             
             if (wicketKeywords.some(kw => upperText.includes(kw))) {
-                color = "#dc2626"; fontWeight = "bold"; bgColor = "#fef2f2";
+                color = "#dc2626"; fontWeight = "bold"; bgColor = "#fef2f2"; avoidBreak = "page-break-inside: avoid;";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                color = "#2563eb"; fontWeight = "bold"; bgColor = "#eff6ff";
+                color = "#2563eb"; fontWeight = "bold"; bgColor = "#eff6ff"; avoidBreak = "page-break-inside: avoid;";
             } else if (safeText.includes("---")) {
-                bgColor = "#e2e8f0"; borderBottom = "2px solid #cbd5e1"; padding = "12px"; fontWeight = "800"; color = "#0f172a";
+                bgColor = "#e2e8f0"; borderBottom = "2px solid #cbd5e1"; padding = "12px"; fontWeight = "800"; color = "#0f172a"; avoidBreak = "page-break-inside: avoid;";
             }
 
-            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom};">${safeText}</div>`;
+            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; ${avoidBreak}">${safeText}</div>`;
         });
 
         pdfHTML += `
@@ -3608,13 +3601,14 @@ function downloadPDF() {
                 </div>
             </div>`;
 
+        // 🌟 FIX 4: Updated options to avoid breaking inside our new 'avoid-break' classes
         const opt = {
             margin:       0.3,
             filename:     `HandClash_Report_${matchID}.pdf`,
             image:        { type: 'jpeg', quality: 1.0 }, 
             html2canvas:  { scale: 3, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' }, 
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: 'css' }
+            pagebreak:    { mode: ['css', 'legacy'], avoid: '.avoid-break' }
         };
 
         html2pdf().set(opt).from(pdfHTML).save().then(() => {
