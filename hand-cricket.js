@@ -1575,6 +1575,11 @@ function applyRankUI(username, avatarBoxId) {
     if (lvlText) lvlText.innerText = `LEVEL ${currentLevel}`;
     if (progBar) progBar.style.width = `${progressPercent}%`;
 
+   // 👇 ADD THIS BLOCK TO INJECT THE XP NUMBERS
+    if (xpProgressText) {
+        // Formats numbers with commas (e.g. 1,500 / 2,500 XP)
+        xpProgressText.innerText = `${Math.floor(xpIntoCurrentLevel).toLocaleString()} / ${xpRequiredForNext.toLocaleString()} XP`;
+    }
     return { rank, xp };
 }
 
