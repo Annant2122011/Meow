@@ -3581,23 +3581,37 @@ function downloadPDF() {
             safeText = safeText.replace(/5 runa ilke/gi, "5 runs like");
             safeText = safeText.replace(/open the green/gi, "upon the green");
             
-            // 👇 HIGH CONTRAST COLORS: Pure black base text with a heavier 600 weight
-            let color = "#000000", fontWeight = "600", bgColor = "transparent", padding = "8px 12px", borderBottom = "1px solid #94a3b8", avoidBreak = "";
+            // Default styling for unclassified text
+            let color = "#1e293b", fontWeight = "600", bgColor = "#ffffff", padding = "8px 12px", borderBottom = "1px solid #cbd5e1", avoidBreak = "";
             const upperText = safeText.toUpperCase();
             const wicketKeywords = ["WICKET", "STUMPED", "HOWZAT", "OUT!", "TIMBER!", "BOWLED!", "DEPARTS!", "SHATTERS", "CASTLED!"];
             
-            if (wicketKeywords.some(kw => upperText.includes(kw))) {
-                // Deep Crimson Red for Wickets
+            if (safeText.includes("---")) {
+                // 🏁 Headers: White text on Dark Slate background
+                bgColor = "#334155"; borderBottom = "2px solid #0f172a"; padding = "12px"; fontWeight = "900"; color = "#ffffff"; avoidBreak = "page-break-inside: avoid;";
+            } else if (wicketKeywords.some(kw => upperText.includes(kw))) {
+                // 💀 Wickets: Deep Crimson text on light red background
                 color = "#991b1b"; fontWeight = "900"; bgColor = "#fef2f2"; avoidBreak = "page-break-inside: avoid;";
             } else if (safeText.includes("+4") || safeText.includes("+6")) {
-                // Deep Navy Blue for Boundaries
+                // 🚀 Boundaries: Deep Navy Blue text on light blue background
                 color = "#1e3a8a"; fontWeight = "900"; bgColor = "#eff6ff"; avoidBreak = "page-break-inside: avoid;";
-            } else if (safeText.includes("---")) {
-                // Inverted Header Blocks: White text on Dark Slate background
-                bgColor = "#475569"; borderBottom = "2px solid #1e293b"; padding = "12px"; fontWeight = "900"; color = "#ffffff"; avoidBreak = "page-break-inside: avoid;";
+            } else if (safeText.includes("+1") || safeText.includes("+2") || safeText.includes("+3") || safeText.includes("+5")) {
+                // 🏃 Normal Runs: Emerald Green text on light mint background
+                color = "#065f46"; fontWeight = "800"; bgColor = "#ecfdf5"; avoidBreak = "page-break-inside: avoid;"; 
+            } else if (upperText.includes("WIDE")) {
+                // ↔️ Wides: Purple text on light purple background
+                color = "#7e22ce"; fontWeight = "800"; bgColor = "#faf5ff"; avoidBreak = "page-break-inside: avoid;"; 
+            } else if (upperText.includes("DEFEND") || upperText.includes("BLOCK") || safeText.includes("0 runs") || safeText.includes("No run")) {
+                // 🛡️ Dot Balls: Slate Grey text on very light grey background
+                color = "#475569"; fontWeight = "800"; bgColor = "#f1f5f9"; avoidBreak = "page-break-inside: avoid;"; 
+            } else if (upperText.includes("TOSS")) {
+                // 🪙 Toss Results: Amber Gold text on light yellow background
+                color = "#92400e"; fontWeight = "900"; bgColor = "#fffbeb"; avoidBreak = "page-break-inside: avoid;"; 
+            } else if (safeText.startsWith("[Ball")) {
+                // 🎯 The "[Ball X]" marker lines: Pure black text
+                color = "#000000"; fontWeight = "700"; bgColor = "#fafafa"; avoidBreak = "page-break-inside: avoid;"; 
             }
 
-            // The border-left and border-right remain to keep the chain intact!
             pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; border-left: 2px solid #cbd5e1; border-right: 2px solid #cbd5e1; ${avoidBreak}">${safeText}</div>`;
         });
         pdfHTML += `
