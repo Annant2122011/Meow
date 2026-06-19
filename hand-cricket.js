@@ -970,8 +970,10 @@ function loadUser(username) {
     } else {
         if (setupScreen) setupScreen.style.display = 'block';
     }
+   // 👇 ADD THIS LINE TO START BGM IN THE ARENA
+    SoundManager.startBGM();
 }
-function loadUser(username) {
+
 function logoutUser() {
     showConfirmModal(
         "SYSTEM DISCONNECT", 
