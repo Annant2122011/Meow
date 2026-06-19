@@ -3567,9 +3567,10 @@ function downloadPDF() {
                         ${wormImgHtml}
                     </div>
                     
-                    <div style="margin-top: 30px;">
+   <div style="margin-top: 30px;">
                         <div class="avoid-break" style="font-size: 20px; font-weight: 900; border-bottom: 4px solid #0f172a; padding-bottom: 10px; margin-bottom: 20px; color: #0f172a;">BALL-BY-BALL AUDIT LOG</div>
-                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.6; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; background: #f8fafc; padding: 5px;">
+                        
+                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.6; background: #f8fafc; padding: 5px;">
         `;
 
         gameState.commentaryHistory.forEach(log => {
@@ -3592,7 +3593,8 @@ function downloadPDF() {
                 bgColor = "#e2e8f0"; borderBottom = "2px solid #cbd5e1"; padding = "12px"; fontWeight = "800"; color = "#0f172a"; avoidBreak = "page-break-inside: avoid;";
             }
 
-            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; ${avoidBreak}">${safeText}</div>`;
+            // 👇 FIX 2: Added 'border-left' and 'border-right' directly to the individual lines instead of the wrapper 👇
+            pdfHTML += `<div style="color: ${color}; font-weight: ${fontWeight}; background: ${bgColor}; padding: ${padding}; border-bottom: ${borderBottom}; border-left: 2px solid #e2e8f0; border-right: 2px solid #e2e8f0; ${avoidBreak}">${safeText}</div>`;
         });
 
         pdfHTML += `
@@ -3600,7 +3602,6 @@ function downloadPDF() {
                     </div>
                 </div>
             </div>`;
-
         // 🌟 FIX 4: Updated options to avoid breaking inside our new 'avoid-break' classes
         const opt = {
             margin:       0.3,
