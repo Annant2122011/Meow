@@ -2734,7 +2734,8 @@ function handleWide(batterNum) {
     currentBatterStats.runs += runsToAdd; 
     currentBatterStats.extras += runsToAdd; 
     currentBatterStats.currentWicketRuns += runsToAdd;
-    
+    // 👇 ADD THIS LINE: Force wides to count as a ball
+    currentBatterStats.balls++;
 
 
     const team = gameState.isPlayerBatting ? "You" : "Computer";
