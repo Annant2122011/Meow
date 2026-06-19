@@ -108,6 +108,14 @@ function bindGlobalEvents() {
             }
         });
     }
+// 👇 ADD THIS BYPASS BLOCK
+    document.body.addEventListener('click', function unlockAudio() {
+        if (SoundManager.enabled && SoundManager.bgm.paused) {
+            SoundManager.startBGM();
+        }
+        // Remove the listener after the first click so it doesn't fire endlessly
+        document.body.removeEventListener('click', unlockAudio);
+    }, { once: true });
 }
 
 // ==========================================
