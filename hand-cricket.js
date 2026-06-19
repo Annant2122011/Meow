@@ -2442,11 +2442,16 @@ function getBossThrow(bossIndex) {
                 return opts[Math.floor(Math.random() * opts.length)]; 
             }
             
-        case 3: // Illusionist
+      case 3: // Illusionist
             let lastT = gameState.playerHistory.length > 0 ? gameState.playerHistory[gameState.playerHistory.length - 1] : 3;
             let opp = 6 - lastT; 
-            return Math.max(0, Math.min(6, opp));
             
+            // FIX: Prevent the infinite wide glitch if the player keeps spamming 6
+            if (opp === 0 && !safeZero) {
+                return generateAIThrow(false);
+            }
+            
+            return Math.max(0, Math.min(6, opp));
         case 4: // Copycat
             if (gameState.playerHistory.length > 0) {
                 let copy = gameState.playerHistory[gameState.playerHistory.length - 1];
