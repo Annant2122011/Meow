@@ -1989,12 +1989,27 @@ if (xpText) xpText.innerText = formatCurrency(stats.xp || 0);
 // 5. GAME SETUP & TOSS
 // ==========================================
 
-// Variable to temporarily remember what the user clicked while the modal is open
-let pendingFormat = { balls: 30, btnId: '' };
+// 1. Updated pendingFormat to also remember the max wickets allowed
+let pendingFormat = { balls: 30, btnId: 'btn-fmt-t5', maxWicketsAllowed: 3 };
 
-function setFormat(wickets, balls, btnId) {
-    pendingFormat = { balls: balls, btnId: btnId };
+// 2. Replaces setFormat. This just highlights the button and saves the choice.
+function selectFormat(maxWickets, balls, btnId) {
+    pendingFormat = { balls: balls, btnId: btnId, maxWicketsAllowed: maxWickets };
     
+    // Remove glow from all format buttons
+    document.querySelectorAll('.setup-btn').forEach(btn => { 
+        if (btn.id && btn.id.startsWith('btn-fmt')) {
+            btn.classList.remove('active-setup-btn'); 
+        }
+    });
+    
+    // Add glow to the chosen format button
+    const activeBtn = document.getElementById(btnId); 
+    if (activeBtn) activeBtn.classList.add('active-setup-btn');
+}
+
+// 3. NEW FUNCTION: Opens the wicket modal when "Proceed to Toss" is clicked
+function promptWickets() {
     const modal = document.getElementById('wicket-modal');
     const title = document.getElementById('wicket-modal-title');
     const btnContainer = document.getElementById('wicket-btn-container');
@@ -2002,25 +2017,20 @@ function setFormat(wickets, balls, btnId) {
     if (!modal) return;
     
     btnContainer.innerHTML = ''; // Clear old buttons
-    let maxWicketsAllowed = 5;
     
-    // Dynamic logic based on the format chosen
-    if (balls === 30) {
+    // Dynamic title based on the format chosen
+    if (pendingFormat.balls === 30) {
         title.innerText = "T5 FORMAT";
-        maxWicketsAllowed = 3; // T5 allows 1 to 3 wickets
-    } else if (balls === 60) {
+    } else if (pendingFormat.balls === 60) {
         title.innerText = "T10 FORMAT";
-        maxWicketsAllowed = 5; // T10 allows 1 to 5 wickets
-    } else if (balls === Infinity) {
+    } else if (pendingFormat.balls === Infinity) {
         title.innerText = "CLASSIC MODE";
-        maxWicketsAllowed = 5; // Classic allows 1 to 5 wickets
     } else {
         title.innerText = "CUSTOM FORMAT";
-        maxWicketsAllowed = wickets || 5;
     }
 
     // Generate the nice circular buttons
-    for (let i = 1; i <= maxWicketsAllowed; i++) {
+    for (let i = 1; i <= pendingFormat.maxWicketsAllowed; i++) {
         const btn = document.createElement('button');
         btn.className = 'setup-btn';
         btn.style.width = '60px';
@@ -2041,33 +2051,25 @@ function setFormat(wickets, balls, btnId) {
     modal.style.display = 'flex';
 }
 
+// 4. Update confirmFormat to trigger the toss automatically
 function confirmFormat(selectedWickets) {
     // Save the choices to the game state
     gameState.maxWickets = selectedWickets;
     gameState.maxBalls = pendingFormat.balls;
     
-    // Remove glow from all format buttons
-    document.querySelectorAll('.setup-btn').forEach(btn => { 
-        if (btn.id && btn.id.startsWith('btn-fmt')) {
-            btn.classList.remove('active-setup-btn'); 
-        }
-    });
-    
-    // Add glow to the chosen format button
-    const activeBtn = document.getElementById(pendingFormat.btnId); 
-    if (activeBtn) activeBtn.classList.add('active-setup-btn');
-    
     // Special rule for Classic mode
     if (pendingFormat.balls === Infinity) {
-        setDifficulty('easy', 'btn-diff-easy'); // Force Easy AI for unlimited
+        setDifficulty('easy', 'btn-diff-easy'); 
         showToast(`Classic Mode: ${selectedWickets} Wkts, Easy AI!`);
     } else {
         showToast(`${pendingFormat.balls / 6} Overs | ${selectedWickets} Wickets Set!`);
     }
     
     closeWicketModal();
+    
+    // 👇 NEW STEP: Go to toss immediately after picking wickets
+    goToToss();
 }
-
 function closeWicketModal() {
     const modal = document.getElementById('wicket-modal');
     if (modal) modal.style.display = 'none';
