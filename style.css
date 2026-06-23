@@ -1008,10 +1008,10 @@ body.theme-blood {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1rem;       /* Reduced from 1.2rem so large emojis fit perfectly */
+    font-size: 22px;       /* Increased to perfectly fill the 35px container */
     line-height: 1;        /* Keeps the emoji perfectly centered vertically */
     border: 2px solid var(--accent-blue);
-    overflow: hidden;      /* Prevents any edges of the emoji from bleeding out */
+    overflow: hidden;      /* Acts as our safety net */
 }
 /* =========================================
    PROFILE PAGE AVATAR (CENTERED ONLY, ORIGINAL SIZE)
