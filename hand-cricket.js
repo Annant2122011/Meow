@@ -1213,24 +1213,27 @@ function applyCosmetics() {
 const displayAvatar = (el) => {
         if (!el) return;
         if (u.customPFP) {
-            // Force the container to clip the image and remove text-based padding
-            el.style.overflow = 'hidden';
-            el.style.padding = '0';
-            el.style.display = 'flex';
-            el.style.justifyContent = 'center';
-            el.style.alignItems = 'center';
+            // Check if we are rendering the small header avatar or the large profile avatar
+            let isHeader = el.id === 'avatar-text';
             
-            // Add display: block to remove the invisible gap under inline images
-            el.innerHTML = `<img src="${u.customPFP}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+            // Header gets locked to an emoji-like size. Profile gets to fill the container.
+            let imgStyle = isHeader 
+                ? 'width: 1.5em; height: 1.5em; vertical-align: middle;' 
+                : 'width: 100%; height: 100%; display: block;';
+
+            el.innerHTML = `<img src="${u.customPFP}" style="${imgStyle} border-radius: 50%; object-fit: cover;">`;
+            
+            el.style.padding = '0';
+            el.style.overflow = 'hidden';
+            el.style.display = isHeader ? 'inline-block' : 'flex';
         } else {
-            // Revert styles for standard text emojis so they remain centered
-            el.style.overflow = '';
+            // Revert to standard text emoji styling
             el.style.padding = '';
+            el.style.overflow = '';
             el.style.display = '';
             el.innerText = u.equippedAvatar || '👤';
         }
     };
-    
     displayAvatar(headerAv); 
     displayAvatar(profAv);
     
