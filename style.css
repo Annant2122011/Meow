@@ -1004,7 +1004,7 @@ body.theme-blood {
  width: 60px;
     height: 60px;
     background: var(--surface-light);
-    border-radius: 50%;
+    border-radius: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
