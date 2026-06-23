@@ -2499,7 +2499,7 @@ function getBossThrow(bossIndex) {
             return Math.max(0, Math.min(6, opp));
         case 4: // Copycat
             if (gameState.playerHistory.length > 0) {
-                let copy = gameState.playerHistory[gameState.playerHistory.length - 1];
+                let copy = gameState.playerHistory[gameState.playerHistory.length - 2];
                 if (copy === 0 && !safeZero) return generateAIThrow(false);
                 return copy;
             }
