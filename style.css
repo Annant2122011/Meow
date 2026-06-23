@@ -1001,14 +1001,14 @@ body.theme-blood {
    ========================================= */
 
 #header-avatar-box {
- width: 35px;
-    height: 35px;
+ width: 60px;
+    height: 60px;
     background: var(--surface-light);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1rem;       /* Reduced from 1.2rem so large emojis fit perfectly */
+    font-size: 1.2rem;       /* Reduced from 1.2rem so large emojis fit perfectly */
     line-height: 1;        /* Keeps the emoji perfectly centered vertically */
     border: 2px solid var(--accent-blue);
     overflow: hidden;      /* Prevents any edges of the emoji from bleeding out */
