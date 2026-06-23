@@ -1001,15 +1001,17 @@ body.theme-blood {
    ========================================= */
 
 #header-avatar-box {
-    width: 60px !important;             /* MUCH bigger circle */
-    height: 60px !important;            /* Keeps it a perfect square */
-    margin: 0 auto 15px auto !important; /* Forces it to perfectly center */
-    display: flex !important;
-    justify-content: center !important;  /* Centers the emoji horizontally */
-    align-items: center !important;      /* Centers the emoji vertically */
-    border-radius: 50% !important;
-    font-size: 3.5rem !important;        /* Makes the emoji itself massive */
-    overflow: hidden !important;
+ width: 35px;
+    height: 35px;
+    background: var(--surface-light);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;       /* Reduced from 1.2rem so large emojis fit perfectly */
+    line-height: 1;        /* Keeps the emoji perfectly centered vertically */
+    border: 2px solid var(--accent-blue);
+    overflow: hidden;      /* Prevents any edges of the emoji from bleeding out */
 }
 /* =========================================
    PROFILE PAGE AVATAR (CENTERED ONLY, ORIGINAL SIZE)
