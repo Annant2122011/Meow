@@ -2497,14 +2497,17 @@ function getBossThrow(bossIndex) {
             }
             
             return Math.max(0, Math.min(6, opp));
-        case 4: // Copycat
-            if (gameState.playerHistory.length > 0) {
+        case 4: // World All-Stars (Alternating Copycat & Hard AI)
+            // If it's an even-numbered ball (2nd, 4th, 6th...), be a Copycat
+            if (gameState.playerHistory.length % 2 === 0) {
+                // Look at the PREVIOUS turn (length - 2)
                 let copy = gameState.playerHistory[gameState.playerHistory.length - 2];
                 if (copy === 0 && !safeZero) return generateAIThrow(false);
                 return copy;
             }
-            return generateAIThrow(safeZero);
             
+            // For odd-numbered balls (1st, 3rd, 5th...), behave like the Hard AI
+            return getComputerThrowFallback();
         case 5: // Gambler
             if (Math.random() < 0.3) { 
                 let currT = getLikely(pMatchThrows); 
