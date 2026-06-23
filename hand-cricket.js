@@ -4028,7 +4028,7 @@ function openLedgerModal(currencyType) {
         
         // Red for ALL expenses, otherwise use the specific income color
         const amountColor = isIncome ? incomeColor : 'var(--accent-red)';
-        const amountPrefix = isIncome ? '+' : '';
+       
             const amountPrefix = isIncome ? '+' : '';
             const currencySymbol = currencyType === 'coin' ? '🪙' : '💎';
             
