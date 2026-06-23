@@ -4022,7 +4022,13 @@ function openLedgerModal(currencyType) {
             
             // Logic for Income vs Expense
             const isIncome = tx.amount > 0;
-            const amountColor = isIncome ? 'var(--accent-neon)' : 'var(--accent-red)';
+            // Use neon green for most income, but use purple if it's the card tab
+        let incomeColor = 'var(--accent-neon)';
+        if (activeLedgerTab === 'cards') incomeColor = '#a855f7'; // Epic purple for cards
+        
+        // Red for ALL expenses, otherwise use the specific income color
+        const amountColor = isIncome ? incomeColor : 'var(--accent-red)';
+        const amountPrefix = isIncome ? '+' : '';
             const amountPrefix = isIncome ? '+' : '';
             const currencySymbol = currencyType === 'coin' ? '🪙' : '💎';
             
