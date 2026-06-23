@@ -1210,11 +1210,23 @@ function applyCosmetics() {
     let headerAv = document.getElementById('avatar-text'); 
     let profAv = document.getElementById('prof-avatar-letter'); 
     
-    const displayAvatar = (el) => {
+const displayAvatar = (el) => {
         if (!el) return;
         if (u.customPFP) {
-            el.innerHTML = `<img src="${u.customPFP}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+            // Force the container to clip the image and remove text-based padding
+            el.style.overflow = 'hidden';
+            el.style.padding = '0';
+            el.style.display = 'flex';
+            el.style.justifyContent = 'center';
+            el.style.alignItems = 'center';
+            
+            // Add display: block to remove the invisible gap under inline images
+            el.innerHTML = `<img src="${u.customPFP}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
         } else {
+            // Revert styles for standard text emojis so they remain centered
+            el.style.overflow = '';
+            el.style.padding = '';
+            el.style.display = '';
             el.innerText = u.equippedAvatar || '👤';
         }
     };
