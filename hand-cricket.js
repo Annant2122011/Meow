@@ -4089,6 +4089,41 @@ function switchLedger(tabType) {
     window.history.replaceState(null, '', `?tab=${tabType}`);
     renderLedger();
 }
+function buyCoinsWithDiamonds(pkgId) {
+    let usersDB = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB)); 
+    let u = usersDB[currentUser];
+
+    // 1. Find the selected package from the shopItems database
+    let pkg = shopItems.exchange.find(p => p.id === pkgId);
+    if (!pkg) return;
+
+    // 2. Validate if the user has enough diamonds
+    if (u.diamonds < pkg.diaPrice) {
+        return showToast("❌ Not enough diamonds!");
+    }
+
+    // 3. Deduct the diamonds
+    u.diamonds -= pkg.diaPrice;
+    logTransaction(u, 'diamond', -pkg.diaPrice, `Bought ${pkg.name}`);
+
+    // 4. Add the coins (using parseInt to prevent string concatenation bugs)
+    let coinsToGive = parseInt(pkg.coins);
+    u.coins = parseInt(u.coins || 0) + coinsToGive;
+    logTransaction(u, 'coin', coinsToGive, `Exchanged Diamonds for Coins`);
+
+    // 5. Save the updated stats to LocalStorage
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
+    
+    // 6. Update the UI and play success sound
+    showToast(`💎 Successfully exchanged for ${pkg.coins.toLocaleString()} Coins!`);
+    SoundManager.play('coinSpend');
+    
+    document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
+    document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+    
+    // Re-render the shop to reflect the new balances
+    renderShop();
+}
 
 function renderLedger() {
     if (!currentUser) currentUser = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
