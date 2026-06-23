@@ -4167,7 +4167,8 @@ function renderLedger() {
     // Handle UI Switching based on the active tab
     if (activeLedgerTab === 'coins') {
         historyArray = u.transactions.coins || [];
-        totalEl.innerHTML = `🪙 ${formatCurrency(u.coins)}`; 
+        // FIX: Display exact Coin balance
+        totalEl.innerHTML = `🪙 ${(u.coins || 0).toLocaleString()}`; 
         totalEl.style.color = '#ffd700';
         if(tabCoins) { tabCoins.style.color = '#ffd700'; tabCoins.style.borderBottom = '3px solid #ffd700'; tabCoins.style.background = 'rgba(255,215,0,0.1)'; }
         
@@ -4180,13 +4181,14 @@ function renderLedger() {
     } else if (activeLedgerTab === 'cards') {
         historyArray = u.transactions.cards || [];
         let totalCards = (u.cards.common||0) + (u.cards.uncommon||0) + (u.cards.rare||0) + (u.cards.epic||0) + (u.cards.legendary||0);
-        totalEl.innerHTML = `🃏 ${totalCards}`;
+        totalEl.innerHTML = `🃏 ${totalCards.toLocaleString()}`; // Exact cards
         totalEl.style.color = '#a855f7'; // Epic purple
         if(tabCards) { tabCards.style.color = '#a855f7'; tabCards.style.borderBottom = '3px solid #a855f7'; tabCards.style.background = 'rgba(168,85,247,0.1)'; }
         
     } else if (activeLedgerTab === 'xp') {
         historyArray = u.transactions.xp || [];
-        totalEl.innerHTML = `🌟 ${formatCurrency(u.xp || 0)}`;
+        // FIX: Display exact XP balance
+        totalEl.innerHTML = `🌟 ${(u.xp || 0).toLocaleString()}`;
         totalEl.style.color = '#00ff88'; // Neon green
         if(tabXp) { tabXp.style.color = '#00ff88'; tabXp.style.borderBottom = '3px solid #00ff88'; tabXp.style.background = 'rgba(0,255,136,0.1)'; }
     }
@@ -4211,8 +4213,10 @@ function renderLedger() {
         if(activeLedgerTab === 'xp') currencySymbol = '🌟';
         
         let displayAmount = Math.abs(tx.amount);
+        
+        // FIX: Ensure exact amounts are printed in the transaction rows as well
         if (activeLedgerTab === 'coins' || activeLedgerTab === 'xp') {
-            displayAmount = formatCurrency(displayAmount);
+            displayAmount = displayAmount.toLocaleString(); 
         } else if (activeLedgerTab === 'diamonds') {
             displayAmount = displayAmount.toFixed(2);
         }
