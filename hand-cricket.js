@@ -1412,7 +1412,7 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     let formattedItemName = itemId.replace(/-/g, ' ').toUpperCase(); 
     let detailedReason = `Bought ${friendlyType}: ${formattedItemName}`;
 
-    // Deduct Assets & LOG IT (Using the detailed string)
+    // Deduct Assets & LOG IT
     if (currencyType === 'coin') {
         u.coins -= finalPrice;
         logTransaction(u, 'coin', -finalPrice, detailedReason);
@@ -1421,8 +1421,17 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
         logTransaction(u, 'diamond', -finalPrice, detailedReason);
     }
 
-    // Deduct Grinding Cards if applicable
-    if (method === 'grind') u.cards[rarityType] -= cardsToDeduct;
+    // 👇 THE FIX: Ensure the correct rarity pool is deducted and logged 👇
+    if (method === 'grind' && rarityType && cardsToDeduct > 0) {
+        // Ensure the card inventory object exists just in case
+        if (!u.cards) u.cards = { common: 0, uncommon: 0, rare: 0, epic: 0, legendary: 0 };
+        
+        // Deduct the specific rarity cards
+        u.cards[rarityType] -= cardsToDeduct;
+        
+        // Log the spent cards to the ledger so the player can track it
+        logTransaction(u, 'card', -cardsToDeduct, `Spent ${rarityType.toUpperCase()} Cards on discount for ${formattedItemName}`);
+    }
 
     // Unlock Item
     if (type === 'avatar') u.unlockedAvatars.push(itemId);
@@ -1439,7 +1448,7 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     SoundManager.play('coinSpend');
     
     document.getElementById('prof-coins').innerText = formatCurrency(u.coins);
-    document.getElementById('prof-diamonds').innerText = u.diamonds.toFixed(2);
+    document.getElementById('prof-diamonds').innerText = (u.diamonds || 0).toFixed(2);
     
     renderShop();
 }
