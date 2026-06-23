@@ -1440,6 +1440,15 @@ function processPurchase(type, itemId, method, finalPrice, currencyType, rarityT
     if (type === 'commentary') u.unlockedCommentary.push(itemId);
     if (type === 'background') u.unlockedBackgrounds.push(itemId);
     if (type === 'sfxRoar') u.unlockedSfxRoar.push(itemId);
+   // 👇 ADD THIS BLOCK TO HANDLE ACTUAL COIN CURRENCY 👇
+    if (type === 'currency') {
+        // Convert both to integers to prevent the "String Bug" (e.g., "100" + 500 = "100500")
+        let coinsToGive = parseInt(itemId); 
+        u.coins = parseInt(u.coins || 0) + coinsToGive;
+        
+        // Log the newly acquired coins in the Ledger
+        logTransaction(u, 'coin', coinsToGive, `Exchanged Diamonds for Coins`);
+    }
     
     localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDB));
     
